@@ -1,0 +1,265 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ------------------------------------------------------
+// Store Configuration & Delivery Engine
+// ------------------------------------------------------
+
+model StoreSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model DeliveryZone {
+  id             String   @id @default(uuid())
+  pincode        String   @unique
+  area           String
+  city           String
+  active         Boolean  @default(true)
+  oneDayDelivery Boolean  @default(false)
+  deliveryCharge Decimal  @default(0.00)
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// ------------------------------------------------------
+// Catalog Taxonomy (Excel Derived)
+// ------------------------------------------------------
+
+model Department {
+  id         String     @id @default(uuid())
+  name       String     @unique
+  slug       String     @unique
+  categories Category[]
+  createdAt  DateTime   @default(now())
+}
+
+model Category {
+  id            String        @id @default(uuid())
+  departmentId  String
+  department    Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  name          String
+  slug          String        @unique
+  subcategories Subcategory[]
+  createdAt     DateTime      @default(now())
+}
+
+model Subcategory {
+  id                 String              @id @default(uuid())
+  categoryId         String
+  category           Category            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name               String
+  slug               String              @unique
+  productDefinitions ProductDefinition[]
+  createdAt          DateTime            @default(now())
+}
+
+// Excel Product Type Blueprint
+model ProductDefinition {
+  id                  String      @id @default(uuid())
+  subcategoryId       String
+  subcategory         Subcategory @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+  productType         String
+  websiteMenuLabel    String
+  isCore              Boolean     @default(true)
+  exampleBrands       String?
+  keyAttributes       String?
+  serviceDeliveryFlag String?
+  products            Product[]
+  createdAt           DateTime    @default(now())
+}
+
+// ------------------------------------------------------
+// Sellable Store Products (Real Inventory)
+// ------------------------------------------------------
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  OUT_OF_STOCK
+  INACTIVE
+}
+
+model Product {
+  id                   String             @id @default(uuid())
+  productDefinitionId  String?
+  productDefinition    ProductDefinition? @relation(fields: [productDefinitionId], references: [id], onDelete: SetNull)
+  name                 String
+  slug                 String             @unique
+  brand                String
+  sku                  String             @unique
+  mrp                  Decimal
+  price                Decimal
+  stock                Int                @default(0)
+  lowStockThreshold    Int                @default(2)
+  status               ProductStatus      @default(DRAFT)
+  isDemoData           Boolean            @default(false)
+  isFeatured           Boolean            @default(false)
+  isBestSeller         Boolean            @default(false)
+  description          String?
+  specifications       String?            // JSON string of spec key-values
+  warrantyInfo         String?
+  requiresInstallation Boolean            @default(false)
+  installationDetails  String?
+  customDeliveryCharge Decimal?
+  specialDeliveryNotes String?
+  images               ProductImage[]
+  cartItems            CartItem[]
+  orderItems           OrderItem[]
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+}
+
+// ------------------------------------------------------
+// Cart & Customer Session
+// ------------------------------------------------------
+
+model Cart {
+  id        String     @id @default(uuid())
+  sessionId String     @unique
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ------------------------------------------------------
+// Orders & Payment Processing
+// ------------------------------------------------------
+
+enum OrderStatus {
+  PLACED
+  CONFIRMED
+  PROCESSING
+  PACKED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  COD
+  RAZORPAY
+  CALL_TO_ORDER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum RefundStatus {
+  NOT_REQUIRED
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+model Order {
+  id                  String               @id @default(uuid())
+  orderNumber         String               @unique
+  customerName        String
+  customerPhone       String
+  customerEmail       String?
+  shippingAddress     String
+  landmark            String?
+  city                String
+  state               String
+  pincode             String
+  subtotal            Decimal
+  deliveryCharge      Decimal
+  totalAmount         Decimal
+  paymentMethod       PaymentMethod
+  paymentStatus       PaymentStatus        @default(PENDING)
+  orderStatus         OrderStatus          @default(PLACED)
+  razorpayOrderId     String?              @unique
+  razorpayPaymentId   String?
+  razorpaySignature   String?
+  checkoutSessionId   String?
+  refundId            String?
+  refundAmount        Decimal?
+  refundStatus        RefundStatus         @default(NOT_REQUIRED)
+  refundedAt          DateTime?
+  items               OrderItem[]
+  statusHistory       OrderStatusHistory[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([checkoutSessionId, paymentStatus])
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName String
+  brand       String
+  sku         String
+  quantity    Int
+  unitPrice   Decimal
+  totalPrice  Decimal
+  createdAt   DateTime @default(now())
+}
+
+model OrderStatusHistory {
+  id             String       @id @default(uuid())
+  orderId        String
+  order          Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  previousStatus OrderStatus?
+  newStatus      OrderStatus
+  changedBy      String       @default("system")
+  note           String?
+  createdAt      DateTime     @default(now())
+}
+
+// ------------------------------------------------------
+// Admin Auth & Session Management (Hashed Session Tokens)
+// ------------------------------------------------------
+
+model AdminUser {
+  id                 String   @id @default(uuid())
+  username           String   @unique
+  passwordHash       String
+  name               String
+  mustChangePassword Boolean  @default(false)
+  createdAt          DateTime @default(now())
+}
+
+model AdminSession {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique // SHA-256 hash of random 32-byte token
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
