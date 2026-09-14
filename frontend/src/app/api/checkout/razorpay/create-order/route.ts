@@ -8,7 +8,6 @@ const CART_COOKIE_NAME = 'ravi_cart_session';
 
 export async function POST(req: Request) {
   try {
-    // 0. Check Environment Configuration
     if (!isRazorpayConfigured()) {
       console.error('[Razorpay Error]: Missing RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET environment variables.');
       return NextResponse.json(
@@ -46,7 +45,6 @@ export async function POST(req: Request) {
       checkoutSessionId,
     } = body;
 
-    // Determine checkout session ID (from body or fallback to cart cookie)
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get(CART_COOKIE_NAME)?.value;
     const cleanCheckoutSessionId = sanitizeString(checkoutSessionId || sessionCookie || '');
@@ -58,12 +56,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1. Backend Protection / Idempotency Check
-    // Check if an order for this session has already been completed/paid
     const paidOrder = await prisma.order.findFirst({
       where: {
         checkoutSessionId: cleanCheckoutSessionId,
-        paymentStatus: 'PAID',
+        payments: {
+          some: { paymentStatus: 'SUCCESS' },
+        },
       },
     });
 
@@ -80,20 +78,19 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check for an active PENDING Razorpay order created within the 20-second protection window
     const twentySecondsAgo = new Date(Date.now() - 20 * 1000);
     const activePendingOrder = await prisma.order.findFirst({
       where: {
         checkoutSessionId: cleanCheckoutSessionId,
-        paymentMethod: 'RAZORPAY',
-        paymentStatus: 'PENDING',
+        paymentMode: 'ONLINE',
         createdAt: { gte: twentySecondsAgo },
       },
       orderBy: { createdAt: 'desc' },
+      include: { payments: true },
     });
 
     if (activePendingOrder && activePendingOrder.razorpayOrderId) {
-      console.log(`[Razorpay Create-Order] Reusing active payment attempt (Order: ${activePendingOrder.orderNumber}, Razorpay Order: ${activePendingOrder.razorpayOrderId}) for session: ${cleanCheckoutSessionId}`);
+      console.log(`[Razorpay Create-Order] Reusing active payment attempt (Order: ${activePendingOrder.orderNumber}) for session: ${cleanCheckoutSessionId}`);
       return NextResponse.json({
         success: true,
         data: {
@@ -110,7 +107,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // 2. Input Sanitization & Validation
     const cleanName = sanitizeString(customerName || '');
     const cleanPhone = sanitizeString(customerPhone || '');
     const cleanEmail = customerEmail ? sanitizeString(customerEmail) : null;
@@ -148,7 +144,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. Validate Pincode Delivery Serviceability & Fee
     const zone = await prisma.deliveryZone.findUnique({
       where: { pincode: cleanPincode },
     });
@@ -162,7 +157,6 @@ export async function POST(req: Request) {
 
     const deliveryFee = Number(zone.deliveryCharge || 0);
 
-    // 4. Fetch products directly from DB & calculate prices server-side
     const productIds = items.map((i: any) => i.productId).filter(Boolean);
     if (productIds.length !== items.length) {
       return NextResponse.json(
@@ -181,7 +175,6 @@ export async function POST(req: Request) {
     for (const item of items) {
       const dbProd = dbProducts.find((p) => p.id === item.productId);
       if (!dbProd) {
-        console.error(`[Razorpay Create-Order Error]: Product ID ${item.productId} not found in database.`);
         return NextResponse.json(
           { success: false, error: { code: 'PRODUCT_NOT_FOUND', message: `Product was not found.` } },
           { status: 400 }
@@ -216,19 +209,9 @@ export async function POST(req: Request) {
     }
 
     const totalAmount = subtotal + deliveryFee;
-    if (totalAmount <= 0) {
-      return NextResponse.json(
-        { success: false, error: { code: 'INVALID_AMOUNT', message: 'Order total amount must be greater than 0.' } },
-        { status: 400 }
-      );
-    }
-
     const amountInPaise = Math.round(totalAmount * 100);
     const orderNumber = `RV-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
 
-    console.log(`[Razorpay Create-Order] Creating Razorpay order for ${orderNumber}, Amount: ₹${totalAmount} (${amountInPaise} paise), Session: ${cleanCheckoutSessionId}`);
-
-    // 5. Create Razorpay Order via Official SDK
     const razorpayOrder = await razorpay.orders.create({
       amount: amountInPaise,
       currency: 'INR',
@@ -240,14 +223,15 @@ export async function POST(req: Request) {
       },
     });
 
-    // 6. Create PENDING Order record in DB
+    const transactionId = `TXN-${orderNumber}`;
+
     await prisma.order.create({
       data: {
         orderNumber,
         customerName: cleanName,
-        customerPhone: cleanPhone,
+        mobileNumber: cleanPhone,
         customerEmail: cleanEmail,
-        shippingAddress: cleanAddress,
+        address: cleanAddress,
         landmark: cleanLandmark,
         city: cleanCity,
         state: cleanState,
@@ -255,14 +239,14 @@ export async function POST(req: Request) {
         subtotal: subtotal.toFixed(2),
         deliveryCharge: deliveryFee.toFixed(2),
         totalAmount: totalAmount.toFixed(2),
-        paymentMethod: 'RAZORPAY',
-        paymentStatus: 'PENDING',
+        currency: 'INR',
+        paymentMode: 'ONLINE',
         orderStatus: 'PLACED',
         razorpayOrderId: razorpayOrder.id,
         checkoutSessionId: cleanCheckoutSessionId,
         items: {
           create: validatedItems.map((item) => ({
-            productId: item.product.id,
+            productReferenceId: item.product.id,
             productName: item.product.name,
             brand: item.product.brand,
             sku: item.product.sku,
@@ -270,6 +254,18 @@ export async function POST(req: Request) {
             unitPrice: item.unitPrice.toFixed(2),
             totalPrice: item.totalPrice.toFixed(2),
           })),
+        },
+        payments: {
+          create: {
+            paymentMode: 'ONLINE',
+            paymentMethod: 'CARD',
+            paymentType: 'ONE_TIME',
+            amount: totalAmount.toFixed(2),
+            currency: 'INR',
+            paymentStatus: 'PENDING',
+            transactionId,
+            razorpayOrderId: razorpayOrder.id,
+          },
         },
         statusHistory: {
           create: {

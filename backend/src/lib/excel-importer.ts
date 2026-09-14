@@ -350,7 +350,7 @@ export async function importCatalogFromExcel(filePath: string): Promise<CatalogI
         specsJson = JSON.stringify(specMap);
       }
 
-      const initialStatus = isCore ? 'ACTIVE' : 'DRAFT';
+      const initialStatus = 'ACTIVE';
 
       await prisma.product.upsert({
         where: { slug: productSlug },

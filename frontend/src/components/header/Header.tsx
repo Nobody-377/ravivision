@@ -74,9 +74,6 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
               <PhoneCall size={14} />
               {storeConfig.phone ? `Call to Order: ${storeConfig.phone}` : 'Call Store to Order'}
             </button>
-            <Link href="/admin/login" style={{ color: '#93c5fd', fontSize: '0.75rem', textDecoration: 'none' }}>
-              Admin Panel
-            </Link>
           </div>
         </div>
       </div>

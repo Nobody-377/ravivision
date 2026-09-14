@@ -77,7 +77,7 @@ export async function getStoreConfig(): Promise<StoreConfig> {
   }
 }
 
-export function checkConfigCompleteness(providedConfig?: StoreConfig): { isComplete: boolean; missingFields: string[] } {
+export function checkConfigCompleteness(providedConfig?: StoreConfig): { isComplete: boolean; missingFields: string[]; score: number; missingSteps: string[] } {
   const phone = providedConfig?.phone || getStorePhone();
   const missingFields: string[] = [];
 
@@ -86,5 +86,7 @@ export function checkConfigCompleteness(providedConfig?: StoreConfig): { isCompl
   return {
     isComplete: missingFields.length === 0,
     missingFields,
+    score: missingFields.length === 0 ? 100 : 50,
+    missingSteps: missingFields,
   };
 }

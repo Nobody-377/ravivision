@@ -56,7 +56,9 @@ router.post('/create-order', async (req: Request, res: Response) => {
     const paidOrder = await prisma.order.findFirst({
       where: {
         checkoutSessionId: cleanCheckoutSessionId,
-        paymentStatus: 'PAID',
+        payments: {
+          some: { paymentStatus: 'SUCCESS' },
+        },
       },
     });
 
@@ -74,11 +76,11 @@ router.post('/create-order', async (req: Request, res: Response) => {
     const activePendingOrder = await prisma.order.findFirst({
       where: {
         checkoutSessionId: cleanCheckoutSessionId,
-        paymentMethod: 'RAZORPAY',
-        paymentStatus: 'PENDING',
+        paymentMode: 'ONLINE',
         createdAt: { gte: twentySecondsAgo },
       },
       orderBy: { createdAt: 'desc' },
+      include: { payments: true },
     });
 
     if (activePendingOrder && activePendingOrder.razorpayOrderId) {
@@ -218,13 +220,15 @@ router.post('/create-order', async (req: Request, res: Response) => {
       },
     });
 
+    const transactionId = `TXN-${orderNumber}`;
+
     await prisma.order.create({
       data: {
         orderNumber,
         customerName: cleanName,
-        customerPhone: cleanPhone,
+        mobileNumber: cleanPhone,
         customerEmail: cleanEmail,
-        shippingAddress: cleanAddress,
+        address: cleanAddress,
         landmark: cleanLandmark,
         city: cleanCity,
         state: cleanState,
@@ -232,14 +236,14 @@ router.post('/create-order', async (req: Request, res: Response) => {
         subtotal: subtotal.toFixed(2),
         deliveryCharge: deliveryFee.toFixed(2),
         totalAmount: totalAmount.toFixed(2),
-        paymentMethod: 'RAZORPAY',
-        paymentStatus: 'PENDING',
+        currency: 'INR',
+        paymentMode: 'ONLINE',
         orderStatus: 'PLACED',
         razorpayOrderId: razorpayOrder.id,
         checkoutSessionId: cleanCheckoutSessionId,
         items: {
           create: validatedItems.map((item) => ({
-            productId: item.product.id,
+            productReferenceId: item.product.id,
             productName: item.product.name,
             brand: item.product.brand,
             sku: item.product.sku,
@@ -247,6 +251,18 @@ router.post('/create-order', async (req: Request, res: Response) => {
             unitPrice: item.unitPrice.toFixed(2),
             totalPrice: item.totalPrice.toFixed(2),
           })),
+        },
+        payments: {
+          create: {
+            paymentMode: 'ONLINE',
+            paymentMethod: 'CARD',
+            paymentType: 'ONE_TIME',
+            amount: totalAmount.toFixed(2),
+            currency: 'INR',
+            paymentStatus: 'PENDING',
+            transactionId,
+            razorpayOrderId: razorpayOrder.id,
+          },
         },
         statusHistory: {
           create: {
@@ -304,7 +320,7 @@ router.post('/verify', async (req: Request, res: Response) => {
       where: {
         OR: [{ razorpayOrderId }, { orderNumber: orderNumber || '' }],
       },
-      include: { items: true },
+      include: { items: true, payments: true },
     });
 
     if (!order) {
@@ -314,7 +330,8 @@ router.post('/verify', async (req: Request, res: Response) => {
       });
     }
 
-    if (order.paymentStatus === 'PAID') {
+    const hasSuccessfulPayment = order.payments.some(p => p.paymentStatus === 'SUCCESS');
+    if (hasSuccessfulPayment || order.orderStatus === 'CONFIRMED') {
       res.cookie(`ravi_order_access_${order.orderNumber}`, 'true', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -335,17 +352,32 @@ router.post('/verify', async (req: Request, res: Response) => {
       await tx.order.update({
         where: { id: order.id },
         data: {
-          paymentStatus: 'PAID',
           orderStatus: 'CONFIRMED',
+        },
+      });
+
+      // Always create a new Payment record for the verification attempt to preserve complete audit history
+      await tx.payment.create({
+        data: {
+          orderId: order.id,
+          paymentMode: 'ONLINE',
+          paymentMethod: 'UPI',
+          paymentType: 'ONE_TIME',
+          amount: order.totalAmount,
+          currency: order.currency || 'INR',
+          paymentStatus: 'SUCCESS',
+          transactionId: `TXN-${order.orderNumber}-${Date.now().toString().slice(-4)}`,
+          razorpayOrderId,
           razorpayPaymentId,
           razorpaySignature,
+          transactionAt: new Date(),
         },
       });
 
       for (const item of order.items) {
-        if (item.productId) {
+        if (item.productReferenceId) {
           await tx.product.update({
-            where: { id: item.productId },
+            where: { id: item.productReferenceId },
             data: {
               stock: { decrement: item.quantity },
             },

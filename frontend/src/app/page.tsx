@@ -250,10 +250,10 @@ export default async function HomePage() {
               No Sellable Products Currently Active
             </div>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', maxWidth: '540px', margin: '0 auto 1.5rem auto' }}>
-              The Excel product catalog definitions (88 product types) have been imported into the database as blueprints. The store administrator can add real sellable SKUs, set prices, stock, and activate products via the Admin Dashboard.
+              Browse our full product catalog or contact customer support for product availability.
             </p>
-            <Link href="/admin/login" className="btn btn-primary" style={{ padding: '0.625rem 1.25rem' }}>
-              Go to Admin Product Manager
+            <Link href="/products" className="btn btn-primary" style={{ padding: '0.625rem 1.25rem' }}>
+              View Catalog
             </Link>
           </div>
         )}

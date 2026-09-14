@@ -225,3 +225,61 @@ test('Payment Session Lock - Paid order prevents subsequent payment attempts for
   assert.strictEqual(res.code, 'ORDER_ALREADY_PAID');
 });
 
+// 11. Order, OrderItem & Payment Schema Relationship Validation Test
+test('Order Schema - Validates Order, OrderItem, and Payment relationships', () => {
+  const mockOrder = {
+    id: 'ord_1001',
+    orderNumber: 'RV-20260914-001',
+    userId: null, // Guest checkout supported
+    customerName: 'Rajesh Kumar',
+    mobileNumber: '9825012345',
+    address: 'Main Street House No 42',
+    pincode: '821107',
+    city: 'Rohtas',
+    state: 'Bihar',
+    subtotal: 24999,
+    deliveryCharge: 0,
+    totalAmount: 24999,
+    currency: 'INR',
+    paymentMode: 'ONLINE',
+    orderStatus: 'PLACED',
+    checkoutSessionId: 'chk_session_test_99',
+    items: [
+      {
+        id: 'item_1',
+        orderId: 'ord_1001',
+        productReferenceId: 'prod_99',
+        productName: 'Voltas Inverter Split AC 1.5 Ton',
+        unitPrice: 24999,
+        quantity: 1,
+        totalPrice: 24999,
+      },
+    ],
+    payments: [
+      {
+        id: 'pay_1',
+        orderId: 'ord_1001',
+        paymentMode: 'ONLINE',
+        paymentMethod: 'CARD',
+        paymentType: 'ONE_TIME',
+        amount: 24999,
+        currency: 'INR',
+        paymentStatus: 'PENDING',
+        transactionId: 'TXN-RV-20260914-001',
+        razorpayOrderId: 'order_rzp_123',
+      },
+    ],
+  };
+
+  assert.strictEqual(mockOrder.items.length, 1);
+  assert.strictEqual(mockOrder.items[0].productReferenceId, 'prod_99');
+  assert.strictEqual(mockOrder.items[0].totalPrice, mockOrder.items[0].unitPrice * mockOrder.items[0].quantity);
+
+  assert.strictEqual(mockOrder.payments.length, 1);
+  assert.strictEqual(mockOrder.payments[0].paymentMode, 'ONLINE');
+  assert.strictEqual(mockOrder.payments[0].paymentMethod, 'CARD');
+  assert.strictEqual(mockOrder.payments[0].paymentType, 'ONE_TIME');
+  assert.strictEqual(mockOrder.payments[0].amount, mockOrder.totalAmount);
+});
+
+

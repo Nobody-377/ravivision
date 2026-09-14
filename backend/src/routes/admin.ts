@@ -133,7 +133,7 @@ router.post('/delivery', requireAdminAuth, async (req: Request, res: Response) =
 // GET /api/admin/orders
 router.get('/orders', requireAdminAuth, async (req: Request, res: Response) => {
   const orders = await prisma.order.findMany({
-    include: { items: true, statusHistory: true },
+    include: { items: true, payments: true, statusHistory: true },
     orderBy: { createdAt: 'desc' },
   });
   return res.json({ success: true, data: orders });
@@ -158,7 +158,7 @@ router.put('/orders', requireAdminAuth, async (req: Request, res: Response) => {
         },
       },
     },
-    include: { items: true, statusHistory: true },
+    include: { items: true, payments: true, statusHistory: true },
   });
 
   return res.json({ success: true, data: updated });

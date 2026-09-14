@@ -108,7 +108,7 @@ router.post('/', async (req: Request, res: Response) => {
         subtotalAcc = subtotalAcc.add(itemTotal);
 
         snapshotItems.push({
-          productId: currentProd.id,
+          productReferenceId: currentProd.id,
           productName: currentProd.name,
           brand: currentProd.brand,
           sku: currentProd.sku,
@@ -123,14 +123,15 @@ router.post('/', async (req: Request, res: Response) => {
       const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       const randomHex = crypto.randomBytes(2).toString('hex').toUpperCase();
       const orderNumber = `RV-${dateStr}-${randomHex}`;
+      const transactionId = `TXN-COD-${orderNumber}`;
 
       const order = await tx.order.create({
         data: {
           orderNumber,
           customerName: customerName.trim(),
-          customerPhone: customerPhone.trim(),
+          mobileNumber: customerPhone.trim(),
           customerEmail: customerEmail?.trim() || null,
-          shippingAddress: shippingAddress.trim(),
+          address: shippingAddress.trim(),
           landmark: landmark?.trim() || null,
           city: city.trim(),
           state: state.trim(),
@@ -138,11 +139,23 @@ router.post('/', async (req: Request, res: Response) => {
           subtotal: subtotalAcc,
           deliveryCharge: deliveryChargeDecimal,
           totalAmount,
-          paymentMethod: 'COD',
-          paymentStatus: 'PENDING',
+          currency: 'INR',
+          paymentMode: 'COD',
           orderStatus: 'PLACED',
+          checkoutSessionId: sessionId,
           items: {
             create: snapshotItems,
+          },
+          payments: {
+            create: {
+              paymentMode: 'COD',
+              paymentMethod: 'COD',
+              paymentType: 'ONE_TIME',
+              amount: totalAmount,
+              currency: 'INR',
+              paymentStatus: 'PENDING',
+              transactionId,
+            },
           },
           statusHistory: {
             create: {

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { formatINR } from '@/lib/currency';
 import { getStoreConfig } from '@/lib/store-config';
-import { CheckCircle2, Package, MapPin, Phone, ShieldCheck, Home } from 'lucide-react';
+import { CheckCircle2, Package, MapPin, Phone, Home } from 'lucide-react';
 
 import { cookies } from 'next/headers';
 
@@ -23,6 +23,7 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
     where: { orderNumber },
     include: {
       items: true,
+      payments: true,
       statusHistory: { orderBy: { createdAt: 'desc' } },
     },
   });
@@ -32,6 +33,7 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
   }
 
   const storeConfig = await getStoreConfig();
+  const primaryPayment = order.payments[0];
 
   return (
     <div className="container" style={{ padding: '3rem 1rem', maxWidth: '800px' }}>
@@ -70,7 +72,7 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
           fontWeight: 700,
         }}>
           <span>Order Number: <strong style={{ color: 'var(--primary-blue)' }}>{order.orderNumber}</strong></span>
-          <span>Payment: <strong style={{ color: order.paymentStatus === 'PAID' ? '#16a34a' : '#ea580c' }}>{order.paymentMethod} ({order.paymentStatus})</strong></span>
+          <span>Payment: <strong style={{ color: primaryPayment?.paymentStatus === 'SUCCESS' ? '#16a34a' : '#ea580c' }}>{order.paymentMode} ({primaryPayment?.paymentStatus || 'PENDING'})</strong></span>
         </div>
       </div>
 
@@ -84,14 +86,16 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
           {order.items.map((item) => (
             <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
               <div>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary-blue)', textTransform: 'uppercase' }}>
-                  {item.brand}
-                </div>
+                {item.brand && (
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary-blue)', textTransform: 'uppercase' }}>
+                    {item.brand}
+                  </div>
+                )}
                 <div style={{ fontWeight: 700, color: 'var(--text-heading)' }}>
                   {item.productName}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  SKU: {item.sku} | Qty: {item.quantity} × {formatINR(item.unitPrice)}
+                  Qty: {item.quantity} × {formatINR(item.unitPrice)}
                 </div>
               </div>
 
@@ -126,13 +130,13 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
         </h3>
         {hasAccessCookie ? (
           <p style={{ fontSize: '0.875rem', color: 'var(--text-body)', lineHeight: 1.6 }}>
-            <strong>{order.customerName}</strong> ({order.customerPhone})<br />
-            {order.shippingAddress}<br />
+            <strong>{order.customerName}</strong> ({order.mobileNumber})<br />
+            {order.address}<br />
             {order.landmark && `Landmark: ${order.landmark}, `}{order.city}, {order.state} - <strong>{order.pincode}</strong>
           </p>
         ) : (
           <p style={{ fontSize: '0.875rem', color: 'var(--text-body)', lineHeight: 1.6 }}>
-            <strong>{order.customerName}</strong> (***-***-{order.customerPhone.slice(-4)})<br />
+            <strong>{order.customerName}</strong> (***-***-{order.mobileNumber.slice(-4)})<br />
             <em>Address masked for customer privacy.</em><br />
             {order.city}, {order.state} - <strong>{order.pincode}</strong>
           </p>

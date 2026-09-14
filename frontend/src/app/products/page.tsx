@@ -33,6 +33,25 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       { brand: { contains: search } },
       { sku: { contains: search } },
       { description: { contains: search } },
+      {
+        productDefinition: {
+          OR: [
+            { productType: { contains: search } },
+            { websiteMenuLabel: { contains: search } },
+            { exampleBrands: { contains: search } },
+            { keyAttributes: { contains: search } },
+            {
+              subcategory: {
+                OR: [
+                  { name: { contains: search } },
+                  { category: { name: { contains: search } } },
+                  { category: { department: { name: { contains: search } } } },
+                ],
+              },
+            },
+          ],
+        },
+      },
     ];
   }
 

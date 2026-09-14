@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -28,6 +28,20 @@ model DeliveryZone {
   notes          String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+// ------------------------------------------------------
+// User Management
+// ------------------------------------------------------
+
+model User {
+  id        String   @id @default(uuid())
+  email     String?  @unique
+  name      String?
+  phone     String?
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ------------------------------------------------------
@@ -113,7 +127,6 @@ model Product {
   specialDeliveryNotes String?
   images               ProductImage[]
   cartItems            CartItem[]
-  orderItems           OrderItem[]
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
 }
@@ -151,7 +164,7 @@ model CartItem {
 }
 
 // ------------------------------------------------------
-// Orders & Payment Processing
+// Orders, Order Items & Payment Processing
 // ------------------------------------------------------
 
 enum OrderStatus {
@@ -159,77 +172,98 @@ enum OrderStatus {
   CONFIRMED
   PROCESSING
   PACKED
+  SHIPPED
   OUT_FOR_DELIVERY
   DELIVERED
   CANCELLED
 }
 
-enum PaymentMethod {
+enum PaymentMode {
   COD
-  RAZORPAY
-  CALL_TO_ORDER
+  ONLINE
+}
+
+enum PaymentMethodEnum {
+  COD
+  UPI
+  CARD
+  NETBANKING
+}
+
+enum PaymentType {
+  ONE_TIME
+  EMI
 }
 
 enum PaymentStatus {
   PENDING
-  PAID
+  SUCCESS
   FAILED
-  REFUNDED
-}
-
-enum RefundStatus {
-  NOT_REQUIRED
-  PENDING
-  PROCESSED
-  FAILED
+  CANCELLED
 }
 
 model Order {
-  id                  String               @id @default(uuid())
-  orderNumber         String               @unique
-  customerName        String
-  customerPhone       String
-  customerEmail       String?
-  shippingAddress     String
-  landmark            String?
-  city                String
-  state               String
-  pincode             String
-  subtotal            Decimal
-  deliveryCharge      Decimal
-  totalAmount         Decimal
-  paymentMethod       PaymentMethod
-  paymentStatus       PaymentStatus        @default(PENDING)
-  orderStatus         OrderStatus          @default(PLACED)
-  razorpayOrderId     String?              @unique
-  razorpayPaymentId   String?
-  razorpaySignature   String?
-  checkoutSessionId   String?
-  refundId            String?
-  refundAmount        Decimal?
-  refundStatus        RefundStatus         @default(NOT_REQUIRED)
-  refundedAt          DateTime?
-  items               OrderItem[]
-  statusHistory       OrderStatusHistory[]
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
+  id                String               @id @default(uuid())
+  orderNumber       String               @unique
+  userId            String?
+  user              User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName      String
+  mobileNumber      String
+  customerEmail     String?
+  address           String
+  landmark          String?
+  pincode           String
+  city              String
+  state             String
+  subtotal          Decimal
+  deliveryCharge    Decimal
+  totalAmount       Decimal
+  currency          String               @default("INR")
+  paymentMode       PaymentMode          @default(COD)
+  orderStatus       OrderStatus          @default(PLACED)
+  checkoutSessionId String?
+  razorpayOrderId   String?              @unique
+  items             OrderItem[]
+  payments          Payment[]
+  statusHistory     OrderStatusHistory[]
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
 
-  @@index([checkoutSessionId, paymentStatus])
+  @@index([checkoutSessionId])
 }
 
 model OrderItem {
-  id          String   @id @default(uuid())
-  orderId     String
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId   String?
-  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
-  productName String
-  brand       String
-  sku         String
-  quantity    Int
-  unitPrice   Decimal
-  totalPrice  Decimal
-  createdAt   DateTime @default(now())
+  id                 String   @id @default(uuid())
+  orderId            String
+  order              Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productReferenceId String?
+  productName        String
+  brand              String?
+  sku                String?
+  unitPrice          Decimal
+  quantity           Int
+  totalPrice         Decimal
+  createdAt          DateTime @default(now())
+}
+
+model Payment {
+  id                String            @id @default(uuid())
+  orderId           String
+  order             Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  paymentMode       PaymentMode
+  paymentMethod     PaymentMethodEnum
+  paymentType       PaymentType       @default(ONE_TIME)
+  amount            Decimal
+  currency          String            @default("INR")
+  paymentStatus     PaymentStatus     @default(PENDING)
+  transactionId     String?           @unique
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+  failureMessage    String?
+  transactionAt     DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 }
 
 model OrderStatusHistory {
@@ -258,7 +292,7 @@ model AdminUser {
 
 model AdminSession {
   id        String   @id @default(uuid())
-  tokenHash String   @unique // SHA-256 hash of random 32-byte token
+  tokenHash String   @unique
   userId    String
   expiresAt DateTime
   createdAt DateTime @default(now())

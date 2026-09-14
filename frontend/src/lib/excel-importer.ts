@@ -390,8 +390,8 @@ export async function importCatalogFromExcel(filePath: string): Promise<CatalogI
         specsJson = JSON.stringify(specMap);
       }
 
-      // If "Future" product type, set status to DRAFT so it's not live until enabled by Admin
-      const initialStatus = isCore ? 'ACTIVE' : 'DRAFT';
+      // Ensure all products imported from Excel are ACTIVE and live on website
+      const initialStatus = 'ACTIVE';
 
       await prisma.product.upsert({
         where: { slug: productSlug },

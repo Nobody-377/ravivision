@@ -79,7 +79,13 @@ async function main() {
   }
   console.log(`✓ Updated Delivery Zones: ${allowedPincodes.length} exclusive PIN codes configured`);
 
-  const excelPath = path.join(process.cwd(), '..', 'Ecommerce_Electronics_Product_Catalog_MVP.xlsx');
+  let excelPath = path.join(process.cwd(), '..', 'Ecommerce_Electronics_Product_Catalog_MVP.xlsx');
+  if (!fs.existsSync(excelPath)) {
+    excelPath = path.join(process.cwd(), 'Ecommerce_Electronics_Product_Catalog_MVP.xlsx');
+  }
+  if (!fs.existsSync(excelPath)) {
+    excelPath = path.join(process.cwd(), '..', 'frontend', 'Ecommerce_Electronics_Product_Catalog_MVP.xlsx');
+  }
 
   if (fs.existsSync(excelPath)) {
     console.log(`✓ Reading Catalog Excel from: ${excelPath}`);

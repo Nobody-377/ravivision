@@ -32,7 +32,7 @@ export async function POST(req: Request) {
           { orderNumber: orderNumber || '' },
         ],
       },
-      include: { items: true },
+      include: { items: true, payments: true },
     });
 
     if (!order) {
@@ -42,8 +42,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. Idempotency Protection: If order is already PAID, return success safely
-    if (order.paymentStatus === 'PAID') {
+    // 3. Idempotency Protection: If order already has a successful payment, return success safely
+    const hasPaid = order.payments?.some((p) => p.paymentStatus === 'SUCCESS');
+    if (hasPaid) {
       const cookieStore = await cookies();
       cookieStore.set(`ravi_order_access_${order.orderNumber}`, 'true', {
         httpOnly: true,
@@ -67,22 +68,37 @@ export async function POST(req: Request) {
       await tx.order.update({
         where: { id: order.id },
         data: {
-          paymentStatus: 'PAID',
           orderStatus: 'CONFIRMED',
+        },
+      });
+
+      // Always create a new Payment record for the verification attempt to preserve complete audit history
+      await tx.payment.create({
+        data: {
+          orderId: order.id,
+          paymentMode: 'ONLINE',
+          paymentMethod: 'UPI',
+          paymentType: 'ONE_TIME',
+          amount: order.totalAmount,
+          currency: order.currency,
+          paymentStatus: 'SUCCESS',
+          transactionId: `TXN_${Date.now()}_${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
+          razorpayOrderId,
           razorpayPaymentId,
           razorpaySignature,
+          transactionAt: new Date(),
         },
       });
 
       // Atomically decrement product stock
       for (const item of order.items) {
-        if (item.productId) {
+        if (item.productReferenceId) {
           await tx.product.update({
-            where: { id: item.productId },
+            where: { id: item.productReferenceId },
             data: {
               stock: { decrement: item.quantity },
             },
-          });
+          }).catch(() => {});
         }
       }
 

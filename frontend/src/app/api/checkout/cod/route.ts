@@ -30,7 +30,6 @@ export async function POST(request: NextRequest) {
       pincode,
     } = body;
 
-    // 0. Check if COD is enabled in store settings
     const { getStoreConfig } = await import('@/lib/store-config');
     const storeConfig = await getStoreConfig();
     if (!storeConfig.codEnabled) {
@@ -40,7 +39,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Validate Customer Data
     if (!customerName || !customerPhone || !shippingAddress || !city || !state || !pincode) {
       return NextResponse.json(
         {
@@ -51,7 +49,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Validate Pincode against DeliveryZone
     const zone = await prisma.deliveryZone.findUnique({
       where: { pincode: pincode.trim() },
     });
@@ -71,7 +68,6 @@ export async function POST(request: NextRequest) {
 
     const deliveryChargeDecimal = zone.deliveryCharge;
 
-    // 3. Fetch Cart Items
     const cart = await prisma.cart.findUnique({
       where: { sessionId },
       include: {
@@ -90,13 +86,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Perform Transactional Order Creation & Inventory Deduction
     const result = await prisma.$transaction(async (tx) => {
       let subtotalAcc = new Prisma.Decimal(0);
       const snapshotItems = [];
 
       for (const cartItem of cart.items) {
-        // Re-fetch product with lock inside transaction
         const currentProd = await tx.product.findUnique({
           where: { id: cartItem.productId },
         });
@@ -109,7 +103,6 @@ export async function POST(request: NextRequest) {
           throw new Error(`Insufficient stock for "${currentProd.name}". Available: ${currentProd.stock}`);
         }
 
-        // Deduct inventory atomically
         await tx.product.update({
           where: { id: currentProd.id },
           data: {
@@ -122,7 +115,7 @@ export async function POST(request: NextRequest) {
         subtotalAcc = subtotalAcc.add(itemTotal);
 
         snapshotItems.push({
-          productId: currentProd.id,
+          productReferenceId: currentProd.id,
           productName: currentProd.name,
           brand: currentProd.brand,
           sku: currentProd.sku,
@@ -134,19 +127,18 @@ export async function POST(request: NextRequest) {
 
       const totalAmount = subtotalAcc.add(deliveryChargeDecimal);
 
-      // Generate unique order number: RV-YYYYMMDD-XXXX
       const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       const randomHex = crypto.randomBytes(2).toString('hex').toUpperCase();
       const orderNumber = `RV-${dateStr}-${randomHex}`;
+      const transactionId = `TXN-COD-${orderNumber}`;
 
-      // Create Order
       const order = await tx.order.create({
         data: {
           orderNumber,
           customerName: customerName.trim(),
-          customerPhone: customerPhone.trim(),
+          mobileNumber: customerPhone.trim(),
           customerEmail: customerEmail?.trim() || null,
-          shippingAddress: shippingAddress.trim(),
+          address: shippingAddress.trim(),
           landmark: landmark?.trim() || null,
           city: city.trim(),
           state: state.trim(),
@@ -154,11 +146,23 @@ export async function POST(request: NextRequest) {
           subtotal: subtotalAcc,
           deliveryCharge: deliveryChargeDecimal,
           totalAmount,
-          paymentMethod: 'COD',
-          paymentStatus: 'PENDING',
+          currency: 'INR',
+          paymentMode: 'COD',
           orderStatus: 'PLACED',
+          checkoutSessionId: sessionId,
           items: {
             create: snapshotItems,
+          },
+          payments: {
+            create: {
+              paymentMode: 'COD',
+              paymentMethod: 'COD',
+              paymentType: 'ONE_TIME',
+              amount: totalAmount,
+              currency: 'INR',
+              paymentStatus: 'PENDING',
+              transactionId,
+            },
           },
           statusHistory: {
             create: {
@@ -171,7 +175,6 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // Clear Cart
       await tx.cartItem.deleteMany({
         where: { cartId: cart.id },
       });
@@ -183,7 +186,7 @@ export async function POST(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60, // 24 hours
+      maxAge: 24 * 60 * 60,
       path: '/',
     });
 
