@@ -24,7 +24,7 @@ model DeliveryZone {
   city           String
   active         Boolean  @default(true)
   oneDayDelivery Boolean  @default(false)
-  deliveryCharge Decimal  @default(0.00)
+  deliveryCharge Decimal  @default(0.00) @db.Decimal(10, 2)
   notes          String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -110,8 +110,8 @@ model Product {
   slug                 String             @unique
   brand                String
   sku                  String             @unique
-  mrp                  Decimal
-  price                Decimal
+  mrp                  Decimal            @db.Decimal(10, 2)
+  price                Decimal            @db.Decimal(10, 2)
   stock                Int                @default(0)
   lowStockThreshold    Int                @default(2)
   status               ProductStatus      @default(DRAFT)
@@ -119,17 +119,18 @@ model Product {
   isFeatured           Boolean            @default(false)
   isBestSeller         Boolean            @default(false)
   description          String?
-  specifications       String?            // JSON string of spec key-values
+  specifications       String?
   warrantyInfo         String?
   requiresInstallation Boolean            @default(false)
   installationDetails  String?
-  customDeliveryCharge Decimal?
+  customDeliveryCharge Decimal?           @db.Decimal(10, 2)
   specialDeliveryNotes String?
   images               ProductImage[]
   cartItems            CartItem[]
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
 }
+
 
 model ProductImage {
   id        String   @id @default(uuid())
@@ -215,9 +216,9 @@ model Order {
   pincode           String
   city              String
   state             String
-  subtotal          Decimal
-  deliveryCharge    Decimal
-  totalAmount       Decimal
+  subtotal          Decimal              @db.Decimal(10, 2)
+  deliveryCharge    Decimal              @db.Decimal(10, 2)
+  totalAmount       Decimal              @db.Decimal(10, 2)
   currency          String               @default("INR")
   paymentMode       PaymentMode          @default(COD)
   orderStatus       OrderStatus          @default(PLACED)
@@ -228,9 +229,10 @@ model Order {
   statusHistory     OrderStatusHistory[]
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
-
   @@index([checkoutSessionId])
 }
+
+
 
 model OrderItem {
   id                 String   @id @default(uuid())
@@ -240,11 +242,13 @@ model OrderItem {
   productName        String
   brand              String?
   sku                String?
-  unitPrice          Decimal
+  unitPrice          Decimal  @db.Decimal(10, 2)
   quantity           Int
-  totalPrice         Decimal
+  totalPrice         Decimal  @db.Decimal(10, 2)
   createdAt          DateTime @default(now())
 }
+
+
 
 model Payment {
   id                String            @id @default(uuid())
@@ -253,7 +257,7 @@ model Payment {
   paymentMode       PaymentMode
   paymentMethod     PaymentMethodEnum
   paymentType       PaymentType       @default(ONE_TIME)
-  amount            Decimal
+  amount            Decimal           @db.Decimal(10, 2)
   currency          String            @default("INR")
   paymentStatus     PaymentStatus     @default(PENDING)
   transactionId     String?           @unique

@@ -11,32 +11,29 @@ async function main() {
   console.log('--- Starting Ravi Vision Database Seed & Catalog Import ---');
 
   const adminUsername = 'admin';
-  const existingAdmin = await prisma.adminUser.findUnique({
+  const targetPassword = '@ravi1921#';
+  const passwordHash = await bcrypt.hash(targetPassword, 10);
+
+  await prisma.adminUser.upsert({
     where: { username: adminUsername },
+    update: {
+      passwordHash,
+      name: 'Ravi Vision Admin',
+      mustChangePassword: false,
+    },
+    create: {
+      username: adminUsername,
+      passwordHash,
+      name: 'Ravi Vision Admin',
+      mustChangePassword: false,
+    },
   });
 
-  if (!existingAdmin) {
-    const envPassword = process.env.ADMIN_INITIAL_PASSWORD;
-    const initialPassword = envPassword || crypto.randomBytes(8).toString('hex') + '!1A';
-    const passwordHash = await bcrypt.hash(initialPassword, 10);
-    
-    await prisma.adminUser.create({
-      data: {
-        username: adminUsername,
-        passwordHash,
-        name: 'Store Owner',
-        mustChangePassword: !envPassword,
-      },
-    });
-
-    console.log('\n======================================================');
-    console.log('🔐 INITIAL ADMIN ACCOUNT CREATED');
-    console.log(`Username: ${adminUsername}`);
-    console.log(`Initial Password: ${initialPassword}`);
-    console.log('======================================================\n');
-  } else {
-    console.log('✓ Admin user already exists in database');
-  }
+  console.log('\n======================================================');
+  console.log('🔐 ADMIN ACCOUNT CONFIGURED');
+  console.log(`Username: ${adminUsername}`);
+  console.log(`Password: ${targetPassword}`);
+  console.log('======================================================\n');
 
   const allowedZones = [
     { pincode: '821107', area: 'Kargahar (Local)', city: 'Rohtas, Bihar', oneDayDelivery: true, deliveryCharge: 0 },
