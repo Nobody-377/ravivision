@@ -123,9 +123,9 @@ export default function CustomersPage() {
             </div>
 
             {loading ? (
-              <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>Loading customer records...</div>
+              <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>Loading customer records...</div>
             ) : filteredCustomers.length === 0 ? (
-              <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>No customer records found.</div>
+              <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>No customer records found.</div>
             ) : (
               <table className="admin-table">
                 <thead>
@@ -142,24 +142,24 @@ export default function CustomersPage() {
                 <tbody>
                   {filteredCustomers.map((c, idx) => (
                     <tr key={idx}>
-                      <td style={{ fontWeight: 700, color: '#38bdf8', fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                      <td style={{ fontWeight: 700, color: '#2563eb', fontFamily: 'monospace', fontSize: '0.8rem' }}>
                         {c.customerId}
                       </td>
-                      <td style={{ fontWeight: 600, color: '#f8fafc' }}>
+                      <td style={{ fontWeight: 600, color: '#0f172a' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                          <User size={14} color="#60a5fa" /> {c.name}
+                          <User size={14} color="#2563eb" /> {c.name}
                         </div>
                       </td>
                       <td>
-                        <div style={{ fontSize: '0.85rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#059669', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                           <Phone size={12} /> {c.mobile}
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                           <Mail size={12} /> {c.email}
                         </div>
                       </td>
                       <td>
-                        <div style={{ fontSize: '0.85rem', color: '#f8fafc', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: '0.85rem', color: '#0f172a', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {c.address}
                         </div>
                         {c.landmark && c.landmark !== 'N/A' && (
@@ -167,13 +167,13 @@ export default function CustomersPage() {
                         )}
                       </td>
                       <td>
-                        <div style={{ fontSize: '0.85rem', color: '#f8fafc', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                          <Navigation size={12} color="#c084fc" /> {c.city}, {c.state}
+                        <div style={{ fontSize: '0.85rem', color: '#0f172a', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <Navigation size={12} color="#7c3aed" /> {c.city}, {c.state}
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: '#38bdf8' }}>Pincode: {c.pincode}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#2563eb' }}>Pincode: {c.pincode}</div>
                       </td>
                       <td style={{ fontWeight: 700, textAlign: 'center' }}>{c.ordersCount}</td>
-                      <td style={{ fontWeight: 800, color: '#34d399' }}>₹{c.totalSpent.toLocaleString('en-IN')}</td>
+                      <td style={{ fontWeight: 800, color: '#059669' }}>₹{c.totalSpent.toLocaleString('en-IN')}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -127,9 +127,9 @@ export default function ReportsPage() {
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
-              background: 'rgba(16, 185, 129, 0.15)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              color: '#34d399',
+              background: '#ecfdf5',
+              border: '1px solid #a7f3d0',
+              color: '#047857',
               padding: '0.85rem 1.25rem',
               borderRadius: '12px',
               fontWeight: 600,
@@ -144,12 +144,12 @@ export default function ReportsPage() {
             {/* Orders Report Card */}
             <div className="table-container" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.15)', borderRadius: '14px', color: '#60a5fa' }}>
+                <div style={{ padding: '0.75rem', background: '#eff6ff', borderRadius: '14px', color: '#2563eb' }}>
                   <ShoppingBag size={28} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>Orders Master Report</h3>
-                  <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Complete tracking of customer orders, addresses & status</p>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>Orders Master Report</h3>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Complete tracking of customer orders, addresses & status</p>
                 </div>
               </div>
               <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
@@ -168,12 +168,12 @@ export default function ReportsPage() {
             {/* Inventory Report Card */}
             <div className="table-container" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(139, 92, 246, 0.15)', borderRadius: '14px', color: '#c084fc' }}>
+                <div style={{ padding: '0.75rem', background: '#f5f3ff', borderRadius: '14px', color: '#7c3aed' }}>
                   <Package size={28} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>Inventory Stock Audit</h3>
-                  <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Product catalog stock counts & price audit</p>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>Inventory Stock Audit</h3>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Product catalog stock counts & price audit</p>
                 </div>
               </div>
               <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
@@ -192,12 +192,12 @@ export default function ReportsPage() {
             {/* Customers Directory Report Card */}
             <div className="table-container" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(16, 185, 129, 0.15)', borderRadius: '14px', color: '#34d399' }}>
+                <div style={{ padding: '0.75rem', background: '#ecfdf5', borderRadius: '14px', color: '#047857' }}>
                   <Users size={28} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>Customer Directory Sheet</h3>
-                  <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Customer contacts & lifetime sales audit</p>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>Customer Directory Sheet</h3>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Customer contacts & lifetime sales audit</p>
                 </div>
               </div>
               <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
@@ -216,12 +216,12 @@ export default function ReportsPage() {
             {/* Payment Reconciliation Card */}
             <div className="table-container" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(245, 158, 11, 0.15)', borderRadius: '14px', color: '#fbbf24' }}>
+                <div style={{ padding: '0.75rem', background: '#fffbeb', borderRadius: '14px', color: '#b45309' }}>
                   <CreditCard size={28} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>Payment Reconciliation</h3>
-                  <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>COD vs Razorpay online payment audit</p>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>Payment Reconciliation</h3>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b' }}>COD vs Razorpay online payment audit</p>
                 </div>
               </div>
               <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>

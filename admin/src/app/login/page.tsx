@@ -43,17 +43,16 @@ export default function LoginPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 70%)',
+      background: 'radial-gradient(circle at 50% 0%, #dbeafe 0%, #f4f7fe 70%)',
       padding: '1.5rem',
     }}>
       <div style={{
         width: '100%',
         maxWidth: '420px',
-        background: 'rgba(30, 41, 59, 0.75)',
+        background: '#ffffff',
         border: '1px solid var(--border-color)',
         borderRadius: '24px',
         padding: '2.5rem',
-        backdropFilter: 'blur(20px)',
         boxShadow: 'var(--shadow-lg)',
       }}>
         {/* Brand */}
@@ -63,17 +62,17 @@ export default function LoginPage() {
             height: '56px',
             margin: '0 auto 1rem',
             borderRadius: '16px',
-            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: '#ffffff',
-            boxShadow: '0 8px 20px rgba(59, 130, 246, 0.35)',
+            boxShadow: '0 8px 20px rgba(37, 99, 235, 0.3)',
           }}>
             <Store size={28} />
           </div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f8fafc' }}>Ravi Vision Admin</h1>
-          <p style={{ fontSize: '0.875rem', color: '#94a3b8', marginTop: '0.35rem' }}>Standalone Operations Portal Sign In</p>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>Ravi Vision Admin</h1>
+          <p style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.35rem' }}>Standalone Operations Portal Sign In</p>
         </div>
 
         {error && (
@@ -81,9 +80,9 @@ export default function LoginPage() {
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            background: 'rgba(244, 63, 94, 0.15)',
-            border: '1px solid rgba(244, 63, 94, 0.3)',
-            color: '#f87171',
+            background: '#fff1f2',
+            border: '1px solid #fecdd3',
+            color: '#be123c',
             padding: '0.75rem 1rem',
             borderRadius: '12px',
             fontSize: '0.85rem',
@@ -96,7 +95,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.5rem' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>
               Username
             </label>
             <div style={{ position: 'relative' }}>
@@ -109,11 +108,11 @@ export default function LoginPage() {
                 placeholder="admin"
                 style={{
                   width: '100%',
-                  background: 'rgba(15, 23, 42, 0.8)',
-                  border: '1px solid var(--border-color)',
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
                   borderRadius: '12px',
                   padding: '0.75rem 1rem 0.75rem 2.75rem',
-                  color: '#f8fafc',
+                  color: '#0f172a',
                   fontSize: '0.9rem',
                 }}
               />
@@ -121,7 +120,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.5rem' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>
               Password
             </label>
             <div style={{ position: 'relative' }}>
@@ -134,11 +133,11 @@ export default function LoginPage() {
                 placeholder="@ravi1921#"
                 style={{
                   width: '100%',
-                  background: 'rgba(15, 23, 42, 0.8)',
-                  border: '1px solid var(--border-color)',
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
                   borderRadius: '12px',
                   padding: '0.75rem 1rem 0.75rem 2.75rem',
-                  color: '#f8fafc',
+                  color: '#0f172a',
                   fontSize: '0.9rem',
                 }}
               />
@@ -164,18 +163,18 @@ export default function LoginPage() {
           marginTop: '1.75rem',
           padding: '0.85rem 1rem',
           borderRadius: '12px',
-          background: 'rgba(15, 23, 42, 0.6)',
-          border: '1px solid var(--border-color)',
+          background: '#eff6ff',
+          border: '1px solid #bfdbfe',
           fontSize: '0.8rem',
-          color: '#94a3b8',
+          color: '#475569',
           display: 'flex',
           alignItems: 'center',
           gap: '0.5rem',
         }}>
-          <ShieldCheck size={18} color="#34d399" />
+          <ShieldCheck size={18} color="#059669" />
           <div>
             Authorized Access Only<br />
-            <span style={{ color: '#38bdf8', fontWeight: 600 }}>Username: admin</span> | <span style={{ color: '#34d399', fontWeight: 600 }}>Password: @ravi1921#</span>
+            <span style={{ color: '#2563eb', fontWeight: 600 }}>Username: admin</span> | <span style={{ color: '#059669', fontWeight: 600 }}>Password: @ravi1921#</span>
           </div>
         </div>
       </div>

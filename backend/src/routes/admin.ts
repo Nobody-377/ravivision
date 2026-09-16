@@ -160,30 +160,97 @@ router.post('/auth/logout', async (req: Request, res: Response) => {
   return res.json({ success: true, message: 'Logged out successfully.' });
 });
 
-// POST /api/admin/change-password
-router.post('/change-password', requireAdminAuth, async (req: Request, res: Response) => {
+// POST /api/admin/auth/clear-all-sessions
+router.post('/auth/clear-all-sessions', async (req: Request, res: Response) => {
   try {
-    const { currentPassword, newPassword } = req.body;
+    const deleted = await prisma.adminSession.deleteMany({});
+    res.clearCookie(ADMIN_SESSION_COOKIE, { path: '/' });
+    return res.json({
+      success: true,
+      message: `Successfully cleared all ${deleted.count} admin login session(s).`,
+      data: { count: deleted.count },
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: error.message || 'Failed to clear admin sessions.' },
+    });
+  }
+});
+
+// POST /api/admin/update-credentials & POST /api/admin/change-password
+const handleUpdateCredentials = async (req: Request, res: Response) => {
+  try {
+    const { currentPassword, newUsername, newPassword, name } = req.body;
+    
+    if (!currentPassword) {
+      return res.status(400).json({ success: false, error: { code: 'MISSING_PASSWORD', message: 'Current password is required to save changes.' } });
+    }
+
     const token = req.cookies[ADMIN_SESSION_COOKIE];
     const session = await prisma.adminSession.findUnique({ where: { tokenHash: hashToken(token) } });
-    if (!session) return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED' } });
+    if (!session) return res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized session.' } });
 
     const admin = await prisma.adminUser.findUnique({ where: { id: session.userId } });
     if (!admin || !(await bcrypt.compare(currentPassword, admin.passwordHash))) {
       return res.status(400).json({ success: false, error: { code: 'INVALID_PASSWORD', message: 'Current password is incorrect.' } });
     }
 
-    const newHash = await bcrypt.hash(newPassword, 10);
-    await prisma.adminUser.update({
+    const updateData: any = {};
+
+    // Update Username if provided and changed
+    if (newUsername && newUsername.trim() && newUsername.trim() !== admin.username) {
+      const trimmedUsername = newUsername.trim();
+      if (trimmedUsername.length < 3) {
+        return res.status(400).json({ success: false, error: { code: 'INVALID_USERNAME', message: 'Username must be at least 3 characters.' } });
+      }
+      const existingUser = await prisma.adminUser.findUnique({ where: { username: trimmedUsername } });
+      if (existingUser && existingUser.id !== admin.id) {
+        return res.status(400).json({ success: false, error: { code: 'USERNAME_TAKEN', message: 'Username is already taken by another admin.' } });
+      }
+      updateData.username = trimmedUsername;
+    }
+
+    // Update Password if provided
+    if (newPassword && newPassword.trim()) {
+      if (newPassword.length < 6) {
+        return res.status(400).json({ success: false, error: { code: 'WEAK_PASSWORD', message: 'New password must be at least 6 characters.' } });
+      }
+      updateData.passwordHash = await bcrypt.hash(newPassword, 10);
+      updateData.mustChangePassword = false;
+    }
+
+    // Update Name if provided
+    if (name && name.trim()) {
+      updateData.name = name.trim();
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ success: false, error: { code: 'NO_CHANGES', message: 'No credential changes were provided.' } });
+    }
+
+    const updatedAdmin = await prisma.adminUser.update({
       where: { id: admin.id },
-      data: { passwordHash: newHash, mustChangePassword: false },
+      data: updateData,
     });
 
-    return res.json({ success: true, message: 'Password changed successfully.' });
+    return res.json({
+      success: true,
+      message: 'Admin credentials updated successfully.',
+      data: {
+        username: updatedAdmin.username,
+        name: updatedAdmin.name,
+      },
+    });
   } catch (error: any) {
-    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR' } });
+    console.error('Error updating admin credentials:', error);
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: 'Failed to update admin credentials.' } });
   }
-});
+};
+
+router.post('/update-credentials', requireAdminAuth, handleUpdateCredentials);
+router.post('/change-password', requireAdminAuth, handleUpdateCredentials);
+
 
 // GET /api/admin/delivery
 router.get('/delivery', requireAdminAuth, async (req: Request, res: Response) => {
@@ -209,7 +276,7 @@ router.post('/delivery', requireAdminAuth, async (req: Request, res: Response) =
 
 // PATCH /api/admin/delivery/:id
 router.patch('/delivery/:id', requireAdminAuth, async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { pincode, area, city, active, oneDayDelivery, deliveryCharge, notes } = req.body;
   const updated = await prisma.deliveryZone.update({
     where: { id },
@@ -228,7 +295,7 @@ router.patch('/delivery/:id', requireAdminAuth, async (req: Request, res: Respon
 
 // DELETE /api/admin/delivery/:id
 router.delete('/delivery/:id', requireAdminAuth, async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   await prisma.deliveryZone.delete({ where: { id } });
   return res.json({ success: true, message: 'Delivery zone deleted.' });
 });
@@ -244,7 +311,7 @@ router.get('/orders', requireAdminAuth, async (req: Request, res: Response) => {
 
 // PATCH /api/admin/orders/:id/status
 router.patch('/orders/:id/status', requireAdminAuth, async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { status, note } = req.body;
   const order = await prisma.order.findUnique({ where: { id } });
   if (!order) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Order not found.' } });
@@ -293,6 +360,87 @@ router.put('/orders', requireAdminAuth, async (req: Request, res: Response) => {
   return res.json({ success: true, data: updated });
 });
 
+// PATCH /api/admin/orders/:id/payment-status
+router.patch('/orders/:id/payment-status', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { paymentStatus, failureMessage, note } = req.body;
+
+    if (!paymentStatus || !['SUCCESS', 'FAILED', 'PENDING', 'CANCELLED'].includes(paymentStatus)) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_STATUS', message: 'Valid payment status is required (SUCCESS, FAILED, PENDING, CANCELLED).' },
+      });
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: { payments: true },
+    });
+
+    if (!order) {
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Order not found.' } });
+    }
+
+    const failMsg = failureMessage || (paymentStatus === 'FAILED' ? 'Manually marked as FAILED by store admin.' : null);
+    const existingPayment = order.payments && order.payments.length > 0 ? order.payments[order.payments.length - 1] : null;
+
+    if (existingPayment) {
+      await prisma.payment.update({
+        where: { id: existingPayment.id },
+        data: {
+          paymentStatus,
+          failureMessage: failMsg,
+          transactionAt: new Date(),
+        },
+      });
+    } else {
+      await prisma.payment.create({
+        data: {
+          orderId: order.id,
+          paymentMode: order.paymentMode,
+          paymentMethod: order.paymentMode === 'COD' ? 'COD' : 'CARD',
+          paymentType: 'ONE_TIME',
+          amount: order.totalAmount,
+          currency: order.currency || 'INR',
+          paymentStatus,
+          failureMessage: failMsg,
+          transactionId: `TXN-${order.orderNumber}-MANUAL`,
+          transactionAt: new Date(),
+        },
+      });
+    }
+
+    const noteText = note || `Payment status manually updated to ${paymentStatus} by store admin${failMsg ? `: ${failMsg}` : ''}`;
+
+    await prisma.orderStatusHistory.create({
+      data: {
+        orderId: order.id,
+        previousStatus: order.orderStatus,
+        newStatus: order.orderStatus,
+        changedBy: 'admin',
+        note: noteText,
+      },
+    });
+
+    const updatedOrder = await prisma.order.findUnique({
+      where: { id },
+      include: { items: true, payments: true, statusHistory: { orderBy: { createdAt: 'desc' } } },
+    });
+
+    return res.json({
+      success: true,
+      message: `Payment status updated to ${paymentStatus}.`,
+      data: updatedOrder,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: error.message || 'Failed to update payment status.' },
+    });
+  }
+});
+
 // GET /api/admin/products
 router.get('/products', requireAdminAuth, async (req: Request, res: Response) => {
   const products = await prisma.product.findMany({
@@ -304,50 +452,358 @@ router.get('/products', requireAdminAuth, async (req: Request, res: Response) =>
 
 // PATCH /api/admin/products/:id
 router.patch('/products/:id', requireAdminAuth, async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { stock, price, mrp, status, specifications, requiresInstallation, installationDetails } = req.body;
-  const updated = await prisma.product.update({
-    where: { id },
-    data: {
-      stock: stock !== undefined ? Number(stock) : undefined,
-      price: price !== undefined ? Number(price) : undefined,
-      mrp: mrp !== undefined ? Number(mrp) : undefined,
-      status: status !== undefined ? status : undefined,
-      specifications: specifications !== undefined ? specifications : undefined,
-      requiresInstallation: requiresInstallation !== undefined ? Boolean(requiresInstallation) : undefined,
-      installationDetails: installationDetails !== undefined ? installationDetails : undefined,
-    },
-    include: { images: true },
-  });
-  return res.json({ success: true, data: updated });
+  try {
+    const id = req.params.id as string;
+    const {
+      name,
+      brand,
+      sku,
+      stock,
+      price,
+      mrp,
+      status,
+      isFeatured,
+      isBestSeller,
+      description,
+      warrantyInfo,
+      specifications,
+      requiresInstallation,
+      installationDetails,
+      imageUrls,
+    } = req.body;
+
+    const existingProduct = await prisma.product.findUnique({ where: { id } });
+    if (!existingProduct) {
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Product not found.' } });
+    }
+
+    let parsedSpecs: string | null | undefined = undefined;
+    if (specifications !== undefined) {
+      parsedSpecs = typeof specifications === 'object' ? JSON.stringify(specifications) : specifications;
+    }
+
+    await prisma.product.update({
+      where: { id },
+      data: {
+        name: name !== undefined ? name.trim() : undefined,
+        brand: brand !== undefined ? brand.trim() : undefined,
+        sku: sku !== undefined ? sku.trim() : undefined,
+        stock: stock !== undefined ? Number(stock) : undefined,
+        price: price !== undefined ? Number(price) : undefined,
+        mrp: mrp !== undefined ? Number(mrp) : undefined,
+        status: status !== undefined ? status : undefined,
+        isFeatured: isFeatured !== undefined ? Boolean(isFeatured) : undefined,
+        isBestSeller: isBestSeller !== undefined ? Boolean(isBestSeller) : undefined,
+        description: description !== undefined ? description : undefined,
+        warrantyInfo: warrantyInfo !== undefined ? warrantyInfo : undefined,
+        specifications: parsedSpecs !== undefined ? parsedSpecs : undefined,
+        requiresInstallation: requiresInstallation !== undefined ? Boolean(requiresInstallation) : undefined,
+        installationDetails: installationDetails !== undefined ? installationDetails : undefined,
+      },
+    });
+
+    if (Array.isArray(imageUrls)) {
+      await prisma.productImage.deleteMany({ where: { productId: id } });
+      const cleanUrls = imageUrls.map((u: string) => String(u).trim()).filter(Boolean);
+      if (cleanUrls.length > 0) {
+        await prisma.productImage.createMany({
+          data: cleanUrls.map((url: string, idx: number) => ({
+            productId: id,
+            url,
+            isPrimary: idx === 0,
+            sortOrder: idx,
+          })),
+        });
+      }
+    }
+
+    const updated = await prisma.product.findUnique({
+      where: { id },
+      include: { images: { orderBy: { sortOrder: 'asc' } } },
+    });
+
+    return res.json({ success: true, data: updated });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message || 'Failed to update product.' } });
+  }
 });
 
 // POST /api/admin/products
 router.post('/products', requireAdminAuth, async (req: Request, res: Response) => {
-  const { name, brand, sku, price, mrp, stock, status, isFeatured, isBestSeller, description, imageUrl, specifications, requiresInstallation } = req.body;
-  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + `-${Date.now().toString().slice(-4)}`;
-
-  const product = await prisma.product.create({
-    data: {
+  try {
+    const {
       name,
-      slug,
       brand,
       sku,
-      price: Number(price),
-      mrp: Number(mrp),
-      stock: Number(stock),
-      status: status || 'ACTIVE',
-      isFeatured: Boolean(isFeatured),
-      isBestSeller: Boolean(isBestSeller),
+      price,
+      mrp,
+      stock,
+      status,
+      isFeatured,
+      isBestSeller,
       description,
-      specifications: specifications || null,
-      requiresInstallation: Boolean(requiresInstallation),
-      images: imageUrl ? { create: { url: imageUrl, isPrimary: true } } : undefined,
-    },
-    include: { images: true },
-  });
+      warrantyInfo,
+      imageUrl,
+      imageUrls,
+      specifications,
+      requiresInstallation,
+      installationDetails,
+    } = req.body;
 
-  return res.json({ success: true, data: product });
+    if (!name || !brand || !sku || price === undefined) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_INPUT', message: 'Product title, brand, SKU, and price are required.' },
+      });
+    }
+
+    const cleanName = name.trim();
+    const cleanBrand = brand.trim();
+    const cleanSku = sku.trim();
+
+    const existingSku = await prisma.product.findUnique({ where: { sku: cleanSku } });
+    if (existingSku) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'SKU_EXISTS', message: `SKU ${cleanSku} is already in use by another product.` },
+      });
+    }
+
+    const slugBase = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const slug = `${slugBase}-${Date.now().toString().slice(-6)}`;
+
+    let parsedSpecs: string | null = null;
+    if (specifications) {
+      parsedSpecs = typeof specifications === 'object' ? JSON.stringify(specifications) : specifications;
+    }
+
+    const imageList: string[] = [];
+    if (Array.isArray(imageUrls)) {
+      imageList.push(...imageUrls.map((u: string) => String(u).trim()).filter(Boolean));
+    } else if (imageUrl && typeof imageUrl === 'string' && imageUrl.trim()) {
+      imageList.push(imageUrl.trim());
+    }
+
+    const product = await prisma.product.create({
+      data: {
+        name: cleanName,
+        slug,
+        brand: cleanBrand,
+        sku: cleanSku,
+        price: Number(price),
+        mrp: Number(mrp || price),
+        stock: Number(stock || 0),
+        status: status || 'ACTIVE',
+        isFeatured: Boolean(isFeatured),
+        isBestSeller: Boolean(isBestSeller),
+        description: description || null,
+        warrantyInfo: warrantyInfo || null,
+        specifications: parsedSpecs,
+        requiresInstallation: Boolean(requiresInstallation),
+        installationDetails: installationDetails || null,
+        images: imageList.length > 0
+          ? {
+              create: imageList.map((url, idx) => ({
+                url,
+                isPrimary: idx === 0,
+                sortOrder: idx,
+              })),
+            }
+          : undefined,
+      },
+      include: { images: { orderBy: { sortOrder: 'asc' } } },
+    });
+
+    return res.json({ success: true, data: product });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message || 'Failed to create product.' } });
+  }
+});
+
+// POST /api/admin/products/import-excel
+router.post('/products/import-excel', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { products } = req.body;
+
+    if (!Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'EMPTY_IMPORT', message: 'No product rows provided in import payload.' },
+      });
+    }
+
+    let createdCount = 0;
+    let updatedCount = 0;
+    let ignoredCount = 0;
+    const errors: string[] = [];
+
+    for (let i = 0; i < products.length; i++) {
+      const row = products[i];
+      try {
+        const name = String(row.name || row['Product Name'] || row.title || row['Title'] || row.productType || row['Product / Product Type'] || '').trim();
+        const brand = String(row.brand || row['Brand'] || row.exampleBrands || row['Example Brands'] || 'Ravi Vision Store').trim();
+        let sku = String(row.sku || row['SKU'] || row['SKU / Product Code'] || '').trim();
+        const priceNum = Number(row.price || row['Selling Price (INR)'] || row['Sale Price'] || row['Price'] || row['Selling Price'] || 0);
+        const mrpNum = Number(row.mrp || row['MRP (INR)'] || row['MRP'] || priceNum || 0);
+        const stockNum = Number(row.stock || row['Stock'] || row['Stock Level'] || 10);
+        const statusVal = String(row.status || row['Status'] || row['Stock Status'] || 'ACTIVE').toUpperCase().trim();
+        const desc = row.description || row['Description'] || row['Product Description'] || null;
+        const warranty = row.warrantyInfo || row['Warranty'] || row['Warranty Details'] || '1 Year Brand Manufacturer Warranty';
+        const reqInst = Boolean(
+          row.requiresInstallation ||
+          row['Requires Installation'] === 'Yes' ||
+          row['Requires Installation (Yes/No)'] === 'Yes' ||
+          row['Requires Installation'] === true
+        );
+        const instDetails = row.installationDetails || row['Installation Details'] || (reqInst ? 'Local technician installation provided upon delivery.' : null);
+
+        if (!name || priceNum <= 0) {
+          ignoredCount++;
+          continue;
+        }
+
+        if (!sku) {
+          const brandCode = brand.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'X');
+          sku = `RV-${brandCode}-${Date.now().toString().slice(-4)}${i + 1}`;
+        }
+
+        const slugBase = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const slug = `${slugBase}-${Date.now().toString().slice(-4)}${i + 1}`;
+
+        // Parse images
+        const imageList: string[] = [];
+        const rawImages = row.imageUrls || row['Image URLs'] || row['Image URLs (comma separated)'] || row.imageUrl || row['Image URL'];
+        if (Array.isArray(rawImages)) {
+          imageList.push(...rawImages.map((u: any) => String(u).trim()).filter(Boolean));
+        } else if (typeof rawImages === 'string' && rawImages.trim()) {
+          imageList.push(...rawImages.split(',').map(u => u.trim()).filter(Boolean));
+        }
+
+        // Parse specifications
+        let specsJson: string | null = null;
+        const rawSpecs = row.specifications || row['Specifications'] || row['Specifications (Key:Value pairs)'] || row.keyAttributes || row['Key Selling Attributes'];
+        if (typeof rawSpecs === 'object' && rawSpecs !== null) {
+          specsJson = JSON.stringify(rawSpecs);
+        } else if (typeof rawSpecs === 'string' && rawSpecs.trim()) {
+          const specMap: Record<string, string> = {};
+          if (rawSpecs.includes(':') || rawSpecs.includes('=')) {
+            const pairs = rawSpecs.split(/[,;\n]/);
+            pairs.forEach(p => {
+              const parts = p.split(/[:=]/);
+              if (parts.length >= 2) {
+                specMap[parts[0].trim()] = parts.slice(1).join(':').trim();
+              }
+            });
+          } else {
+            const specKeys = rawSpecs.split(',').map(k => k.trim());
+            specKeys.forEach((key, idx) => {
+              if (key) specMap[key] = `Standard Grade (${idx + 1})`;
+            });
+          }
+          if (Object.keys(specMap).length > 0) {
+            specsJson = JSON.stringify(specMap);
+          }
+        }
+
+        const existingProduct = await prisma.product.findUnique({ where: { sku } });
+
+        if (existingProduct) {
+          await prisma.product.update({
+            where: { id: existingProduct.id },
+            data: {
+              name,
+              brand,
+              price: priceNum,
+              mrp: mrpNum > 0 ? mrpNum : priceNum,
+              stock: stockNum,
+              status: statusVal === 'ACTIVE' || statusVal === 'DRAFT' || statusVal === 'OUT_OF_STOCK' || statusVal === 'INACTIVE' ? statusVal : 'ACTIVE',
+              description: desc || existingProduct.description,
+              warrantyInfo: warranty || existingProduct.warrantyInfo,
+              requiresInstallation: reqInst,
+              installationDetails: instDetails,
+              specifications: specsJson || existingProduct.specifications,
+            },
+          });
+
+          if (imageList.length > 0) {
+            await prisma.productImage.deleteMany({ where: { productId: existingProduct.id } });
+            await prisma.productImage.createMany({
+              data: imageList.map((url, idx) => ({
+                productId: existingProduct.id,
+                url,
+                isPrimary: idx === 0,
+                sortOrder: idx,
+              })),
+            });
+          }
+          updatedCount++;
+        } else {
+          const newProduct = await prisma.product.create({
+            data: {
+              name,
+              slug,
+              brand,
+              sku,
+              price: priceNum,
+              mrp: mrpNum > 0 ? mrpNum : priceNum,
+              stock: stockNum,
+              status: statusVal === 'ACTIVE' || statusVal === 'DRAFT' || statusVal === 'OUT_OF_STOCK' || statusVal === 'INACTIVE' ? statusVal : 'ACTIVE',
+              description: desc,
+              warrantyInfo: warranty,
+              requiresInstallation: reqInst,
+              installationDetails: instDetails,
+              specifications: specsJson,
+              images: imageList.length > 0
+                ? {
+                    create: imageList.map((url, idx) => ({
+                      url,
+                      isPrimary: idx === 0,
+                      sortOrder: idx,
+                    })),
+                  }
+                : undefined,
+            },
+          });
+          createdCount++;
+        }
+      } catch (rowErr: any) {
+        errors.push(`Row ${i + 1}: ${rowErr.message || 'Row import error'}`);
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: `Excel Catalog Import Complete: ${createdCount} created, ${updatedCount} updated.`,
+      data: {
+        createdCount,
+        updatedCount,
+        ignoredCount,
+        totalProcessed: products.length,
+        errors,
+      },
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      error: { code: 'IMPORT_FAILED', message: error.message || 'Excel import processing failed.' },
+    });
+  }
+});
+
+// DELETE /api/admin/products/:id
+router.delete('/products/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const existing = await prisma.product.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Product not found.' } });
+    }
+
+    await prisma.product.delete({ where: { id } });
+    return res.json({ success: true, message: 'Product deleted successfully.' });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message || 'Failed to delete product.' } });
+  }
 });
 
 // GET /api/admin/settings

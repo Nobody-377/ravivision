@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "db:push": "prisma db push",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "db:clear-admin-sessions": "tsx src/scripts/clear-admin-sessions.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

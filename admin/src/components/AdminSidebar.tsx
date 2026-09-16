@@ -35,18 +35,18 @@ export default function AdminSidebar() {
           width: '40px',
           height: '40px',
           borderRadius: '12px',
-          background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+          background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           color: '#ffffff',
-          boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)'
+          boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)'
         }}>
           <Store size={22} />
         </div>
         <div>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc', lineHeight: 1.2 }}>Ravi Vision</h2>
-          <span style={{ fontSize: '0.75rem', color: '#38bdf8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>Ravi Vision</h2>
+          <span style={{ fontSize: '0.75rem', color: '#2563eb', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <ShieldCheck size={12} /> Standalone Admin
           </span>
         </div>
@@ -69,14 +69,14 @@ export default function AdminSidebar() {
                 borderRadius: '12px',
                 fontSize: '0.9rem',
                 fontWeight: isActive ? 700 : 500,
-                color: isActive ? '#ffffff' : '#94a3b8',
-                background: isActive ? 'linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.05) 100%)' : 'transparent',
-                borderLeft: isActive ? '3px solid #3b82f6' : '3px solid transparent',
+                color: isActive ? '#2563eb' : '#475569',
+                background: isActive ? '#eff6ff' : 'transparent',
+                borderLeft: isActive ? '3px solid #2563eb' : '3px solid transparent',
                 textDecoration: 'none',
                 transition: 'all 0.2s ease',
               }}
             >
-              <Icon size={19} color={isActive ? '#38bdf8' : '#64748b'} />
+              <Icon size={19} color={isActive ? '#2563eb' : '#64748b'} />
               <span>{item.name}</span>
             </Link>
           );
@@ -87,7 +87,7 @@ export default function AdminSidebar() {
       <div style={{ marginTop: 'auto', padding: '1rem 0.5rem 0', borderTop: '1px solid var(--border-color)' }}>
         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
           DB Schema: SQLite / Prisma<br />
-          System Status: <span style={{ color: '#34d399', fontWeight: 600 }}>Connected</span>
+          System Status: <span style={{ color: '#059669', fontWeight: 600 }}>Connected</span>
         </div>
       </div>
     </aside>

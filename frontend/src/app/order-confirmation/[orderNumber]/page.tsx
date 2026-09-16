@@ -72,8 +72,14 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
           fontWeight: 700,
         }}>
           <span>Order Number: <strong style={{ color: 'var(--primary-blue)' }}>{order.orderNumber}</strong></span>
-          <span>Payment: <strong style={{ color: primaryPayment?.paymentStatus === 'SUCCESS' ? '#16a34a' : '#ea580c' }}>{order.paymentMode} ({primaryPayment?.paymentStatus || 'PENDING'})</strong></span>
+          <span>Payment: <strong style={{ color: primaryPayment?.paymentStatus === 'SUCCESS' ? '#16a34a' : primaryPayment?.paymentStatus === 'FAILED' ? '#dc2626' : '#ea580c' }}>{order.paymentMode} ({primaryPayment?.paymentStatus || 'PENDING'})</strong></span>
         </div>
+
+        {primaryPayment?.failureMessage && (
+          <div style={{ marginTop: '1rem', backgroundColor: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', fontWeight: 600 }}>
+            ⚠️ Payment Failure Details: {primaryPayment.failureMessage}
+          </div>
+        )}
       </div>
 
       {/* Order Details & Items Snapshot */}

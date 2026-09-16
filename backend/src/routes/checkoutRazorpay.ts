@@ -309,19 +309,61 @@ router.post('/verify', async (req: Request, res: Response) => {
     }
 
     const isValid = verifyRazorpaySignature(razorpayOrderId, razorpayPaymentId, razorpaySignature);
-    if (!isValid) {
-      return res.status(400).json({
-        success: false,
-        error: { code: 'INVALID_SIGNATURE', message: 'Razorpay HMAC-SHA256 signature verification failed.' },
-      });
-    }
-
     const order = await prisma.order.findFirst({
       where: {
         OR: [{ razorpayOrderId }, { orderNumber: orderNumber || '' }],
       },
       include: { items: true, payments: true },
     });
+
+    if (!isValid) {
+      if (order) {
+        const failureMsg = 'Razorpay HMAC-SHA256 signature verification failed (invalid signature token).';
+        const pendingPayment = order.payments.find(p => p.paymentStatus === 'PENDING');
+        if (pendingPayment) {
+          await prisma.payment.update({
+            where: { id: pendingPayment.id },
+            data: {
+              paymentStatus: 'FAILED',
+              failureMessage: failureMsg,
+              razorpayPaymentId: razorpayPaymentId || undefined,
+              razorpaySignature: razorpaySignature || undefined,
+              transactionAt: new Date(),
+            },
+          });
+        } else {
+          await prisma.payment.create({
+            data: {
+              orderId: order.id,
+              paymentMode: 'ONLINE',
+              paymentMethod: 'CARD',
+              paymentType: 'ONE_TIME',
+              amount: order.totalAmount,
+              currency: order.currency || 'INR',
+              paymentStatus: 'FAILED',
+              failureMessage: failureMsg,
+              razorpayOrderId,
+              razorpayPaymentId,
+              razorpaySignature,
+              transactionAt: new Date(),
+            },
+          });
+        }
+        await prisma.orderStatusHistory.create({
+          data: {
+            orderId: order.id,
+            previousStatus: order.orderStatus,
+            newStatus: order.orderStatus,
+            changedBy: 'razorpay-verification',
+            note: `Payment verification failed: ${failureMsg}`,
+          },
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_SIGNATURE', message: 'Razorpay HMAC-SHA256 signature verification failed.' },
+      });
+    }
 
     if (!order) {
       return res.status(404).json({
@@ -421,6 +463,86 @@ router.post('/verify', async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       error: { code: 'VERIFICATION_FAILED', message: error.message || 'Payment verification failed.' },
+    });
+  }
+});
+
+// POST /api/checkout/razorpay/failure
+router.post('/failure', async (req: Request, res: Response) => {
+  try {
+    const { razorpayOrderId, orderNumber, failureMessage, razorpayPaymentId, code, reason } = req.body;
+
+    if (!razorpayOrderId && !orderNumber) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_FAILURE_DATA', message: 'Order identifier is required.' },
+      });
+    }
+
+    const order = await prisma.order.findFirst({
+      where: {
+        OR: [{ razorpayOrderId: razorpayOrderId || '' }, { orderNumber: orderNumber || '' }],
+      },
+      include: { payments: true },
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'ORDER_NOT_FOUND', message: 'Order record was not found to record payment failure.' },
+      });
+    }
+
+    const formattedMessage = failureMessage || reason || code || 'Payment failed during checkout processing.';
+
+    const pendingPayment = order.payments.find(p => p.paymentStatus === 'PENDING');
+    if (pendingPayment) {
+      await prisma.payment.update({
+        where: { id: pendingPayment.id },
+        data: {
+          paymentStatus: 'FAILED',
+          failureMessage: formattedMessage,
+          razorpayPaymentId: razorpayPaymentId || undefined,
+          transactionAt: new Date(),
+        },
+      });
+    } else {
+      await prisma.payment.create({
+        data: {
+          orderId: order.id,
+          paymentMode: 'ONLINE',
+          paymentMethod: 'CARD',
+          paymentType: 'ONE_TIME',
+          amount: order.totalAmount,
+          currency: order.currency || 'INR',
+          paymentStatus: 'FAILED',
+          failureMessage: formattedMessage,
+          razorpayOrderId: order.razorpayOrderId,
+          razorpayPaymentId: razorpayPaymentId || undefined,
+          transactionAt: new Date(),
+        },
+      });
+    }
+
+    await prisma.orderStatusHistory.create({
+      data: {
+        orderId: order.id,
+        previousStatus: order.orderStatus,
+        newStatus: order.orderStatus,
+        changedBy: 'razorpay-gateway',
+        note: `Payment failure logged: ${formattedMessage}`,
+      },
+    });
+
+    return res.json({
+      success: true,
+      message: 'Payment failure recorded successfully.',
+      data: { orderNumber: order.orderNumber, failureMessage: formattedMessage },
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      error: { code: 'FAILURE_LOGGING_FAILED', message: error.message || 'Failed to record payment failure.' },
     });
   }
 });

@@ -21,6 +21,7 @@ build/
 
 # Logs & OS
 *.log
+*.tsbuildinfo
 .DS_Store
 .vscode/
 .idea/

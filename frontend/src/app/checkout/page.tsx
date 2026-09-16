@@ -249,21 +249,55 @@ function CheckoutContent() {
             }
           },
           modal: {
-            ondismiss: function () {
+            ondismiss: async function () {
               isLockedRef.current = false;
               setSubmitting(false);
               setPaymentState('cancelled');
+              const cancelMsg = 'Payment checkout popup closed by customer before completion.';
               setPaymentNotice({ type: 'warning', message: 'Payment was cancelled. You can try again or choose Cash on Delivery.' });
+
+              try {
+                await fetch('/api/checkout/razorpay/failure', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    razorpayOrderId: razorpayOrder.id,
+                    orderNumber,
+                    failureMessage: cancelMsg,
+                    code: 'PAYMENT_CANCELLED',
+                  }),
+                });
+              } catch {
+                // Ignore silent logging failure
+              }
             },
           },
         };
 
         const rzp = new (window as any).Razorpay(options);
-        rzp.on('payment.failed', function (response: any) {
+        rzp.on('payment.failed', async function (response: any) {
           isLockedRef.current = false;
           setSubmitting(false);
           setPaymentState('failed');
-          setPaymentNotice({ type: 'error', message: response.error?.description || 'Razorpay payment failed. Please try again.' });
+          const failMsg = response.error?.description || response.error?.reason || response.error?.code || 'Razorpay payment failed. Please try again.';
+          setPaymentNotice({ type: 'error', message: failMsg });
+
+          try {
+            await fetch('/api/checkout/razorpay/failure', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpayOrderId: razorpayOrder.id,
+                orderNumber,
+                razorpayPaymentId: response.error?.metadata?.payment_id,
+                failureMessage: failMsg,
+                code: response.error?.code,
+                reason: response.error?.reason,
+              }),
+            });
+          } catch {
+            // Ignore silent logging failure
+          }
         });
         rzp.open();
       }

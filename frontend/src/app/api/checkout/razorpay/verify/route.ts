@@ -15,16 +15,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1. Server-Side HMAC SHA-256 Signature Verification
-    const isValid = verifyRazorpaySignature(razorpayOrderId, razorpayPaymentId, razorpaySignature);
-    if (!isValid) {
-      return NextResponse.json(
-        { success: false, error: { code: 'INVALID_SIGNATURE', message: 'Razorpay HMAC-SHA256 signature verification failed.' } },
-        { status: 400 }
-      );
-    }
-
-    // 2. Fetch Order from Database
+    // 1. Fetch Order from Database
     const order = await prisma.order.findFirst({
       where: {
         OR: [
@@ -34,6 +25,57 @@ export async function POST(req: Request) {
       },
       include: { items: true, payments: true },
     });
+
+    // 2. Server-Side HMAC SHA-256 Signature Verification
+    const isValid = verifyRazorpaySignature(razorpayOrderId, razorpayPaymentId, razorpaySignature);
+    if (!isValid) {
+      if (order) {
+        const failureMsg = 'Razorpay HMAC-SHA256 signature verification failed (invalid token).';
+        const pendingPayment = order.payments?.find((p) => p.paymentStatus === 'PENDING');
+        if (pendingPayment) {
+          await prisma.payment.update({
+            where: { id: pendingPayment.id },
+            data: {
+              paymentStatus: 'FAILED',
+              failureMessage: failureMsg,
+              razorpayPaymentId,
+              razorpaySignature,
+              transactionAt: new Date(),
+            },
+          });
+        } else {
+          await prisma.payment.create({
+            data: {
+              orderId: order.id,
+              paymentMode: 'ONLINE',
+              paymentMethod: 'CARD',
+              paymentType: 'ONE_TIME',
+              amount: order.totalAmount,
+              currency: order.currency || 'INR',
+              paymentStatus: 'FAILED',
+              failureMessage: failureMsg,
+              razorpayOrderId,
+              razorpayPaymentId,
+              razorpaySignature,
+              transactionAt: new Date(),
+            },
+          });
+        }
+        await prisma.orderStatusHistory.create({
+          data: {
+            orderId: order.id,
+            previousStatus: order.orderStatus,
+            newStatus: order.orderStatus,
+            changedBy: 'razorpay-verification',
+            note: `Payment verification failed: ${failureMsg}`,
+          },
+        });
+      }
+      return NextResponse.json(
+        { success: false, error: { code: 'INVALID_SIGNATURE', message: 'Razorpay HMAC-SHA256 signature verification failed.' } },
+        { status: 400 }
+      );
+    }
 
     if (!order) {
       return NextResponse.json(

@@ -282,4 +282,215 @@ test('Order Schema - Validates Order, OrderItem, and Payment relationships', () 
   assert.strictEqual(mockOrder.payments[0].amount, mockOrder.totalAmount);
 });
 
+// 12. Payment Failure & Failure Message Resolution Tests
+test('Payment Failure Audit - Correctly updates payment status to FAILED and stores failure message', () => {
+  const failedPaymentAttempt = {
+    orderId: 'ord_1002',
+    paymentMode: 'ONLINE',
+    paymentMethod: 'CARD',
+    amount: 14999,
+    paymentStatus: 'FAILED',
+    failureMessage: 'Payment failed due to incorrect OTP entered by customer.',
+    razorpayOrderId: 'order_rzp_failed_01',
+    razorpayPaymentId: 'pay_failed_99',
+    transactionAt: new Date().toISOString(),
+  };
+
+  const getEffectiveStatusAndMessage = (payments: Array<any>) => {
+    if (!payments || payments.length === 0) return { status: 'PENDING', failureMessage: null };
+    const success = payments.find((p) => p.paymentStatus === 'SUCCESS');
+    if (success) return { status: 'SUCCESS', failureMessage: null };
+    const latest = payments[payments.length - 1];
+    return { status: latest.paymentStatus || 'PENDING', failureMessage: latest.failureMessage || null };
+  };
+
+  const auditResult = getEffectiveStatusAndMessage([failedPaymentAttempt]);
+
+  assert.strictEqual(auditResult.status, 'FAILED');
+  assert.strictEqual(auditResult.failureMessage, 'Payment failed due to incorrect OTP entered by customer.');
+});
+
+// 13. Admin Product Insertion & Specifications Gallery Builder Tests
+test('Admin Product Insertion - Validates dynamic key-value specifications JSON and image gallery URLs', () => {
+  const specPairs = [
+    { key: 'Screen Size', value: '55 Inch' },
+    { key: 'Resolution', value: '4K Ultra HD' },
+    { key: 'Energy Rating', value: '5 Star' },
+  ];
+
+  const buildSpecsObject = (pairs: Array<{ key: string; value: string }>) => {
+    const obj: Record<string, string> = {};
+    pairs.forEach((p) => {
+      if (p.key.trim()) obj[p.key.trim()] = p.value.trim();
+    });
+    return obj;
+  };
+
+  const specsObj = buildSpecsObject(specPairs);
+  const jsonString = JSON.stringify(specsObj);
+
+  assert.strictEqual(jsonString, '{"Screen Size":"55 Inch","Resolution":"4K Ultra HD","Energy Rating":"5 Star"}');
+
+  const imageUrlsInput = [
+    'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1',
+    'https://images.unsplash.com/photo-1526738549149-8e07eca6c147',
+    '  ',
+  ];
+
+  const cleanUrls = imageUrlsInput.map((u) => u.trim()).filter(Boolean);
+  assert.strictEqual(cleanUrls.length, 2);
+  assert.strictEqual(cleanUrls[0], 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1');
+});
+
+// 14. Bulk Excel Product Import Row Normalization Tests
+test('Bulk Excel Product Import - Normalizes spreadsheet rows, prices, and generates missing SKUs', () => {
+  const excelRow = {
+    'Product Name': 'LG 260L Double Door Refrigerator',
+    'Brand': 'LG',
+    'Selling Price (INR)': 26490,
+    'MRP (INR)': 32990,
+    'Stock': 8,
+    'Status': 'ACTIVE',
+    'Image URLs (comma separated)': 'https://images.unsplash.com/photo-1584992236310-6edddc08acff',
+    'Specifications (Key:Value pairs)': 'Capacity: 260L, Defrost: Frost Free',
+  };
+
+  const normalizeExcelRow = (row: any, idx: number) => {
+    const name = String(row['Product Name'] || row.name || '').trim();
+    const brand = String(row['Brand'] || row.brand || 'Store Brand').trim();
+    let sku = String(row['SKU'] || row.sku || '').trim();
+    const price = Number(row['Selling Price (INR)'] || row.price || 0);
+
+    if (!sku) {
+      const brandCode = brand.substring(0, 3).toUpperCase();
+      sku = `RV-${brandCode}-TEST${idx + 1}`;
+    }
+
+    return { name, brand, sku, price };
+  };
+
+  const result = normalizeExcelRow(excelRow, 0);
+
+  assert.strictEqual(result.name, 'LG 260L Double Door Refrigerator');
+  assert.strictEqual(result.brand, 'LG');
+  assert.strictEqual(result.sku, 'RV-LG-TEST1');
+  assert.strictEqual(result.price, 26490);
+});
+
+// 15. Manual Payment Status Update & Admin Audit Log Tests
+test('Manual Payment Status Update - Validates payment status change logic, status mapping, and audit history entry', () => {
+  interface OrderAuditHistory {
+    status: string;
+    note: string;
+    createdAt: string;
+  }
+
+  interface MockOrder {
+    id: string;
+    paymentStatus: 'PENDING' | 'SUCCESS' | 'FAILED' | 'CANCELLED';
+    orderStatus: string;
+    history: OrderAuditHistory[];
+  }
+
+  const mockOrder: MockOrder = {
+    id: 'ord_12345',
+    paymentStatus: 'PENDING',
+    orderStatus: 'PROCESSING',
+    history: []
+  };
+
+  const updatePaymentStatus = (order: MockOrder, newPaymentStatus: 'SUCCESS' | 'FAILED', reason?: string, adminEmail: string = 'admin@ravivision.com') => {
+    order.paymentStatus = newPaymentStatus;
+    
+    // Auto-align order status if payment fails
+    if (newPaymentStatus === 'FAILED' && order.orderStatus === 'PROCESSING') {
+      order.orderStatus = 'PAYMENT_FAILED';
+    }
+
+    const note = `[MANUAL_PAYMENT_UPDATE] Payment status updated to ${newPaymentStatus} by Admin (${adminEmail}). Reason: ${reason || 'Cash collected on delivery'}`;
+    order.history.push({
+      status: order.orderStatus,
+      note,
+      createdAt: new Date().toISOString()
+    });
+
+    return order;
+  };
+
+  // 1. Mark COD Payment as SUCCESS
+  const successOrder = updatePaymentStatus(mockOrder, 'SUCCESS', 'Cash ₹24,990 collected by courier partner');
+  assert.strictEqual(successOrder.paymentStatus, 'SUCCESS');
+  assert.strictEqual(successOrder.history.length, 1);
+  assert.match(successOrder.history[0].note, /Cash ₹24,990 collected by courier partner/);
+
+  // 2. Mark Payment as FAILED
+  const failedOrder = updatePaymentStatus(mockOrder, 'FAILED', 'Customer refused COD payment on delivery');
+  assert.strictEqual(failedOrder.paymentStatus, 'FAILED');
+  assert.strictEqual(failedOrder.orderStatus, 'PAYMENT_FAILED');
+  assert.strictEqual(failedOrder.history.length, 2);
+  assert.match(failedOrder.history[1].note, /Customer refused COD payment/);
+});
+
+// 21. Admin Credentials Update (Username & Password) Tests
+test('Admin Credentials Update - Validates username change, password hashing, and authentication validation', async () => {
+  const bcrypt = await import('bcryptjs');
+
+  const adminAccount = {
+    id: 'admin_1',
+    username: 'admin@ravivision.com',
+    passwordHash: await bcrypt.hash('OldPassword123', 10),
+    name: 'Store Admin',
+  };
+
+  const updateAdminCredentials = async (
+    account: typeof adminAccount,
+    currentPasswordAttempt: string,
+    newUsernameAttempt?: string,
+    newPasswordAttempt?: string
+  ) => {
+    // 1. Verify Current Password
+    const isValid = await bcrypt.compare(currentPasswordAttempt, account.passwordHash);
+    if (!isValid) return { success: false, error: 'Current password is incorrect.' };
+
+    // 2. Update Username if provided
+    if (newUsernameAttempt && newUsernameAttempt.trim() !== account.username) {
+      if (newUsernameAttempt.trim().length < 3) return { success: false, error: 'Username too short.' };
+      account.username = newUsernameAttempt.trim();
+    }
+
+    // 3. Update Password if provided
+    if (newPasswordAttempt && newPasswordAttempt.trim()) {
+      if (newPasswordAttempt.trim().length < 6) return { success: false, error: 'Password too short.' };
+      account.passwordHash = await bcrypt.hash(newPasswordAttempt.trim(), 10);
+    }
+
+    return { success: true, username: account.username };
+  };
+
+  // Attempt with invalid current password -> reject
+  const badAuth = await updateAdminCredentials(adminAccount, 'WrongPassword', 'newadmin@ravivision.com');
+  assert.strictEqual(badAuth.success, false);
+  assert.strictEqual(badAuth.error, 'Current password is incorrect.');
+  assert.strictEqual(adminAccount.username, 'admin@ravivision.com');
+
+  // Attempt with valid password -> change username to 'newadmin@ravivision.com' and password to 'NewSecurePassword456'
+  const successAuth = await updateAdminCredentials(
+    adminAccount,
+    'OldPassword123',
+    'newadmin@ravivision.com',
+    'NewSecurePassword456'
+  );
+  assert.strictEqual(successAuth.success, true);
+  assert.strictEqual(adminAccount.username, 'newadmin@ravivision.com');
+
+  // Verify new password works with bcrypt
+  const newPassValid = await bcrypt.compare('NewSecurePassword456', adminAccount.passwordHash);
+  assert.strictEqual(newPassValid, true);
+});
+
+
+
+
+
+
 

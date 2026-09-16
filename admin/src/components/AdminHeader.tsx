@@ -25,8 +25,8 @@ export default function AdminHeader({ title, subtitle, onRefresh, isRefreshing }
   return (
     <header className="admin-header">
       <div>
-        <h1 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#f8fafc' }}>{title}</h1>
-        {subtitle && <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{subtitle}</p>}
+        <h1 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0f172a' }}>{title}</h1>
+        {subtitle && <p style={{ fontSize: '0.8rem', color: '#64748b' }}>{subtitle}</p>}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -46,20 +46,20 @@ export default function AdminHeader({ title, subtitle, onRefresh, isRefreshing }
           display: 'flex',
           alignItems: 'center',
           gap: '0.6rem',
-          background: 'rgba(15, 23, 42, 0.6)',
+          background: '#eff6ff',
           padding: '0.4rem 0.85rem',
           borderRadius: '10px',
-          border: '1px solid var(--border-color)',
+          border: '1px solid #bfdbfe',
           fontSize: '0.85rem'
         }}>
-          <UserCheck size={16} color="#34d399" />
-          <span style={{ fontWeight: 600, color: '#f8fafc' }}>Store Administrator</span>
+          <UserCheck size={16} color="#2563eb" />
+          <span style={{ fontWeight: 600, color: '#1d4ed8' }}>Store Administrator</span>
         </div>
 
         <button 
           onClick={handleLogout} 
           className="btn btn-secondary"
-          style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem', color: '#f87171' }}
+          style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem', color: '#dc2626', borderColor: '#fca5a5', background: '#fff1f2' }}
         >
           <LogOut size={14} />
           Logout

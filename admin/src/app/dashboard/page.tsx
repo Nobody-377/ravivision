@@ -93,14 +93,14 @@ export default function DashboardPage() {
             <div className="metric-card">
               <div>
                 <span className="metric-label">Total Store Revenue</span>
-                <div className="metric-val" style={{ color: '#34d399' }}>
+                <div className="metric-val" style={{ color: '#059669' }}>
                   ₹{stats.totalRevenue.toLocaleString('en-IN')}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  <TrendingUp size={14} color="#34d399" /> Real-time sales total
+                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <TrendingUp size={14} color="#059669" /> Real-time sales total
                 </div>
               </div>
-              <div className="metric-icon" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399' }}>
+              <div className="metric-icon" style={{ background: '#ecfdf5', color: '#059669' }}>
                 <DollarSign size={24} />
               </div>
             </div>
@@ -108,14 +108,14 @@ export default function DashboardPage() {
             <div className="metric-card">
               <div>
                 <span className="metric-label">Total Customer Orders</span>
-                <div className="metric-val" style={{ color: '#60a5fa' }}>
+                <div className="metric-val" style={{ color: '#2563eb' }}>
                   {stats.totalOrders}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
                   {stats.pendingOrders} pending fulfillment
                 </div>
               </div>
-              <div className="metric-icon" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa' }}>
+              <div className="metric-icon" style={{ background: '#eff6ff', color: '#2563eb' }}>
                 <ShoppingBag size={24} />
               </div>
             </div>
@@ -123,29 +123,29 @@ export default function DashboardPage() {
             <div className="metric-card">
               <div>
                 <span className="metric-label">Active Catalog Products</span>
-                <div className="metric-val" style={{ color: '#c084fc' }}>
+                <div className="metric-val" style={{ color: '#7c3aed' }}>
                   {stats.activeProducts}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.25rem' }}>
+                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.25rem' }}>
                   Ready for sellable stock
                 </div>
               </div>
-              <div className="metric-icon" style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#c084fc' }}>
+              <div className="metric-icon" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
                 <Package size={24} />
               </div>
             </div>
 
-            <div className="metric-card" style={{ borderColor: stats.lowStockCount > 0 ? 'rgba(245, 158, 11, 0.4)' : 'var(--border-color)' }}>
+            <div className="metric-card" style={{ borderColor: stats.lowStockCount > 0 ? '#fde68a' : 'var(--border-color)' }}>
               <div>
                 <span className="metric-label">Low / Out of Stock Items</span>
-                <div className="metric-val" style={{ color: stats.lowStockCount > 0 ? '#fbbf24' : '#34d399' }}>
+                <div className="metric-val" style={{ color: stats.lowStockCount > 0 ? '#d97706' : '#059669' }}>
                   {stats.lowStockCount}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: stats.lowStockCount > 0 ? '#fbbf24' : '#94a3b8', marginTop: '0.25rem' }}>
+                <div style={{ fontSize: '0.75rem', color: stats.lowStockCount > 0 ? '#b45309' : '#64748b', marginTop: '0.25rem' }}>
                   {stats.lowStockCount > 0 ? 'Action required in inventory' : 'Stock levels healthy'}
                 </div>
               </div>
-              <div className="metric-icon" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' }}>
+              <div className="metric-icon" style={{ background: '#fffbeb', color: '#d97706' }}>
                 <AlertTriangle size={24} />
               </div>
             </div>
@@ -155,49 +155,51 @@ export default function DashboardPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
             <Link href="/orders" style={{ textDecoration: 'none' }}>
               <div style={{
-                background: 'rgba(30, 41, 59, 0.6)',
+                background: '#ffffff',
                 border: '1px solid var(--border-color)',
                 borderRadius: '16px',
                 padding: '1.25rem 1.5rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
                 transition: 'transform 0.2s ease',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.15)', borderRadius: '12px', color: '#60a5fa' }}>
+                  <div style={{ padding: '0.75rem', background: '#eff6ff', borderRadius: '12px', color: '#2563eb' }}>
                     <Clock size={20} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>Manage & Track Orders</h3>
-                    <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Update delivery status & customer details</p>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>Manage & Track Orders</h3>
+                    <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Update delivery status & customer details</p>
                   </div>
                 </div>
-                <ChevronRight size={20} color="#64748b" />
+                <ChevronRight size={20} color="#94a3b8" />
               </div>
             </Link>
 
             <Link href="/inventory" style={{ textDecoration: 'none' }}>
               <div style={{
-                background: 'rgba(30, 41, 59, 0.6)',
+                background: '#ffffff',
                 border: '1px solid var(--border-color)',
                 borderRadius: '16px',
                 padding: '1.25rem 1.5rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
                 transition: 'transform 0.2s ease',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ padding: '0.75rem', background: 'rgba(139, 92, 246, 0.15)', borderRadius: '12px', color: '#c084fc' }}>
+                  <div style={{ padding: '0.75rem', background: '#f5f3ff', borderRadius: '12px', color: '#7c3aed' }}>
                     <Package size={20} />
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#f8fafc' }}>Update Inventory Stock</h3>
-                    <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Adjust quantities & SKU prices</p>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>Update Inventory Stock</h3>
+                    <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Adjust quantities & SKU prices</p>
                   </div>
                 </div>
-                <ChevronRight size={20} color="#64748b" />
+                <ChevronRight size={20} color="#94a3b8" />
               </div>
             </Link>
           </div>
@@ -206,8 +208,8 @@ export default function DashboardPage() {
           <div className="table-container">
             <div className="table-header-toolbar">
               <div>
-                <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>Recent Customer Orders</h2>
-                <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Latest store orders with fulfillment status</p>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>Recent Customer Orders</h2>
+                <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Latest store orders with fulfillment status</p>
               </div>
               <Link href="/orders" className="btn btn-secondary" style={{ fontSize: '0.8rem' }}>
                 View All Orders <ArrowUpRight size={14} />
@@ -215,9 +217,9 @@ export default function DashboardPage() {
             </div>
 
             {loading ? (
-              <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>Loading store data...</div>
+              <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>Loading store data...</div>
             ) : orders.length === 0 ? (
-              <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>No customer orders placed yet.</div>
+              <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>No customer orders placed yet.</div>
             ) : (
               <table className="admin-table">
                 <thead>
@@ -234,11 +236,11 @@ export default function DashboardPage() {
                 <tbody>
                   {orders.slice(0, 6).map((order) => (
                     <tr key={order.id}>
-                      <td style={{ fontWeight: 700, color: '#38bdf8' }}>{order.orderNumber}</td>
+                      <td style={{ fontWeight: 700, color: '#2563eb' }}>{order.orderNumber}</td>
                       <td style={{ fontWeight: 600 }}>{order.customerName}</td>
                       <td>{order.mobileNumber}</td>
                       <td>{order.city} ({order.pincode})</td>
-                      <td style={{ fontWeight: 700, color: '#34d399' }}>₹{Number(order.totalAmount).toLocaleString('en-IN')}</td>
+                      <td style={{ fontWeight: 700, color: '#059669' }}>₹{Number(order.totalAmount).toLocaleString('en-IN')}</td>
                       <td>
                         <span className={`badge ${order.paymentMode === 'ONLINE' ? 'badge-purple' : 'badge-blue'}`}>
                           {order.paymentMode}

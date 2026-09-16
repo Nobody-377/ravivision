@@ -17,13 +17,14 @@ interface FooterProps {
 export function Footer({ storeConfig }: FooterProps) {
   return (
     <footer style={{
-      backgroundColor: '#0f172a',
-      color: '#cbd5e1',
+      backgroundColor: '#f8fafc',
+      color: '#334155',
       fontSize: '0.875rem',
-      paddingTop: '3rem',
-      paddingBottom: '1.5rem',
+      paddingTop: '3.5rem',
+      paddingBottom: '2rem',
       marginTop: '4rem',
-      borderTop: '4px solid var(--primary-blue)',
+      borderTop: '1px solid #e2e8f0',
+      boxShadow: '0 -2px 12px rgba(0, 0, 0, 0.03)',
     }}>
       <div className="container">
         {/* Value Proposition Highlights */}
@@ -33,39 +34,39 @@ export function Footer({ storeConfig }: FooterProps) {
           gap: '1.5rem',
           paddingBottom: '2.5rem',
           marginBottom: '2.5rem',
-          borderBottom: '1px solid #334155',
+          borderBottom: '1px solid #e2e8f0',
         }}>
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-            <div style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', backgroundColor: '#1e293b', color: '#60a5fa' }}>
+          <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start' }}>
+            <div style={{ padding: '0.6rem', borderRadius: 'var(--radius-md)', backgroundColor: '#e8f0fe', color: '#0d52bf', border: '1px solid #dbeafe' }}>
               <Truck size={24} />
             </div>
             <div>
-              <h5 style={{ color: '#ffffff', fontWeight: 700, fontSize: '0.9375rem' }}>Local ~1-Day Delivery</h5>
-              <p style={{ fontSize: '0.8125rem', color: '#94a3b8', marginTop: '0.125rem' }}>
+              <h5 style={{ color: '#093680', fontWeight: 700, fontSize: '0.95rem' }}>Local ~1-Day Delivery</h5>
+              <p style={{ fontSize: '0.8125rem', color: '#475569', marginTop: '0.2rem' }}>
                 Fast local delivery for eligible pincodes directly from our store inventory.
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-            <div style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', backgroundColor: '#1e293b', color: '#60a5fa' }}>
+          <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start' }}>
+            <div style={{ padding: '0.6rem', borderRadius: 'var(--radius-md)', backgroundColor: '#e8f0fe', color: '#0d52bf', border: '1px solid #dbeafe' }}>
               <Phone size={24} />
             </div>
             <div>
-              <h5 style={{ color: '#ffffff', fontWeight: 700, fontSize: '0.9375rem' }}>Call to Order Option</h5>
-              <p style={{ fontSize: '0.8125rem', color: '#94a3b8', marginTop: '0.125rem' }}>
+              <h5 style={{ color: '#093680', fontWeight: 700, fontSize: '0.95rem' }}>Call to Order Option</h5>
+              <p style={{ fontSize: '0.8125rem', color: '#475569', marginTop: '0.2rem' }}>
                 Prefer ordering over phone? Call our local store team directly for assistance.
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-            <div style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', backgroundColor: '#1e293b', color: '#60a5fa' }}>
+          <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start' }}>
+            <div style={{ padding: '0.6rem', borderRadius: 'var(--radius-md)', backgroundColor: '#e8f0fe', color: '#0d52bf', border: '1px solid #dbeafe' }}>
               <Shield size={24} />
             </div>
             <div>
-              <h5 style={{ color: '#ffffff', fontWeight: 700, fontSize: '0.9375rem' }}>Genuine Store Warranty</h5>
-              <p style={{ fontSize: '0.8125rem', color: '#94a3b8', marginTop: '0.125rem' }}>
+              <h5 style={{ color: '#093680', fontWeight: 700, fontSize: '0.95rem' }}>Genuine Store Warranty</h5>
+              <p style={{ fontSize: '0.8125rem', color: '#475569', marginTop: '0.2rem' }}>
                 All products come with official brand manufacturer warranty and store support.
               </p>
             </div>
@@ -78,47 +79,47 @@ export function Footer({ storeConfig }: FooterProps) {
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '2rem',
           paddingBottom: '2.5rem',
-          borderBottom: '1px solid #334155',
+          borderBottom: '1px solid #e2e8f0',
         }}>
           {/* Store Info Column */}
           <div>
-            <h4 style={{ color: '#ffffff', fontWeight: 800, fontSize: '1.125rem', marginBottom: '1rem', letterSpacing: '0.05em' }}>
+            <h4 style={{ color: '#0d52bf', fontWeight: 800, fontSize: '1.25rem', marginBottom: '1rem', letterSpacing: '0.05em' }}>
               RAVI VISION
             </h4>
-            <p style={{ fontSize: '0.8125rem', color: '#94a3b8', marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '1.25rem', lineHeight: '1.5' }}>
               Your trusted local electronics, electrical, and home-appliance retailer.
             </p>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem', fontSize: '0.8125rem' }}>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                <MapPin size={16} color="#60a5fa" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem' }}>
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+                <MapPin size={18} color="#0d52bf" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <span>
                   {storeConfig.address ? (
                     `${storeConfig.address}, ${storeConfig.city}, ${storeConfig.state}`
                   ) : (
-                    <em style={{ color: '#94a3b8' }}>Store address setup pending</em>
+                    <em style={{ color: '#64748b' }}>Store address setup pending</em>
                   )}
                 </span>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <Phone size={16} color="#60a5fa" style={{ flexShrink: 0 }} />
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                <Phone size={18} color="#0d52bf" style={{ flexShrink: 0 }} />
                 <span>
                   {storeConfig.phone ? (
-                    <a href={`tel:${storeConfig.phone}`} style={{ color: '#ffffff', fontWeight: 600 }}>{storeConfig.phone}</a>
+                    <a href={`tel:${storeConfig.phone}`} style={{ color: '#0d52bf', fontWeight: 700 }}>{storeConfig.phone}</a>
                   ) : (
-                    <em style={{ color: '#94a3b8' }}>Phone number setup pending</em>
+                    <em style={{ color: '#64748b' }}>Phone number setup pending</em>
                   )}
                 </span>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <Clock size={16} color="#60a5fa" style={{ flexShrink: 0 }} />
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                <Clock size={18} color="#0d52bf" style={{ flexShrink: 0 }} />
                 <span>
                   {storeConfig.openingHours ? (
                     storeConfig.openingHours
                   ) : (
-                    <em style={{ color: '#94a3b8' }}>Hours setup pending</em>
+                    <em style={{ color: '#64748b' }}>Hours setup pending</em>
                   )}
                 </span>
               </div>
@@ -127,26 +128,26 @@ export function Footer({ storeConfig }: FooterProps) {
 
           {/* Primary Categories */}
           <div>
-            <h5 style={{ color: '#ffffff', fontWeight: 700, marginBottom: '1rem' }}>Primary Categories</h5>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: 0 }}>
-              <li><Link href="/products" style={{ color: '#cbd5e1', textDecoration: 'none' }}>All Products</Link></li>
-              <li><Link href="/products?category=refrigerators" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Refrigerators</Link></li>
-              <li><Link href="/products?category=washing-machines" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Washing Machines</Link></li>
-              <li><Link href="/products?category=air-conditioners" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Air Conditioners</Link></li>
-              <li><Link href="/products?category=fans" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Fans & Coolers</Link></li>
-              <li><Link href="/products?category=inverters-batteries" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Inverters & Batteries</Link></li>
-              <li><Link href="/products?category=ro" style={{ color: '#cbd5e1', textDecoration: 'none' }}>RO Water Purifiers</Link></li>
+            <h5 style={{ color: '#0f172a', fontWeight: 700, fontSize: '1rem', marginBottom: '1rem' }}>Primary Categories</h5>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.6rem', padding: 0 }}>
+              <li><Link href="/products" style={{ color: '#475569', textDecoration: 'none' }}>All Products</Link></li>
+              <li><Link href="/products?category=refrigerators" style={{ color: '#475569', textDecoration: 'none' }}>Refrigerators</Link></li>
+              <li><Link href="/products?category=washing-machines" style={{ color: '#475569', textDecoration: 'none' }}>Washing Machines</Link></li>
+              <li><Link href="/products?category=air-conditioners" style={{ color: '#475569', textDecoration: 'none' }}>Air Conditioners</Link></li>
+              <li><Link href="/products?category=fans" style={{ color: '#475569', textDecoration: 'none' }}>Fans & Coolers</Link></li>
+              <li><Link href="/products?category=inverters-batteries" style={{ color: '#475569', textDecoration: 'none' }}>Inverters & Batteries</Link></li>
+              <li><Link href="/products?category=ro" style={{ color: '#475569', textDecoration: 'none' }}>RO Water Purifiers</Link></li>
             </ul>
           </div>
 
           {/* Customer Service & Policies */}
           <div>
-            <h5 style={{ color: '#ffffff', fontWeight: 700, marginBottom: '1rem' }}>Customer Care</h5>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: 0 }}>
-              <li><Link href="/cart" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Shopping Cart</Link></li>
-              <li><Link href="/checkout" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Guest Checkout</Link></li>
-              <li><span style={{ color: '#94a3b8' }}>Cash on Delivery (COD)</span></li>
-              <li><span style={{ color: '#94a3b8' }}>Razorpay Online Payments</span></li>
+            <h5 style={{ color: '#0f172a', fontWeight: 700, fontSize: '1rem', marginBottom: '1rem' }}>Customer Care</h5>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.6rem', padding: 0 }}>
+              <li><Link href="/cart" style={{ color: '#475569', textDecoration: 'none' }}>Shopping Cart</Link></li>
+              <li><Link href="/checkout" style={{ color: '#475569', textDecoration: 'none' }}>Guest Checkout</Link></li>
+              <li><span style={{ color: '#64748b' }}>Cash on Delivery (COD)</span></li>
+              <li><span style={{ color: '#64748b' }}>Razorpay Online Payments</span></li>
             </ul>
           </div>
         </div>
@@ -159,17 +160,19 @@ export function Footer({ storeConfig }: FooterProps) {
           alignItems: 'center',
           flexWrap: 'wrap',
           gap: '1rem',
-          fontSize: '0.75rem',
+          fontSize: '0.8125rem',
           color: '#64748b',
         }}>
           <div>
             © {new Date().getFullYear()} RAVI VISION (ravivision.com). All rights reserved.
           </div>
           <div>
-            Production Canonical Domain: <strong style={{ color: '#94a3b8' }}>https://ravivision.com</strong>
+            Production Canonical Domain: <strong style={{ color: '#0d52bf' }}>https://ravivision.com</strong>
           </div>
         </div>
       </div>
     </footer>
   );
 }
+
+
