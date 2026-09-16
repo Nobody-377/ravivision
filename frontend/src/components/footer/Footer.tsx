@@ -148,6 +148,7 @@ export function Footer({ storeConfig }: FooterProps) {
               <li><Link href="/checkout" style={{ color: '#475569', textDecoration: 'none' }}>Guest Checkout</Link></li>
               <li><span style={{ color: '#64748b' }}>Cash on Delivery (COD)</span></li>
               <li><span style={{ color: '#64748b' }}>Razorpay Online Payments</span></li>
+              <li><Link href="/admin" style={{ color: '#0d52bf', fontWeight: 600, textDecoration: 'none' }}>Store Admin Portal</Link></li>
             </ul>
           </div>
         </div>
