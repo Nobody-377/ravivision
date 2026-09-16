@@ -492,11 +492,11 @@ export default function InventoryPage() {
                           )}
                         </td>
                         <td>
-                          <div style={{ fontWeight: 700, color: '#38bdf8', fontFamily: 'monospace' }}>{p.sku}</div>
-                          <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Brand: {p.brand}</div>
+                          <div style={{ fontWeight: 700, color: '#0284c7', fontFamily: 'monospace' }}>{p.sku}</div>
+                          <div style={{ fontSize: '0.75rem', color: '#475569' }}>Brand: {p.brand}</div>
                         </td>
                         <td>
-                          <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.9rem' }}>{p.name}</div>
+                          <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.9rem' }}>{p.name}</div>
                           <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
                             {p.isFeatured && <span className="badge badge-purple" style={{ fontSize: '0.675rem' }}>★ Featured</span>}
                             {p.isBestSeller && <span className="badge badge-emerald" style={{ fontSize: '0.675rem' }}>🔥 Best Seller</span>}
@@ -504,14 +504,14 @@ export default function InventoryPage() {
                           </div>
                         </td>
                         <td>
-                          <div style={{ fontWeight: 700, color: '#34d399' }}>₹{Number(p.price).toLocaleString('en-IN')}</div>
+                          <div style={{ fontWeight: 700, color: '#059669' }}>₹{Number(p.price).toLocaleString('en-IN')}</div>
                           {Number(p.mrp) > Number(p.price) && (
                             <div style={{ fontSize: '0.75rem', color: '#64748b', textDecoration: 'line-through' }}>
                               MRP: ₹{Number(p.mrp).toLocaleString('en-IN')}
                             </div>
                           )}
                         </td>
-                        <td style={{ fontWeight: 800, fontSize: '0.9rem', color: isLowStock ? '#fbbf24' : '#f8fafc' }}>
+                        <td style={{ fontWeight: 800, fontSize: '0.9rem', color: isLowStock ? '#d97706' : '#0f172a' }}>
                           {p.stock} units
                         </td>
                         <td>
@@ -567,26 +567,26 @@ export default function InventoryPage() {
           <div className="modal-card animate-fade-in" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <FileUp size={22} color="#a855f7" />
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc' }}>
+                <FileUp size={22} color="#7c3aed" />
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
                   Bulk Import Products via Excel Spreadsheet
                 </h2>
               </div>
-              <button onClick={() => setShowExcelModal(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+              <button onClick={() => setShowExcelModal(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
 
             {/* Template Download Banner */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(139, 92, 246, 0.15)', border: '1px solid rgba(139, 92, 246, 0.3)', padding: '0.85rem 1.15rem', borderRadius: '12px', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f5f3ff', border: '1px solid #ddd6fe', padding: '0.85rem 1.15rem', borderRadius: '12px', marginBottom: '1.25rem' }}>
               <div>
-                <div style={{ fontWeight: 700, color: '#c084fc', fontSize: '0.9rem' }}>Need a formatted Excel spreadsheet template?</div>
-                <div style={{ fontSize: '0.775rem', color: '#94a3b8', marginTop: '0.15rem' }}>Download our pre-formatted template with sample rows for ACs, Refrigerators, Washing Machines, TVs & Fans.</div>
+                <div style={{ fontWeight: 700, color: '#6d28d9', fontSize: '0.9rem' }}>Need a formatted Excel spreadsheet template?</div>
+                <div style={{ fontSize: '0.775rem', color: '#475569', marginTop: '0.15rem' }}>Download our pre-formatted template with sample rows for ACs, Refrigerators, Washing Machines, TVs & Fans.</div>
               </div>
               <button
                 onClick={downloadProductImportTemplate}
                 className="btn btn-secondary"
-                style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.35rem', borderColor: '#c084fc', color: '#c084fc' }}
+                style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.35rem', borderColor: '#7c3aed', color: '#7c3aed', background: '#ffffff' }}
               >
                 <Download size={15} /> Download Sample Template (.xlsx)
               </button>
@@ -594,7 +594,7 @@ export default function InventoryPage() {
 
             {/* File Upload Zone */}
             <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', marginBottom: '0.5rem' }}>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>
                 Select Excel File (.xlsx, .xls, .csv)
               </label>
               <input
@@ -604,10 +604,10 @@ export default function InventoryPage() {
                 style={{
                   width: '100%',
                   padding: '1rem',
-                  background: 'rgba(15, 23, 42, 0.8)',
+                  background: '#f8fafc',
                   border: '2px dashed #a855f7',
                   borderRadius: '12px',
-                  color: '#f8fafc',
+                  color: '#0f172a',
                   cursor: 'pointer',
                   fontSize: '0.875rem',
                 }}
@@ -618,7 +618,7 @@ export default function InventoryPage() {
             {excelParsedRows.length > 0 && (
               <div style={{ marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#34d399', textTransform: 'uppercase' }}>
+                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#059669', textTransform: 'uppercase' }}>
                     Live Preview: {excelParsedRows.length} Product Rows Detected ({excelFileName})
                   </h3>
                 </div>
@@ -640,21 +640,21 @@ export default function InventoryPage() {
                       {excelParsedRows.slice(0, 15).map((row, idx) => (
                         <tr key={idx}>
                           <td>{idx + 1}</td>
-                          <td style={{ fontWeight: 600, color: '#f8fafc' }}>
+                          <td style={{ fontWeight: 600, color: '#0f172a' }}>
                             {row['Product Name'] || row.name || row['Product / Product Type'] || 'N/A'}
                           </td>
-                          <td>{row['Brand'] || row.brand || 'Store Brand'}</td>
-                          <td style={{ fontFamily: 'monospace', color: '#38bdf8' }}>{row['SKU'] || row.sku || 'Auto-Generate'}</td>
-                          <td style={{ color: '#34d399', fontWeight: 700 }}>₹{row['Selling Price (INR)'] || row.price || 0}</td>
-                          <td>₹{row['MRP (INR)'] || row.mrp || 0}</td>
-                          <td>{row['Stock'] || row.stock || 10}</td>
+                          <td style={{ color: '#475569' }}>{row['Brand'] || row.brand || 'Store Brand'}</td>
+                          <td style={{ fontFamily: 'monospace', color: '#0284c7' }}>{row['SKU'] || row.sku || 'Auto-Generate'}</td>
+                          <td style={{ color: '#059669', fontWeight: 700 }}>₹{row['Selling Price (INR)'] || row.price || 0}</td>
+                          <td style={{ color: '#64748b' }}>₹{row['MRP (INR)'] || row.mrp || 0}</td>
+                          <td style={{ color: '#0f172a' }}>{row['Stock'] || row.stock || 10}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
                 {excelParsedRows.length > 15 && (
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.35rem', textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.35rem', textAlign: 'right' }}>
                     + Showing first 15 of {excelParsedRows.length} rows
                   </div>
                 )}
@@ -710,7 +710,6 @@ export default function InventoryPage() {
                 Close
               </button>
             </div>
-
           </div>
         </div>
       )}
@@ -721,12 +720,12 @@ export default function InventoryPage() {
           <div className="modal-card animate-fade-in" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '750px', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Sparkles size={20} color="#38bdf8" />
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc' }}>
+                <Sparkles size={20} color="#2563eb" />
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
                   Insert New Product into Store Catalog
                 </h2>
               </div>
-              <button onClick={() => setShowAddModal(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+              <button onClick={() => setShowAddModal(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
@@ -734,14 +733,14 @@ export default function InventoryPage() {
             <form onSubmit={handleCreateProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               
               {/* Section 1: Basic Information */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1rem', borderRadius: '12px' }}>
-                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#38bdf8', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '12px' }}>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#2563eb', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
                   1. Basic Information & Product Identifiers
                 </h3>
                 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       Product Title / Name *
                     </label>
                     <input
@@ -750,12 +749,12 @@ export default function InventoryPage() {
                       placeholder="e.g. Voltas 1.5 Ton 5 Star Inverter Split AC"
                       value={formName}
                       onChange={(e) => setFormName(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.875rem' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       Brand Name *
                     </label>
                     <input
@@ -764,7 +763,7 @@ export default function InventoryPage() {
                       placeholder="e.g. Voltas / LG / Samsung"
                       value={formBrand}
                       onChange={(e) => setFormBrand(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.875rem' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
                     />
                   </div>
                 </div>
@@ -772,13 +771,13 @@ export default function InventoryPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#475569' }}>
                         SKU / Code *
                       </label>
                       <button
                         type="button"
                         onClick={handleGenerateSku}
-                        style={{ background: 'none', border: 'none', color: '#38bdf8', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 700 }}
+                        style={{ background: 'none', border: 'none', color: '#0284c7', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 700 }}
                       >
                         ⚡ Auto-Generate
                       </button>
@@ -789,18 +788,18 @@ export default function InventoryPage() {
                       placeholder="e.g. VOL-992018"
                       value={formSku}
                       onChange={(e) => setFormSku(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.875rem', fontFamily: 'monospace' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem', fontFamily: 'monospace' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       Status
                     </label>
                     <select
                       value={formStatus}
                       onChange={(e) => setFormStatus(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.875rem' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
                     >
                       <option value="ACTIVE">ACTIVE (Visible on Frontend)</option>
                       <option value="DRAFT">DRAFT (Hidden)</option>
@@ -811,7 +810,7 @@ export default function InventoryPage() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#f8fafc' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#0f172a' }}>
                     <input
                       type="checkbox"
                       checked={formIsFeatured}
@@ -820,7 +819,7 @@ export default function InventoryPage() {
                     />
                     Featured Product Badge
                   </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#f8fafc' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#0f172a' }}>
                     <input
                       type="checkbox"
                       checked={formIsBestSeller}
@@ -833,14 +832,14 @@ export default function InventoryPage() {
               </div>
 
               {/* Section 2: Pricing & Inventory */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1rem', borderRadius: '12px' }}>
-                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#34d399', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '12px' }}>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#059669', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
                   2. Pricing & Stock Inventory
                 </h3>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       Selling Price (₹) *
                     </label>
                     <input
@@ -849,12 +848,12 @@ export default function InventoryPage() {
                       placeholder="e.g. 34990"
                       value={formPrice}
                       onChange={(e) => setFormPrice(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#34d399', fontWeight: 700, fontSize: '0.95rem' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#059669', fontWeight: 700, fontSize: '0.95rem' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       MRP Price (₹)
                     </label>
                     <input
@@ -862,12 +861,12 @@ export default function InventoryPage() {
                       placeholder="e.g. 45990"
                       value={formMrp}
                       onChange={(e) => setFormMrp(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.875rem' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       Stock Quantity *
                     </label>
                     <input
@@ -875,22 +874,22 @@ export default function InventoryPage() {
                       required
                       value={formStock}
                       onChange={(e) => setFormStock(Number(e.target.value))}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.875rem' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
                     />
                   </div>
                 </div>
               </div>
 
               {/* Section 3: Product Picture Gallery URLs */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1rem', borderRadius: '12px' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#c084fc', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <ImageIcon size={16} /> 3. Product Pictures & Image Gallery URLs
                   </h3>
                   <button
                     type="button"
                     onClick={handleAddImageUrlInput}
-                    style={{ background: 'none', border: '1px solid #c084fc', color: '#c084fc', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
+                    style={{ background: '#ffffff', border: '1px solid #7c3aed', color: '#7c3aed', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
                   >
                     + Add Picture URL
                   </button>
@@ -899,7 +898,7 @@ export default function InventoryPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {formImageUrls.map((url, idx) => (
                     <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8', width: '70px', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.75rem', color: '#475569', width: '70px', fontWeight: 600 }}>
                         {idx === 0 ? 'Primary' : `Image #${idx + 1}`}
                       </div>
                       <input
@@ -907,7 +906,7 @@ export default function InventoryPage() {
                         placeholder={idx === 0 ? "Main image URL (e.g. https://images.unsplash.com/...)" : `Gallery image #${idx + 1} URL`}
                         value={url}
                         onChange={(e) => handleImageUrlChange(idx, e.target.value)}
-                        style={{ flex: 1, background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.55rem 0.75rem', color: '#f8fafc', fontSize: '0.825rem' }}
+                        style={{ flex: 1, background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.55rem 0.75rem', color: '#0f172a', fontSize: '0.825rem' }}
                       />
                       {url.trim() && (
                         <img
@@ -921,7 +920,7 @@ export default function InventoryPage() {
                         <button
                           type="button"
                           onClick={() => handleRemoveImageUrlInput(idx)}
-                          style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '0.25rem' }}
+                          style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0.25rem' }}
                         >
                           <X size={18} />
                         </button>
@@ -932,15 +931,15 @@ export default function InventoryPage() {
               </div>
 
               {/* Section 4: Features & Specifications Key-Value Builder */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1rem', borderRadius: '12px' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#d97706', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <FileText size={16} /> 4. Key Specifications & Features
                   </h3>
                   <button
                     type="button"
                     onClick={handleAddSpecPair}
-                    style={{ background: 'none', border: '1px solid #fbbf24', color: '#fbbf24', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
+                    style={{ background: '#ffffff', border: '1px solid #d97706', color: '#d97706', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
                   >
                     + Add Feature Spec
                   </button>
@@ -954,20 +953,20 @@ export default function InventoryPage() {
                         placeholder="Attribute (e.g. Capacity / Screen Size)"
                         value={pair.key}
                         onChange={(e) => handleSpecPairChange(idx, 'key', e.target.value)}
-                        style={{ width: '40%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#f8fafc', fontSize: '0.825rem' }}
+                        style={{ width: '40%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#0f172a', fontSize: '0.825rem' }}
                       />
                       <input
                         type="text"
                         placeholder="Value (e.g. 1.5 Ton / 55 Inch / 4K Ultra HD)"
                         value={pair.value}
                         onChange={(e) => handleSpecPairChange(idx, 'value', e.target.value)}
-                        style={{ flex: 1, background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#f8fafc', fontSize: '0.825rem' }}
+                        style={{ flex: 1, background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#0f172a', fontSize: '0.825rem' }}
                       />
                       {formSpecsPairs.length > 1 && (
                         <button
                           type="button"
                           onClick={() => handleRemoveSpecPair(idx)}
-                          style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '0.2rem' }}
+                          style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0.2rem' }}
                         >
                           <X size={18} />
                         </button>
@@ -978,13 +977,13 @@ export default function InventoryPage() {
               </div>
 
               {/* Section 5: Description, Warranty & Installation */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1rem', borderRadius: '12px' }}>
-                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '12px' }}>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
                   5. Product Description, Warranty & Technician Service
                 </h3>
 
                 <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                     Full Product Description
                   </label>
                   <textarea
@@ -992,12 +991,12 @@ export default function InventoryPage() {
                     placeholder="Enter detailed product description and key selling points..."
                     value={formDescription}
                     onChange={(e) => setFormDescription(e.target.value)}
-                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.85rem' }}
+                    style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.85rem' }}
                   />
                 </div>
 
                 <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                     Warranty Information
                   </label>
                   <input
@@ -1005,12 +1004,12 @@ export default function InventoryPage() {
                     placeholder="e.g. 1 Year Comprehensive + 10 Years Compressor Warranty"
                     value={formWarrantyInfo}
                     onChange={(e) => setFormWarrantyInfo(e.target.value)}
-                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.85rem' }}
+                    style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.85rem' }}
                   />
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem 1rem', borderRadius: '10px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#f8fafc', fontWeight: 600 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: '#ffffff', border: '1px solid #e2e8f0', padding: '0.75rem 1rem', borderRadius: '10px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#0f172a', fontWeight: 600 }}>
                     <input
                       type="checkbox"
                       checked={formRequiresInstallation}
@@ -1026,7 +1025,7 @@ export default function InventoryPage() {
                       placeholder="Installation details (e.g. Technician demo & installation within 24h of delivery)"
                       value={formInstallationDetails}
                       onChange={(e) => setFormInstallationDetails(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#f8fafc', fontSize: '0.825rem' }}
+                      style={{ width: '100%', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#0f172a', fontSize: '0.825rem' }}
                     />
                   )}
                 </div>
@@ -1050,7 +1049,6 @@ export default function InventoryPage() {
                   Cancel
                 </button>
               </div>
-
             </form>
           </div>
         </div>
@@ -1062,12 +1060,12 @@ export default function InventoryPage() {
           <div className="modal-card animate-fade-in" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '750px', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Edit3 size={20} color="#38bdf8" />
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc' }}>
+                <Edit3 size={20} color="#2563eb" />
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
                   Edit Product: {editingProduct.sku}
                 </h2>
               </div>
-              <button onClick={() => setEditingProduct(null)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>
+              <button onClick={() => setEditingProduct(null)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
                 <X size={20} />
               </button>
             </div>
@@ -1075,14 +1073,14 @@ export default function InventoryPage() {
             <form onSubmit={handleSaveEditProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               
               {/* Section 1: Basic Info */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1rem', borderRadius: '12px' }}>
-                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#38bdf8', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '12px' }}>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#2563eb', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
                   1. Product Identifiers
                 </h3>
                 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       Product Title / Name
                     </label>
                     <input
@@ -1090,12 +1088,12 @@ export default function InventoryPage() {
                       required
                       value={formName}
                       onChange={(e) => setFormName(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.875rem' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       Brand Name
                     </label>
                     <input
@@ -1103,14 +1101,14 @@ export default function InventoryPage() {
                       required
                       value={formBrand}
                       onChange={(e) => setFormBrand(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.875rem' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
                     />
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       SKU Code
                     </label>
                     <input
@@ -1118,18 +1116,18 @@ export default function InventoryPage() {
                       required
                       value={formSku}
                       onChange={(e) => setFormSku(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.875rem', fontFamily: 'monospace' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem', fontFamily: 'monospace' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       Status
                     </label>
                     <select
                       value={formStatus}
                       onChange={(e) => setFormStatus(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.875rem' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
                     >
                       <option value="ACTIVE">ACTIVE</option>
                       <option value="DRAFT">DRAFT</option>
@@ -1140,7 +1138,7 @@ export default function InventoryPage() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#f8fafc' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#0f172a' }}>
                     <input
                       type="checkbox"
                       checked={formIsFeatured}
@@ -1149,7 +1147,7 @@ export default function InventoryPage() {
                     />
                     Featured Product Badge
                   </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#f8fafc' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#0f172a' }}>
                     <input
                       type="checkbox"
                       checked={formIsBestSeller}
@@ -1162,14 +1160,14 @@ export default function InventoryPage() {
               </div>
 
               {/* Section 2: Pricing & Stock */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1rem', borderRadius: '12px' }}>
-                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#34d399', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '12px' }}>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#059669', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
                   2. Pricing & Inventory
                 </h3>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       Selling Price (₹)
                     </label>
                     <input
@@ -1177,24 +1175,24 @@ export default function InventoryPage() {
                       required
                       value={formPrice}
                       onChange={(e) => setFormPrice(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#34d399', fontWeight: 700, fontSize: '0.95rem' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#059669', fontWeight: 700, fontSize: '0.95rem' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       MRP Price (₹)
                     </label>
                     <input
                       type="number"
                       value={formMrp}
                       onChange={(e) => setFormMrp(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.875rem' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                       Stock Quantity
                     </label>
                     <input
@@ -1202,22 +1200,22 @@ export default function InventoryPage() {
                       required
                       value={formStock}
                       onChange={(e) => setFormStock(Number(e.target.value))}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.875rem' }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
                     />
                   </div>
                 </div>
               </div>
 
               {/* Section 3: Pictures Gallery */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1rem', borderRadius: '12px' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#c084fc', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <ImageIcon size={16} /> 3. Product Gallery Image URLs
                   </h3>
                   <button
                     type="button"
                     onClick={handleAddImageUrlInput}
-                    style={{ background: 'none', border: '1px solid #c084fc', color: '#c084fc', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
+                    style={{ background: '#ffffff', border: '1px solid #7c3aed', color: '#7c3aed', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
                   >
                     + Add Picture URL
                   </button>
@@ -1226,7 +1224,7 @@ export default function InventoryPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {formImageUrls.map((url, idx) => (
                     <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={{ fontSize: '0.75rem', color: '#94a3b8', width: '70px', fontWeight: 600 }}>
+                      <div style={{ fontSize: '0.75rem', color: '#475569', width: '70px', fontWeight: 600 }}>
                         {idx === 0 ? 'Primary' : `Image #${idx + 1}`}
                       </div>
                       <input
@@ -1234,7 +1232,7 @@ export default function InventoryPage() {
                         placeholder="Image URL"
                         value={url}
                         onChange={(e) => handleImageUrlChange(idx, e.target.value)}
-                        style={{ flex: 1, background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.55rem 0.75rem', color: '#f8fafc', fontSize: '0.825rem' }}
+                        style={{ flex: 1, background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.55rem 0.75rem', color: '#0f172a', fontSize: '0.825rem' }}
                       />
                       {url.trim() && (
                         <img
@@ -1248,7 +1246,7 @@ export default function InventoryPage() {
                         <button
                           type="button"
                           onClick={() => handleRemoveImageUrlInput(idx)}
-                          style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '0.25rem' }}
+                          style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0.25rem' }}
                         >
                           <X size={18} />
                         </button>
@@ -1259,15 +1257,15 @@ export default function InventoryPage() {
               </div>
 
               {/* Section 4: Key Specifications */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1rem', borderRadius: '12px' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#d97706', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <FileText size={16} /> 4. Key Specifications & Features
                   </h3>
                   <button
                     type="button"
                     onClick={handleAddSpecPair}
-                    style={{ background: 'none', border: '1px solid #fbbf24', color: '#fbbf24', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
+                    style={{ background: '#ffffff', border: '1px solid #d97706', color: '#d97706', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
                   >
                     + Add Feature Spec
                   </button>
@@ -1281,20 +1279,20 @@ export default function InventoryPage() {
                         placeholder="Attribute"
                         value={pair.key}
                         onChange={(e) => handleSpecPairChange(idx, 'key', e.target.value)}
-                        style={{ width: '40%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#f8fafc', fontSize: '0.825rem' }}
+                        style={{ width: '40%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#0f172a', fontSize: '0.825rem' }}
                       />
                       <input
                         type="text"
                         placeholder="Value"
                         value={pair.value}
                         onChange={(e) => handleSpecPairChange(idx, 'value', e.target.value)}
-                        style={{ flex: 1, background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#f8fafc', fontSize: '0.825rem' }}
+                        style={{ flex: 1, background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#0f172a', fontSize: '0.825rem' }}
                       />
                       {formSpecsPairs.length > 1 && (
                         <button
                           type="button"
                           onClick={() => handleRemoveSpecPair(idx)}
-                          style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: '0.2rem' }}
+                          style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0.2rem' }}
                         >
                           <X size={18} />
                         </button>
@@ -1305,37 +1303,37 @@ export default function InventoryPage() {
               </div>
 
               {/* Section 5: Description & Service */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', padding: '1rem', borderRadius: '12px' }}>
-                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '12px' }}>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
                   5. Description, Warranty & Installation
                 </h3>
 
                 <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                     Full Product Description
                   </label>
                   <textarea
                     rows={3}
                     value={formDescription}
                     onChange={(e) => setFormDescription(e.target.value)}
-                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.85rem' }}
+                    style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.85rem' }}
                   />
                 </div>
 
                 <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
                     Warranty Details
                   </label>
                   <input
                     type="text"
                     value={formWarrantyInfo}
                     onChange={(e) => setFormWarrantyInfo(e.target.value)}
-                    style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#f8fafc', fontSize: '0.85rem' }}
+                    style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.85rem' }}
                   />
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(15, 23, 42, 0.6)', padding: '0.75rem 1rem', borderRadius: '10px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#f8fafc', fontWeight: 600 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: '#ffffff', border: '1px solid #e2e8f0', padding: '0.75rem 1rem', borderRadius: '10px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#0f172a', fontWeight: 600 }}>
                     <input
                       type="checkbox"
                       checked={formRequiresInstallation}
@@ -1351,7 +1349,7 @@ export default function InventoryPage() {
                       placeholder="Installation details"
                       value={formInstallationDetails}
                       onChange={(e) => setFormInstallationDetails(e.target.value)}
-                      style={{ width: '100%', background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#f8fafc', fontSize: '0.825rem' }}
+                      style={{ width: '100%', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.5rem 0.75rem', color: '#0f172a', fontSize: '0.825rem' }}
                     />
                   )}
                 </div>

@@ -1,15 +1,15 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 
 import cartRouter from './routes/cart.js';
 import checkoutCodRouter from './routes/checkoutCod.js';
 import checkoutRazorpayRouter from './routes/checkoutRazorpay.js';
 import pincodeRouter from './routes/pincode.js';
 import adminRouter from './routes/admin.js';
-
-dotenv.config();
 
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
