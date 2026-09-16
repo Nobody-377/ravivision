@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "prisma generate && tsc",
+    "postbuild": "node -e \"const fs=require('fs'); ['build','public','.next','out'].forEach(d=>{ if(!fs.existsSync(d)) fs.cpSync('dist', d, {recursive: true}); })\"",
     "start": "node dist/index.js",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
