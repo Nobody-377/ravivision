@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "prisma generate && tsc",
-    "postbuild": "node -e \"const fs=require('fs'); ['build','public','.next','out'].forEach(d=>{ if(!fs.existsSync(d)) fs.cpSync('dist', d, {recursive: true}); })\"",
+    "postbuild": "node -e \"const fs=require('fs'); ['build','public','.next','out'].forEach(d=>{ if(!fs.existsSync(d)) fs.cpSync('dist', d, {recursive: true}); }); fs.mkdirSync('.next/standalone', {recursive: true}); fs.writeFileSync('.next/standalone/server.js', 'require(\"../../dist/index.js\");'); fs.writeFileSync('.next/required-server-files.json', JSON.stringify({config:{},appDir:'',files:[]}));\"",
     "start": "node dist/index.js",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
