@@ -1,9 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Header } from '@/components/header/Header';
-import { Footer } from '@/components/footer/Footer';
-import { getStoreConfig } from '@/lib/store-config';
-import { prisma } from '@/lib/prisma';
 
 export const metadata: Metadata = {
   title: 'RAVI VISION — Local Electronics, Electrical & Home Appliance Retailer',
@@ -22,28 +18,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const storeConfig = await getStoreConfig();
-  const departments = await prisma.department.findMany({
-    orderBy: { name: 'asc' },
-    select: { id: true, name: true, slug: true },
-  });
-
-  const categories = await prisma.category.findMany({
-    orderBy: { name: 'asc' },
-    select: { id: true, name: true, slug: true, department: { select: { name: true } } },
-  });
-
   return (
     <html lang="en">
       <body suppressHydrationWarning>
-        <Header storeConfig={storeConfig} departments={departments} categories={categories} />
-        <main>{children}</main>
-        <Footer storeConfig={storeConfig} />
+        {children}
       </body>
     </html>
   );
