@@ -155,12 +155,24 @@ export default function OrdersPage() {
         <main className="admin-content animate-fade-in">
           <div className="table-container">
             <div className="table-header-toolbar">
-              <div style={{ position: 'relative' }}>
-                <Search size={18} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+              <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                <Search size={18} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b', pointerEvents: 'none', zIndex: 10 }} />
                 <input
                   type="text"
                   placeholder="Search order #, customer, status, pincode..."
                   className="input-search"
+                  style={{
+                    paddingLeft: '2.6rem',
+                    paddingRight: '1rem',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '10px',
+                    height: '42px',
+                    fontSize: '0.875rem',
+                    backgroundColor: '#ffffff',
+                    color: '#0f172a',
+                    outline: 'none',
+                    minWidth: '340px',
+                  }}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
