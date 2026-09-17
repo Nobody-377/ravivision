@@ -1,0 +1,13 @@
+{
+  "name": "ravivision-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ravi Vision Unified E-Commerce Application & Admin System",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix frontend run start",
+    "db:seed": "npm --prefix frontend run seed",
+    "prisma:generate": "npm --prefix frontend run prisma:generate"
+  }
+}
