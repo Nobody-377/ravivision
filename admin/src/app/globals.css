@@ -39,6 +39,28 @@ body {
   overflow-x: hidden;
 }
 
+.input-search {
+  padding: 0.625rem 1rem 0.625rem 2.6rem !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 10px !important;
+  font-size: 0.875rem !important;
+  font-family: var(--font-main) !important;
+  color: var(--text-primary) !important;
+  background-color: #ffffff !important;
+  outline: none !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  min-width: 320px;
+}
+
+.input-search:focus {
+  border-color: var(--accent-blue) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+.input-search::placeholder {
+  color: var(--text-muted) !important;
+}
+
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;
