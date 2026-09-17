@@ -6,8 +6,8 @@ import { Store, Lock, User, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('@ravi1921#');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -105,7 +105,7 @@ export default function LoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                placeholder="admin"
+                placeholder="Enter username"
                 style={{
                   width: '100%',
                   background: '#ffffff',
@@ -130,7 +130,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="@ravi1921#"
+                placeholder="Enter password"
                 style={{
                   width: '100%',
                   background: '#ffffff',
@@ -158,24 +158,21 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Credentials Info Helper */}
         <div style={{
           marginTop: '1.75rem',
           padding: '0.85rem 1rem',
           borderRadius: '12px',
-          background: '#eff6ff',
-          border: '1px solid #bfdbfe',
+          background: '#f8fafc',
+          border: '1px solid #e2e8f0',
           fontSize: '0.8rem',
-          color: '#475569',
+          color: '#64748b',
           display: 'flex',
           alignItems: 'center',
           gap: '0.5rem',
+          justifyContent: 'center',
         }}>
-          <ShieldCheck size={18} color="#059669" />
-          <div>
-            Authorized Access Only<br />
-            <span style={{ color: '#2563eb', fontWeight: 600 }}>Username: admin</span> | <span style={{ color: '#059669', fontWeight: 600 }}>Password: @ravi1921#</span>
-          </div>
+          <ShieldCheck size={18} color="#2563eb" />
+          <span>Authorized Store Personnel Only</span>
         </div>
       </div>
     </div>
