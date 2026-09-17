@@ -30,7 +30,7 @@ export default function LoginPage() {
         setError(data.error?.message || 'Invalid admin credentials');
       }
     } catch (err: any) {
-      setError('Connection failed. Please ensure backend server is running on port 5000.');
+      setError(err.message || 'Connection failed. Please try again.');
     } finally {
       setLoading(false);
     }
