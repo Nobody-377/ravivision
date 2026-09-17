@@ -6,6 +6,9 @@ import { PincodeChecker } from '@/components/pincode/PincodeChecker';
 import { Truck, PhoneCall, ShieldCheck, ShoppingBag, ArrowRight, Store, CheckCircle } from 'lucide-react';
 import { formatINR } from '@/lib/currency';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function HomePage() {
   const storeConfig = await getStoreConfig();
 
