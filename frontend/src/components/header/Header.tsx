@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ShoppingCart, PhoneCall, Search, Menu, X, ShieldCheck, MapPin, UserCheck } from 'lucide-react';
 import { CallToOrderModal } from '../call-to-order/CallToOrderModal';
 
@@ -26,8 +27,13 @@ interface HeaderProps {
 }
 
 export function Header({ storeConfig, departments, categories = [], cartCount = 0 }: HeaderProps) {
+  const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
   const [callModalOpen, setCallModalOpen] = useState(false);
 
   const handleSearchSubmit = (e: React.FormEvent) => {

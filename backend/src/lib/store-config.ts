@@ -12,7 +12,7 @@ export async function getStoreConfig(): Promise<StoreConfig> {
   const settingsMap = new Map(settings.map((s) => [s.key, s.value]));
 
   const codEnabled = settingsMap.get('COD_ENABLED') !== 'false';
-  const storePhone = settingsMap.get('STORE_PHONE') || process.env.STORE_PHONE || '+91 8809842700';
+  const storePhone = settingsMap.get('STORE_PHONE') || process.env.STORE_PHONE || '+91 9631410611';
   const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '';
 
   return {

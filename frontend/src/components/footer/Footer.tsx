@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Phone, MapPin, Clock, Shield, Truck, CreditCard } from 'lucide-react';
 
 interface FooterProps {
@@ -15,6 +18,11 @@ interface FooterProps {
 }
 
 export function Footer({ storeConfig }: FooterProps) {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
   return (
     <footer style={{
       backgroundColor: '#f8fafc',
