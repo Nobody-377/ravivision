@@ -46,6 +46,10 @@ function CheckoutContent() {
   const isLockedRef = useRef(false);
   const checkoutSessionIdRef = useRef<string>('');
 
+  // Customer session state
+  const [customer, setCustomer] = useState<{ id: string; name: string; mobileNumber: string; pincode: string } | null>(null);
+  const [editCustomerInfo, setEditCustomerInfo] = useState(false);
+
   // Form State
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -66,12 +70,49 @@ function CheckoutContent() {
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'RAZORPAY'>('COD');
   const [callModalOpen, setCallModalOpen] = useState(false);
 
+  const verifyPincodeAuto = async (codeToVerify: string) => {
+    if (!codeToVerify || codeToVerify.trim().length !== 6) return;
+
+    setPincodeError('');
+    try {
+      const res = await fetch(`/api/pincode/check?pincode=${encodeURIComponent(codeToVerify.trim())}`);
+      const data = await res.json();
+      if (data.success && data.data.isServiceable) {
+        setDeliveryCharge(data.data.deliveryCharge);
+        setOneDayAvailable(data.data.oneDayDelivery);
+        setPincodeChecked(true);
+      } else {
+        setPincodeError(data.data?.message || 'Online delivery is currently unavailable for this pincode.');
+        setPincodeChecked(false);
+      }
+    } catch {
+      setPincodeError('Unable to check pincode at this time.');
+    }
+  };
+
   useEffect(() => {
     // Dynamically load Razorpay Checkout Script
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
     document.body.appendChild(script);
+
+    // Fetch customer session to auto-fill details
+    fetch('/api/auth/customer')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.customer) {
+          const cust = data.customer;
+          setCustomer(cust);
+          setCustomerName(cust.name || '');
+          setCustomerPhone(cust.mobileNumber || '');
+          if (cust.pincode) {
+            setPincode(cust.pincode);
+            verifyPincodeAuto(cust.pincode);
+          }
+        }
+      })
+      .catch(() => {});
 
     fetch('/api/cart')
       .then((res) => res.json())
@@ -94,22 +135,7 @@ function CheckoutContent() {
       setPincodeError('Please enter a valid 6-digit pincode.');
       return;
     }
-
-    setPincodeError('');
-    try {
-      const res = await fetch(`/api/pincode/check?pincode=${encodeURIComponent(pincode.trim())}`);
-      const data = await res.json();
-      if (data.success && data.data.isServiceable) {
-        setDeliveryCharge(data.data.deliveryCharge);
-        setOneDayAvailable(data.data.oneDayDelivery);
-        setPincodeChecked(true);
-      } else {
-        setPincodeError(data.data?.message || 'Online delivery is currently unavailable for this pincode.');
-        setPincodeChecked(false);
-      }
-    } catch {
-      setPincodeError('Unable to check pincode at this time.');
-    }
+    await verifyPincodeAuto(pincode);
   };
 
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
@@ -373,10 +399,10 @@ function CheckoutContent() {
         </Link>
         <div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-heading)' }}>
-            Guest Checkout
+            {customer ? 'Order Checkout' : 'Guest Checkout'}
           </h1>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-            No account required for placing local orders
+          <p style={{ fontSize: '0.875rem', color: customer ? '#059669' : 'var(--text-muted)', fontWeight: customer ? 600 : 400 }}>
+            {customer ? `Logged in as ${customer.name} (${customer.mobileNumber})` : 'No account required for placing local orders'}
           </p>
         </div>
       </div>
@@ -387,57 +413,114 @@ function CheckoutContent() {
         <form onSubmit={handleCheckoutSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
           {/* Step 1: Customer Contact */}
-          <div className="card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '1rem' }}>
-              1. Customer Information
-            </h3>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '0.375rem' }}>
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  disabled={submitting}
-                  placeholder="e.g. Rajesh Kumar"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  style={{ width: '100%', padding: '0.625rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', outline: 'none' }}
-                />
+          {customer ? (
+            <div className="card" style={{ padding: '1.5rem', backgroundColor: '#f8fafc', border: '1px solid #bfdbfe' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <CheckCircle2 size={15} color="#2563eb" /> 1. Customer Information (Auto-Filled)
+                  </div>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                    {customerName || customer.name}
+                  </h3>
+                  <div style={{ fontSize: '0.875rem', color: '#059669', fontWeight: 600, marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    📞 +91 {customerPhone || customer.mobileNumber}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditCustomerInfo(!editCustomerInfo)}
+                  style={{ fontSize: '0.8125rem', color: '#2563eb', background: 'none', border: 'none', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  {editCustomerInfo ? 'Hide Details' : 'Edit Contact Info'}
+                </button>
               </div>
 
-              <div>
+              {editCustomerInfo && (
+                <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #cbd5e1', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '0.375rem' }}>
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      disabled={submitting}
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      style={{ width: '100%', padding: '0.625rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', outline: 'none' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '0.375rem' }}>
+                      Mobile Number *
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      disabled={submitting}
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      style={{ width: '100%', padding: '0.625rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', outline: 'none' }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="card" style={{ padding: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '1rem' }}>
+                1. Customer Information
+              </h3>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '0.375rem' }}>
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    disabled={submitting}
+                    placeholder="e.g. Rajesh Kumar"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    style={{ width: '100%', padding: '0.625rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', outline: 'none' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '0.375rem' }}>
+                    Mobile Number *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    disabled={submitting}
+                    placeholder="10-digit mobile number"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    style={{ width: '100%', padding: '0.625rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', outline: 'none' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginTop: '1rem' }}>
                 <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '0.375rem' }}>
-                  Mobile Number *
+                  Email Address (Optional)
                 </label>
                 <input
-                  type="tel"
-                  required
+                  type="email"
                   disabled={submitting}
-                  placeholder="10-digit mobile number"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="For digital order receipt"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
                   style={{ width: '100%', padding: '0.625rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', outline: 'none' }}
                 />
               </div>
             </div>
-
-            <div style={{ marginTop: '1rem' }}>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '0.375rem' }}>
-                Email Address (Optional)
-              </label>
-              <input
-                type="email"
-                disabled={submitting}
-                placeholder="For digital order receipt"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                style={{ width: '100%', padding: '0.625rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-strong)', outline: 'none' }}
-              />
-            </div>
-          </div>
+          )}
 
           {/* Step 2: Shipping Address & Pincode */}
           <div className="card" style={{ padding: '1.5rem' }}>
