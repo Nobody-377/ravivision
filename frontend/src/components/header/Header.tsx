@@ -69,45 +69,6 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
 
   return (
     <>
-      {/* Top Announcement & Quick Contact Bar */}
-      <div style={{
-        backgroundColor: '#093680',
-        color: '#ffffff',
-        fontSize: '0.8125rem',
-        padding: '0.375rem 0',
-      }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-              <ShieldCheck size={14} color="#60a5fa" /> Official Local E-Commerce Store
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-              <MapPin size={14} color="#60a5fa" />
-              {storeConfig.city ? `Store Location: ${storeConfig.city}` : 'Store Location: Setup Pending'}
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button
-              onClick={() => setCallModalOpen(true)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#facc15',
-                fontWeight: 600,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-                cursor: 'pointer',
-              }}
-            >
-              <PhoneCall size={14} />
-              {storeConfig.phone ? `Call to Order: ${storeConfig.phone}` : 'Call Store to Order'}
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Main Header */}
       <header style={{
         backgroundColor: 'var(--surface-white)',
@@ -130,7 +91,7 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
               borderRadius: 'var(--radius-sm)',
               letterSpacing: '0.05em',
             }}>
-              RAVI VISION
+              RAVI ELECTRONICS
             </div>
             <div style={{ display: 'none', flexDirection: 'column', lineHeight: 1.1 }} className="desktop-tagline">
               <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-heading)', textTransform: 'uppercase' }}>

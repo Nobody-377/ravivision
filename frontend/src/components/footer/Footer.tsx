@@ -13,6 +13,7 @@ interface FooterProps {
     address: string;
     city: string;
     state: string;
+    pincode?: string;
     openingHours: string;
   };
 }
@@ -92,7 +93,7 @@ export function Footer({ storeConfig }: FooterProps) {
           {/* Store Info Column */}
           <div>
             <h4 style={{ color: '#0d52bf', fontWeight: 800, fontSize: '1.25rem', marginBottom: '1rem', letterSpacing: '0.05em' }}>
-              RAVI VISION
+              {storeConfig.storeName || 'RAVI ELECTRONICS'}
             </h4>
             <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '1.25rem', lineHeight: '1.5' }}>
               Your trusted local electronics, electrical, and home-appliance retailer.
@@ -103,9 +104,9 @@ export function Footer({ storeConfig }: FooterProps) {
                 <MapPin size={18} color="#0d52bf" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <span>
                   {storeConfig.address ? (
-                    `${storeConfig.address}, ${storeConfig.city}, ${storeConfig.state}`
+                    `${storeConfig.address}, ${storeConfig.city || 'Kargahar'}, ${storeConfig.state || 'Bihar'} ${storeConfig.pincode || '821107'}`
                   ) : (
-                    <em style={{ color: '#64748b' }}>Store address setup pending</em>
+                    '4WHG+7H Kargahar, Bihar 821107'
                   )}
                 </span>
               </div>
@@ -116,7 +117,7 @@ export function Footer({ storeConfig }: FooterProps) {
                   {storeConfig.phone ? (
                     <a href={`tel:${storeConfig.phone}`} style={{ color: '#0d52bf', fontWeight: 700 }}>{storeConfig.phone}</a>
                   ) : (
-                    <em style={{ color: '#64748b' }}>Phone number setup pending</em>
+                    <a href="tel:9631410611" style={{ color: '#0d52bf', fontWeight: 700 }}>9631410611</a>
                   )}
                 </span>
               </div>
@@ -124,11 +125,7 @@ export function Footer({ storeConfig }: FooterProps) {
               <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
                 <Clock size={18} color="#0d52bf" style={{ flexShrink: 0 }} />
                 <span>
-                  {storeConfig.openingHours ? (
-                    storeConfig.openingHours
-                  ) : (
-                    <em style={{ color: '#64748b' }}>Hours setup pending</em>
-                  )}
+                  {storeConfig.openingHours || '24/7 Open'}
                 </span>
               </div>
             </div>
@@ -161,7 +158,7 @@ export function Footer({ storeConfig }: FooterProps) {
           </div>
         </div>
 
-        {/* Copyright & Canonical Domain */}
+        {/* Copyright */}
         <div style={{
           paddingTop: '1.5rem',
           display: 'flex',
@@ -173,10 +170,7 @@ export function Footer({ storeConfig }: FooterProps) {
           color: '#64748b',
         }}>
           <div>
-            © {new Date().getFullYear()} RAVI VISION (ravivision.com). All rights reserved.
-          </div>
-          <div>
-            Production Canonical Domain: <strong style={{ color: '#0d52bf' }}>https://ravivision.com</strong>
+            © {new Date().getFullYear()} RAVI ELECTRONICS. All rights reserved.
           </div>
         </div>
       </div>
