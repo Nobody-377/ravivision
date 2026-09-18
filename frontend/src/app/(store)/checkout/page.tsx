@@ -339,7 +339,7 @@ function CheckoutContent() {
     return (
       <div className="container" style={{ padding: '4rem 1rem', textAlign: 'center' }}>
         <div style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-          Preparing guest checkout...
+          Preparing checkout...
         </div>
       </div>
     );
@@ -399,10 +399,10 @@ function CheckoutContent() {
         </Link>
         <div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-heading)' }}>
-            {customer ? 'Order Checkout' : 'Guest Checkout'}
+            Checkout
           </h1>
           <p style={{ fontSize: '0.875rem', color: customer ? '#059669' : 'var(--text-muted)', fontWeight: customer ? 600 : 400 }}>
-            {customer ? `Logged in as ${customer.name} (${customer.mobileNumber})` : 'No account required for placing local orders'}
+            {customer ? `Logged in as ${customer.name} (${customer.mobileNumber})` : 'Enter delivery details to place local order'}
           </p>
         </div>
       </div>

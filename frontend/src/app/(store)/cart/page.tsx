@@ -210,7 +210,7 @@ export default function CartPage() {
               className="btn btn-primary"
               style={{ width: '100%', padding: '0.875rem', fontSize: '1rem' }}
             >
-              Proceed to Guest Checkout <ArrowRight size={18} />
+              Proceed to Checkout <ArrowRight size={18} />
             </Link>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '1rem', justifyContent: 'center' }}>
