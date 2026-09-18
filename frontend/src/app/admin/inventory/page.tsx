@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import * as xlsx from 'xlsx';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminHeader from '@/components/admin/AdminHeader';
+import { ProductImageUploader } from '@/components/admin/ProductImageUploader';
 import { exportToExcel } from '@/lib/admin/excel-export';
 import { downloadProductImportTemplate } from '@/lib/admin/excel-template';
 import { 
@@ -884,54 +885,15 @@ export default function InventoryPage() {
                 </div>
               </div>
 
-              {/* Section 3: Product Picture Gallery URLs */}
+              {/* Section 3: Product Picture Gallery & Multi-Source Uploader */}
               <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <ImageIcon size={16} /> 3. Product Pictures & Image Gallery URLs
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={handleAddImageUrlInput}
-                    style={{ background: '#ffffff', border: '1px solid #7c3aed', color: '#7c3aed', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
-                  >
-                    + Add Picture URL
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {formImageUrls.map((url, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={{ fontSize: '0.75rem', color: '#475569', width: '70px', fontWeight: 600 }}>
-                        {idx === 0 ? 'Primary' : `Image #${idx + 1}`}
-                      </div>
-                      <input
-                        type="url"
-                        placeholder={idx === 0 ? "Main image URL (e.g. https://images.unsplash.com/...)" : `Gallery image #${idx + 1} URL`}
-                        value={url}
-                        onChange={(e) => handleImageUrlChange(idx, e.target.value)}
-                        style={{ flex: 1, background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.55rem 0.75rem', color: '#0f172a', fontSize: '0.825rem' }}
-                      />
-                      {url.trim() && (
-                        <img
-                          src={url.trim()}
-                          alt="preview"
-                          onError={(e) => (e.currentTarget.style.display = 'none')}
-                          style={{ width: '36px', height: '36px', objectFit: 'contain', borderRadius: '6px', background: '#fff', border: '1px solid var(--border-color)' }}
-                        />
-                      )}
-                      {formImageUrls.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImageUrlInput(idx)}
-                          style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0.25rem' }}
-                        >
-                          <X size={18} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.85rem' }}>
+                  <ImageIcon size={16} /> 3. Product Photos & Multi-Source Image Uploader
+                </h3>
+                <ProductImageUploader
+                  imageUrls={formImageUrls}
+                  onChange={(newUrls) => setFormImageUrls(newUrls)}
+                />
               </div>
 
               {/* Section 4: Features & Specifications Key-Value Builder */}
@@ -1210,54 +1172,15 @@ export default function InventoryPage() {
                 </div>
               </div>
 
-              {/* Section 3: Pictures Gallery */}
+              {/* Section 3: Product Picture Gallery & Multi-Source Uploader */}
               <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '1rem', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <ImageIcon size={16} /> 3. Product Gallery Image URLs
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={handleAddImageUrlInput}
-                    style={{ background: '#ffffff', border: '1px solid #7c3aed', color: '#7c3aed', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 600 }}
-                  >
-                    + Add Picture URL
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {formImageUrls.map((url, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={{ fontSize: '0.75rem', color: '#475569', width: '70px', fontWeight: 600 }}>
-                        {idx === 0 ? 'Primary' : `Image #${idx + 1}`}
-                      </div>
-                      <input
-                        type="url"
-                        placeholder="Image URL"
-                        value={url}
-                        onChange={(e) => handleImageUrlChange(idx, e.target.value)}
-                        style={{ flex: 1, background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.55rem 0.75rem', color: '#0f172a', fontSize: '0.825rem' }}
-                      />
-                      {url.trim() && (
-                        <img
-                          src={url.trim()}
-                          alt="preview"
-                          onError={(e) => (e.currentTarget.style.display = 'none')}
-                          style={{ width: '36px', height: '36px', objectFit: 'contain', borderRadius: '6px', background: '#fff', border: '1px solid var(--border-color)' }}
-                        />
-                      )}
-                      {formImageUrls.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImageUrlInput(idx)}
-                          style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: '0.25rem' }}
-                        >
-                          <X size={18} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.85rem' }}>
+                  <ImageIcon size={16} /> 3. Product Photos & Multi-Source Image Uploader
+                </h3>
+                <ProductImageUploader
+                  imageUrls={formImageUrls}
+                  onChange={(newUrls) => setFormImageUrls(newUrls)}
+                />
               </div>
 
               {/* Section 4: Key Specifications */}
