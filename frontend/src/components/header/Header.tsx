@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShoppingCart, PhoneCall, Search, Menu, X, ShieldCheck, MapPin, UserCheck } from 'lucide-react';
+import { ShoppingCart, PhoneCall, Search, Menu, X, ShieldCheck, MapPin, User, LogOut, UserCheck } from 'lucide-react';
 import { CallToOrderModal } from '../call-to-order/CallToOrderModal';
+import { CustomerAuthModal } from '../auth/CustomerAuthModal';
 
 interface HeaderProps {
   storeConfig: {
@@ -30,6 +31,29 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [customer, setCustomer] = useState<{ id: string; name: string; mobileNumber: string; pincode: string } | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/customer')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.customer) {
+          setCustomer(data.customer);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/customer', { method: 'DELETE' });
+      setCustomer(null);
+      window.location.reload();
+    } catch {
+      console.error('Failed to log out');
+    }
+  };
 
   if (pathname?.startsWith('/admin')) {
     return null;
@@ -153,8 +177,31 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
             </button>
           </form>
 
-          {/* Actions: Call CTA & Cart */}
+          {/* Actions: Call CTA, Customer Auth & Cart */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {customer ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '0.35rem 0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8125rem', fontWeight: 700, color: '#1e40af' }}>
+                  <UserCheck size={16} color="#2563eb" /> {customer.name}
+                </div>
+                <button
+                  onClick={handleLogout}
+                  title="Log Out"
+                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0.2rem' }}
+                >
+                  <LogOut size={14} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setAuthModalOpen(true)}
+                className="btn btn-outline"
+                style={{ padding: '0.5rem 0.875rem', fontSize: '0.8125rem', borderColor: '#cbd5e1', color: '#1e293b' }}
+              >
+                <User size={16} color="#2563eb" /> <span>Login / Sign Up</span>
+              </button>
+            )}
+
             <button
               onClick={() => setCallModalOpen(true)}
               className="btn btn-phone"
@@ -235,6 +282,15 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
         phone={storeConfig.phone}
         storeName={storeConfig.storeName}
         openingHours={storeConfig.openingHours}
+      />
+
+      {/* Customer Login / Signup Modal */}
+      <CustomerAuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onSuccess={(loggedInCustomer) => {
+          setCustomer(loggedInCustomer);
+        }}
       />
     </>
   );

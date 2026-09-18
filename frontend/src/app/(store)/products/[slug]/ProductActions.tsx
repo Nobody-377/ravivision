@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Zap, PhoneCall, Check } from 'lucide-react';
 import { CallToOrderModal } from '@/components/call-to-order/CallToOrderModal';
+import { CustomerAuthModal } from '@/components/auth/CustomerAuthModal';
 
 interface ProductActionsProps {
   productId: string;
@@ -16,6 +17,8 @@ export function ProductActions({ productId, isOutOfStock, phone, storeName, open
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
   const [callModalOpen, setCallModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [pendingRedirect, setPendingRedirect] = useState(false);
 
   const handleAddToCart = async (redirectCheckout = false) => {
     setLoading(true);
@@ -27,6 +30,12 @@ export function ProductActions({ productId, isOutOfStock, phone, storeName, open
       });
 
       const data = await res.json();
+      if (res.status === 401 || data.requireAuth) {
+        setPendingRedirect(redirectCheckout);
+        setAuthModalOpen(true);
+        return;
+      }
+
       if (data.success) {
         setAdded(true);
         setTimeout(() => setAdded(false), 2500);
@@ -42,6 +51,11 @@ export function ProductActions({ productId, isOutOfStock, phone, storeName, open
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAuthSuccess = () => {
+    // Automatically retry Add to Cart after successful login/signup
+    handleAddToCart(pendingRedirect);
   };
 
   return (
@@ -90,6 +104,13 @@ export function ProductActions({ productId, isOutOfStock, phone, storeName, open
         phone={phone}
         storeName={storeName}
         openingHours={openingHours}
+      />
+
+      <CustomerAuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onSuccess={handleAuthSuccess}
+        customSubtitle="Please log in or sign up to add this item to your shopping cart"
       />
     </>
   );

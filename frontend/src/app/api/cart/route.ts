@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
+import { getCustomerSession } from '@/lib/customer-session';
 
 const CART_COOKIE_NAME = 'ravi_cart_session';
 
@@ -102,9 +103,21 @@ export async function GET() {
   }
 }
 
-// POST /api/cart - Add item to cart
+// POST /api/cart - Add item to cart (Requires Customer Authentication)
 export async function POST(request: NextRequest) {
   try {
+    const customer = await getCustomerSession();
+    if (!customer) {
+      return NextResponse.json(
+        {
+          success: false,
+          requireAuth: true,
+          error: { code: 'UNAUTHENTICATED', message: 'Please login or sign up to add items to your cart.' },
+        },
+        { status: 401 }
+      );
+    }
+
     const sessionId = await getOrCreateCartSessionId();
     const body = await request.json();
     const { productId, quantity = 1 } = body;
