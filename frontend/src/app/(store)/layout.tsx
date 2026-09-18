@@ -1,5 +1,6 @@
 import { Header } from '@/components/header/Header';
 import { Footer } from '@/components/footer/Footer';
+import { MobileBottomNav } from '@/components/navigation/MobileBottomNav';
 import { getStoreConfig } from '@/lib/store-config';
 import { prisma } from '@/lib/prisma';
 
@@ -24,6 +25,7 @@ export default async function StoreLayout({
       <Header storeConfig={storeConfig} departments={departments} categories={categories} />
       <main>{children}</main>
       <Footer storeConfig={storeConfig} />
+      <MobileBottomNav />
     </>
   );
 }

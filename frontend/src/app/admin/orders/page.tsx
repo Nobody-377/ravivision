@@ -12,7 +12,12 @@ import {
   X,
   History,
   PackageCheck,
-  Clock
+  Clock,
+  Mail,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  ArrowRight
 } from 'lucide-react';
 
 const ORDER_STATUS_OPTIONS = [
@@ -297,8 +302,12 @@ export default function OrdersPage() {
               <div>
                 <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>CUSTOMER CONTACT</div>
                 <div style={{ fontWeight: 700, color: '#0f172a', marginTop: '0.25rem' }}>{selectedOrder.customerName}</div>
-                <div style={{ fontSize: '0.85rem', color: '#2563eb', marginTop: '0.15rem' }}>📞 {selectedOrder.mobileNumber}</div>
-                <div style={{ fontSize: '0.85rem', color: '#64748b' }}>✉️ {selectedOrder.customerEmail || 'No email provided'}</div>
+                <div style={{ fontSize: '0.85rem', color: '#2563eb', marginTop: '0.15rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Phone size={13} /> {selectedOrder.mobileNumber}
+                </div>
+                <div style={{ fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Mail size={13} /> {selectedOrder.customerEmail || 'No email provided'}
+                </div>
               </div>
 
               <div>
@@ -333,8 +342,8 @@ export default function OrdersPage() {
                   {p?.razorpayOrderId && <div style={{ fontSize: '0.8rem', color: '#2563eb', fontFamily: 'monospace' }}>Razorpay Order ID: {p.razorpayOrderId}</div>}
                   {p?.razorpayPaymentId && <div style={{ fontSize: '0.8rem', color: '#059669', fontFamily: 'monospace' }}>Razorpay Payment ID: {p.razorpayPaymentId}</div>}
                   {p?.failureMessage && (
-                    <div style={{ marginTop: '0.5rem', backgroundColor: '#fff1f2', border: '1px solid #fecdd3', color: '#be123c', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600 }}>
-                      ⚠️ Failure Reason: {p.failureMessage}
+                    <div style={{ marginTop: '0.5rem', backgroundColor: '#fff1f2', border: '1px solid #fecdd3', color: '#be123c', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <AlertTriangle size={14} /> Failure Reason: {p.failureMessage}
                     </div>
                   )}
 
@@ -345,9 +354,9 @@ export default function OrdersPage() {
                       disabled={updatingId === selectedOrder.id}
                       onClick={() => handlePaymentStatusUpdate(selectedOrder.id, 'SUCCESS', 'Payment marked as SUCCESS / Cash Collected by store admin.')}
                       className="btn btn-emerald"
-                      style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}
+                      style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                     >
-                      ✓ Mark SUCCESS (Paid / Cash Collected)
+                      <CheckCircle size={13} /> Mark SUCCESS (Paid / Cash Collected)
                     </button>
                     <button
                       disabled={updatingId === selectedOrder.id}
@@ -366,9 +375,12 @@ export default function OrdersPage() {
                         fontSize: '0.75rem',
                         cursor: 'pointer',
                         fontWeight: 600,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
                       }}
                     >
-                      ✕ Mark FAILED
+                      <XCircle size={13} /> Mark FAILED
                     </button>
                   </div>
                 </div>
@@ -407,8 +419,8 @@ export default function OrdersPage() {
                   {selectedOrder.statusHistory.map((h: any) => (
                     <div key={h.id} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderLeft: '3px solid #2563eb', padding: '0.65rem 0.85rem', borderRadius: '8px', fontSize: '0.8rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', color: '#0f172a', fontWeight: 600 }}>
-                        <span>
-                          {h.previousStatus ? `${h.previousStatus} ➔ ${h.newStatus}` : `Initial Status: ${h.newStatus}`}
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                          {h.previousStatus ? <>{h.previousStatus} <ArrowRight size={12} /> {h.newStatus}</> : `Initial Status: ${h.newStatus}`}
                         </span>
                         <span style={{ color: '#64748b', fontWeight: 400, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                           <Clock size={12} /> {new Date(h.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} (IST)

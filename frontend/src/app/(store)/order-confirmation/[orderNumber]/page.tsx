@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { formatINR } from '@/lib/currency';
 import { getStoreConfig } from '@/lib/store-config';
-import { CheckCircle2, Package, MapPin, Phone, Home } from 'lucide-react';
+import { CheckCircle2, Package, MapPin, Phone, Home, AlertTriangle } from 'lucide-react';
 
 import { cookies } from 'next/headers';
 
@@ -76,8 +76,8 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
         </div>
 
         {primaryPayment?.failureMessage && (
-          <div style={{ marginTop: '1rem', backgroundColor: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', fontWeight: 600 }}>
-            ⚠️ Payment Failure Details: {primaryPayment.failureMessage}
+          <div style={{ marginTop: '1rem', backgroundColor: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <AlertTriangle size={16} /> Payment Failure Details: {primaryPayment.failureMessage}
           </div>
         )}
       </div>

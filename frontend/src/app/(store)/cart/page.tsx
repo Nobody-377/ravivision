@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, PhoneCall, ShieldCheck } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, PhoneCall, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { formatINR } from '@/lib/currency';
 import { CallToOrderModal } from '@/components/call-to-order/CallToOrderModal';
 
@@ -135,13 +135,11 @@ export default function CartPage() {
                       {item.productName}
                     </Link>
                   </h3>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    SKU: {item.sku}
-                  </div>
+
 
                   {!item.isAvailable && (
-                    <div style={{ fontSize: '0.75rem', color: '#dc2626', fontWeight: 700, marginTop: '0.25rem' }}>
-                      ⚠️ Out of Stock — Please remove to proceed to checkout
+                    <div style={{ fontSize: '0.75rem', color: '#dc2626', fontWeight: 700, marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <AlertTriangle size={14} /> Out of Stock — Please remove to proceed to checkout
                     </div>
                   )}
                 </div>

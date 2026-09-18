@@ -19,7 +19,11 @@ import {
   Sparkles,
   CheckCircle2,
   Download,
-  FileUp
+  FileUp,
+  Star,
+  Flame,
+  Wrench,
+  Zap
 } from 'lucide-react';
 
 interface SpecPair {
@@ -503,9 +507,9 @@ export default function InventoryPage() {
                         <td>
                           <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.9rem' }}>{p.name}</div>
                           <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
-                            {p.isFeatured && <span className="badge badge-purple" style={{ fontSize: '0.675rem' }}>★ Featured</span>}
-                            {p.isBestSeller && <span className="badge badge-emerald" style={{ fontSize: '0.675rem' }}>🔥 Best Seller</span>}
-                            {p.requiresInstallation && <span className="badge badge-blue" style={{ fontSize: '0.675rem' }}>🔧 Installation</span>}
+                            {p.isFeatured && <span className="badge badge-purple" style={{ fontSize: '0.675rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}><Star size={11} fill="#9333ea" /> Featured</span>}
+                            {p.isBestSeller && <span className="badge badge-emerald" style={{ fontSize: '0.675rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}><Flame size={11} fill="#10b981" /> Best Seller</span>}
+                            {p.requiresInstallation && <span className="badge badge-blue" style={{ fontSize: '0.675rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}><Wrench size={11} /> Installation</span>}
                           </div>
                         </td>
                         <td>
@@ -782,9 +786,9 @@ export default function InventoryPage() {
                       <button
                         type="button"
                         onClick={handleGenerateSku}
-                        style={{ background: 'none', border: 'none', color: '#0284c7', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 700 }}
+                        style={{ background: 'none', border: 'none', color: '#0284c7', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
                       >
-                        ⚡ Auto-Generate
+                        <Zap size={13} fill="#0284c7" /> Auto-Generate
                       </button>
                     </div>
                     <input

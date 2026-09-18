@@ -8,7 +8,7 @@ import { Smartphone, User, MapPin, AlertCircle, ArrowRight, ShieldCheck, CheckCi
 function CustomerLoginPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const redirectPath = searchParams.get('redirect') || '/';
+  const redirectPath = searchParams.get('redirect') || '/account';
 
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [mobileNumber, setMobileNumber] = useState('');

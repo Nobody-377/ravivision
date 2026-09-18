@@ -60,10 +60,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   const isOutOfStock = product.stock <= 0 || product.status === 'OUT_OF_STOCK';
 
   return (
-    <div className="container" style={{ padding: '2rem 1rem' }}>
+    <div className="container pdp-container" style={{ padding: '2rem 1rem' }}>
       
       {/* Breadcrumb Bar */}
-      <nav style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
+      <nav className="pdp-breadcrumb" style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
         <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Home</Link>
         <ChevronRight size={14} />
         <Link href="/products" style={{ color: 'inherit', textDecoration: 'none' }}>Products</Link>
@@ -83,20 +83,20 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
       </nav>
 
       {/* Main Product PDP Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem', alignItems: 'flex-start' }}>
+      <div className="pdp-layout-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', alignItems: 'flex-start' }}>
         
         {/* Left: Product Image / Gallery */}
         <div>
-          <div className="card" style={{ padding: '2rem', textAlign: 'center', backgroundColor: '#ffffff' }}>
+          <div className="card pdp-image-card" style={{ padding: '1.75rem', textAlign: 'center', backgroundColor: '#ffffff' }}>
             {product.images.length > 0 ? (
               <img
                 src={product.images[0].url}
                 alt={product.name}
-                style={{ maxWidth: '100%', maxHeight: '380px', objectFit: 'contain', margin: '0 auto' }}
+                style={{ maxWidth: '100%', maxHeight: '360px', objectFit: 'contain', margin: '0 auto' }}
               />
             ) : (
               <div style={{
-                height: '320px',
+                height: '280px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -114,13 +114,13 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           </div>
 
           {/* Key Trust Signals */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.25rem' }}>
-            <div className="card" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8125rem' }}>
-              <Truck size={20} color="var(--primary-blue)" />
+          <div className="pdp-trust-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '1rem' }}>
+            <div className="card pdp-trust-card" style={{ padding: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '0.8125rem' }}>
+              <Truck size={18} color="var(--primary-blue)" style={{ flexShrink: 0 }} />
               <span>~1-Day Local Delivery</span>
             </div>
-            <div className="card" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8125rem' }}>
-              <ShieldCheck size={20} color="var(--primary-blue)" />
+            <div className="card pdp-trust-card" style={{ padding: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '0.8125rem' }}>
+              <ShieldCheck size={18} color="var(--primary-blue)" style={{ flexShrink: 0 }} />
               <span>{product.warrantyInfo || 'Brand Warranty'}</span>
             </div>
           </div>
@@ -128,33 +128,44 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
         {/* Right: Details & Purchase Actions */}
         <div>
-          <div style={{ fontSize: '0.8125rem', fontWeight: 800, color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <div className="pdp-brand" style={{ fontSize: '0.8125rem', fontWeight: 800, color: 'var(--primary-blue)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {product.brand}
           </div>
 
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-heading)', margin: '0.25rem 0 0.5rem 0' }}>
+          <h1 className="pdp-title" style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--text-heading)', margin: '0.25rem 0 0.5rem 0' }}>
             {product.name}
           </h1>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.8125rem', marginBottom: '1.25rem' }}>
-            <span style={{ color: 'var(--text-muted)' }}>SKU: <strong>{product.sku}</strong></span>
-            <span className={`badge ${!isOutOfStock ? 'badge-success' : 'badge-warning'}`}>
-              {!isOutOfStock ? `In Stock (${product.stock} units)` : 'Out of Stock'}
+          <div className="pdp-meta-bar" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', marginBottom: '1rem' }}>
+            <span
+              style={{
+                fontSize: '0.825rem',
+                padding: '0.3rem 0.75rem',
+                fontWeight: 800,
+                borderRadius: '9999px',
+                backgroundColor: !isOutOfStock ? '#dcfce7' : '#fee2e2',
+                color: !isOutOfStock ? '#15803d' : '#b91c1c',
+                border: !isOutOfStock ? '1px solid #bbf7d0' : '1px solid #fecaca',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              {!isOutOfStock ? 'IN STOCK' : 'NOT IN STOCK'}
             </span>
           </div>
 
           {/* Pricing Box */}
-          <div className="card" style={{ padding: '1.25rem', backgroundColor: '#f8fafc', marginBottom: '1.5rem' }}>
+          <div className="card pdp-price-box" style={{ padding: '1.15rem', backgroundColor: '#f8fafc', marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
+              <span className="pdp-price-val" style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
                 {formatINR(product.price)}
               </span>
               {product.mrp.toNumber() > product.price.toNumber() && (
                 <>
-                  <span style={{ fontSize: '1rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                  <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
                     MRP: {formatINR(product.mrp)}
                   </span>
-                  <span className="badge badge-success" style={{ fontSize: '0.8125rem' }}>
+                  <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>
                     Save {formatINR(product.mrp.toNumber() - product.price.toNumber())}
                   </span>
                 </>
@@ -167,19 +178,19 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
           {/* Installation Banner if applicable */}
           {product.requiresInstallation && (
-            <div style={{
+            <div className="pdp-install-banner" style={{
               backgroundColor: '#eff6ff',
               border: '1px solid #bfdbfe',
               borderRadius: 'var(--radius-sm)',
-              padding: '0.875rem',
+              padding: '0.85rem',
               color: '#1e40af',
-              fontSize: '0.875rem',
+              fontSize: '0.85rem',
               display: 'flex',
               alignItems: 'center',
               gap: '0.625rem',
-              marginBottom: '1.5rem',
+              marginBottom: '1.25rem',
             }}>
-              <Wrench size={20} color="#1d4ed8" style={{ flexShrink: 0 }} />
+              <Wrench size={18} color="#1d4ed8" style={{ flexShrink: 0 }} />
               <div>
                 <strong>Installation Service Available:</strong> {product.installationDetails || 'Local technician installation provided upon delivery.'}
               </div>
@@ -190,31 +201,32 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <ProductActions
             productId={product.id}
             isOutOfStock={isOutOfStock}
+            stock={product.stock}
             phone={storeConfig.phone}
             storeName={storeConfig.storeName}
             openingHours={storeConfig.openingHours}
           />
 
           {/* Pincode Availability Checker */}
-          <div style={{ marginTop: '2rem' }}>
+          <div style={{ marginTop: '1.5rem' }}>
             <PincodeChecker />
           </div>
 
           {/* Technical Specifications */}
           {Object.keys(specsObj).length > 0 && (
-            <div style={{ marginTop: '2rem' }}>
-              <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '0.75rem' }}>
+            <div className="pdp-specs-wrapper" style={{ marginTop: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '0.65rem' }}>
                 Technical Specifications
               </h3>
               <div className="card" style={{ overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                <table className="pdp-spec-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                   <tbody>
                     {Object.entries(specsObj).map(([key, val], idx) => (
                       <tr key={key} style={{ backgroundColor: idx % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
-                        <td style={{ padding: '0.625rem 1rem', fontWeight: 600, color: 'var(--text-muted)', width: '40%', borderBottom: '1px solid var(--border-light)' }}>
+                        <td style={{ padding: '0.55rem 0.85rem', fontWeight: 600, color: 'var(--text-muted)', width: '40%', borderBottom: '1px solid var(--border-light)' }}>
                           {key}
                         </td>
-                        <td style={{ padding: '0.625rem 1rem', color: 'var(--text-heading)', borderBottom: '1px solid var(--border-light)' }}>
+                        <td style={{ padding: '0.55rem 0.85rem', color: 'var(--text-heading)', borderBottom: '1px solid var(--border-light)' }}>
                           {val}
                         </td>
                       </tr>

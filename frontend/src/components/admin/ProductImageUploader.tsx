@@ -186,7 +186,7 @@ export function ProductImageUploader({ imageUrls, onChange }: ProductImageUpload
             transition: 'all 0.2s ease',
           }}
         >
-          <HardDrive size={16} /> 🖥️ Local Machine
+          <HardDrive size={16} /> Local Machine
         </button>
 
         <button
@@ -210,7 +210,7 @@ export function ProductImageUploader({ imageUrls, onChange }: ProductImageUpload
             transition: 'all 0.2s ease',
           }}
         >
-          <UploadCloud size={16} /> ☁️ Google Drive
+          <UploadCloud size={16} /> Google Drive
         </button>
 
         <button
@@ -234,7 +234,7 @@ export function ProductImageUploader({ imageUrls, onChange }: ProductImageUpload
             transition: 'all 0.2s ease',
           }}
         >
-          <LinkIcon size={16} /> 🔗 Web Image URL
+          <LinkIcon size={16} /> Web Image URL
         </button>
       </div>
 

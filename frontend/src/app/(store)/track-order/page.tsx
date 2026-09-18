@@ -17,6 +17,8 @@ import {
   ShoppingBag,
   ArrowRight,
   User,
+  Phone,
+  AlertTriangle,
 } from 'lucide-react';
 import { formatINR } from '@/lib/currency';
 import { CallToOrderModal } from '@/components/call-to-order/CallToOrderModal';
@@ -379,8 +381,8 @@ function TrackOrderContent() {
             </h3>
 
             {orderData.isCancelled ? (
-              <div style={{ backgroundColor: '#fff1f2', border: '1px solid #fecdd3', borderRadius: '12px', padding: '1rem 1.25rem', color: '#be123c', fontWeight: 700, fontSize: '0.9375rem' }}>
-                ⚠️ This order has been cancelled by the store or customer.
+              <div style={{ backgroundColor: '#fff1f2', border: '1px solid #fecdd3', borderRadius: '12px', padding: '1rem 1.25rem', color: '#be123c', fontWeight: 700, fontSize: '0.9375rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <AlertTriangle size={18} /> This order has been cancelled by the store or customer.
               </div>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1.25rem', position: 'relative' }}>
@@ -458,13 +460,15 @@ function TrackOrderContent() {
 
                 <div>
                   <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, display: 'block' }}>MOBILE NUMBER</span>
-                  <strong style={{ color: '#2563eb' }}>📞 {orderData.mobileNumber}</strong>
+                  <strong style={{ color: '#2563eb', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <Phone size={14} /> {orderData.mobileNumber}
+                  </strong>
                 </div>
 
                 <div>
                   <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, display: 'block' }}>SERVICEABLE PINCODE</span>
-                  <strong style={{ color: '#059669', backgroundColor: '#ecfdf5', padding: '0.2rem 0.5rem', borderRadius: '6px', fontSize: '0.8125rem' }}>
-                    📍 {orderData.pincode} ({orderData.city})
+                  <strong style={{ color: '#059669', backgroundColor: '#ecfdf5', padding: '0.2rem 0.5rem', borderRadius: '6px', fontSize: '0.8125rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <MapPin size={13} /> {orderData.pincode} ({orderData.city})
                   </strong>
                 </div>
 
@@ -560,7 +564,7 @@ function TrackOrderContent() {
                     <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9375rem' }}>
                       {item.productName}
                     </div>
-                    {item.sku && <div style={{ fontSize: '0.75rem', color: '#64748b' }}>SKU: {item.sku}</div>}
+
                   </div>
 
                   <div style={{ textAlign: 'right' }}>

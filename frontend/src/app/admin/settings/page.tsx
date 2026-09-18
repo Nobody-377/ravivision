@@ -10,7 +10,8 @@ import {
   KeyRound,
   AlertCircle,
   CheckCircle2,
-  Trash2
+  Trash2,
+  Zap
 } from 'lucide-react';
 
 export default function AdminOperationsPage() {
@@ -654,8 +655,8 @@ export default function AdminOperationsPage() {
               </div>
 
               <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <div style={{ padding: '0.85rem 1rem', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '0.8rem', color: '#64748b' }}>
-                  🛡️ All admin session tokens are stored in the database as SHA-256 hashes to prevent raw token compromise.
+                <div style={{ padding: '0.85rem 1rem', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <ShieldCheck size={16} color="#2563eb" /> All admin session tokens are stored in the database as SHA-256 hashes to prevent raw token compromise.
                 </div>
 
                 <button
@@ -734,9 +735,9 @@ export default function AdminOperationsPage() {
                         <button
                           onClick={() => handleToggleOneDay(zone.id, zone.oneDayDelivery)}
                           className={`badge ${zone.oneDayDelivery ? 'badge-emerald' : 'badge-amber'}`}
-                          style={{ cursor: 'pointer', border: 'none' }}
+                          style={{ cursor: 'pointer', border: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
                         >
-                          {zone.oneDayDelivery ? '⚡ 1-Day Express Available' : 'Standard Only'}
+                          {zone.oneDayDelivery ? <><Zap size={11} fill="#10b981" /> 1-Day Express Available</> : 'Standard Only'}
                         </button>
                       </td>
                       <td>

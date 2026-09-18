@@ -9,7 +9,8 @@ import {
   FileSpreadsheet, 
   Clock, 
   Edit3, 
-  X
+  X,
+  AlertTriangle
 } from 'lucide-react';
 
 export default function PaymentsPage() {
@@ -223,8 +224,8 @@ export default function PaymentsPage() {
                             <span style={{ color: '#64748b' }}>Cash on Delivery</span>
                           )}
                           {p?.failureMessage && (
-                            <div style={{ color: '#be123c', fontSize: '0.775rem', fontWeight: 600, marginTop: '0.25rem', background: '#fff1f2', padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #fecdd3' }}>
-                              ⚠️ Failure: {p.failureMessage}
+                            <div style={{ color: '#be123c', fontSize: '0.775rem', fontWeight: 600, marginTop: '0.25rem', background: '#fff1f2', padding: '0.25rem 0.5rem', borderRadius: '4px', border: '1px solid #fecdd3', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                              <AlertTriangle size={13} /> Failure: {p.failureMessage}
                             </div>
                           )}
                         </td>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MapPin, CheckCircle2, AlertCircle, Clock, PhoneCall } from 'lucide-react';
+import { MapPin, CheckCircle2, AlertCircle, Clock, PhoneCall, Zap, Check } from 'lucide-react';
 
 interface PincodeCheckerProps {
   onCallToOrder?: () => void;
@@ -62,7 +62,7 @@ export function PincodeChecker({ onCallToOrder, compact = false }: PincodeChecke
       backgroundColor: compact ? 'transparent' : 'var(--surface-card)',
       border: compact ? 'none' : '1px solid var(--border-light)',
       borderRadius: compact ? '0' : 'var(--radius-md)',
-      padding: compact ? '0' : '1.25rem',
+      padding: compact ? '0' : '0.85rem 1rem',
     }}>
       {!compact && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
@@ -73,7 +73,7 @@ export function PincodeChecker({ onCallToOrder, compact = false }: PincodeChecke
         </div>
       )}
 
-      <form onSubmit={handleCheck} style={{ display: 'flex', gap: '0.5rem' }}>
+      <form onSubmit={handleCheck} style={{ display: 'flex', gap: '0.4rem', width: '100%' }}>
         <input
           type="text"
           maxLength={6}
@@ -82,18 +82,25 @@ export function PincodeChecker({ onCallToOrder, compact = false }: PincodeChecke
           onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
           style={{
             flex: 1,
-            padding: '0.625rem 0.875rem',
+            minWidth: 0,
+            padding: compact ? '0.45rem 0.65rem' : '0.625rem 0.75rem',
             borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--border-strong)',
-            fontSize: '0.875rem',
+            fontSize: compact ? '0.825rem' : '0.875rem',
             outline: 'none',
+            boxSizing: 'border-box',
           }}
         />
         <button
           type="submit"
           disabled={loading || pincode.length !== 6}
           className="btn btn-primary"
-          style={{ padding: '0.625rem 1rem', fontSize: '0.875rem' }}
+          style={{
+            padding: compact ? '0.45rem 0.75rem' : '0.625rem 0.85rem',
+            fontSize: compact ? '0.825rem' : '0.875rem',
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+          }}
         >
           {loading ? 'Checking...' : 'Check'}
         </button>
@@ -111,7 +118,17 @@ export function PincodeChecker({ onCallToOrder, compact = false }: PincodeChecke
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontWeight: 700 }}>
                 <CheckCircle2 size={18} />
-                <span>{result.oneDayDelivery ? '⚡ One-day local delivery available!' : '✓ Local delivery available'}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                  {result.oneDayDelivery ? (
+                    <>
+                      <Zap size={15} fill="#d97706" color="#d97706" /> One-day local delivery available!
+                    </>
+                  ) : (
+                    <>
+                      <Check size={15} /> Local delivery available
+                    </>
+                  )}
+                </span>
               </div>
               <div style={{ fontSize: '0.8125rem', marginTop: '0.25rem', color: '#166534' }}>
                 {result.area && `${result.area}, ${result.city} — `}

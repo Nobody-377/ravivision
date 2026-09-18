@@ -197,3 +197,537 @@ input, select, textarea {
   align-items: center;
   gap: 0.5rem;
 }
+
+/* Base Catalog Products Grid & Cards */
+.catalog-products-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
+  gap: 1rem !important;
+}
+
+.catalog-product-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.catalog-product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.catalog-card-img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 110px;
+  padding: 0.25rem;
+}
+
+.catalog-card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0.15rem 0 0.25rem 0;
+  height: 2.5em;
+  overflow: hidden;
+  line-height: 1.25;
+}
+
+.catalog-card-price {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--primary-blue);
+}
+
+.catalog-card-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* Mobile Responsive Overrides (Targeting max-width <= 640px, keeping desktop >= 641px 100% intact!) */
+@media (max-width: 640px) {
+  html, body {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+    font-size: 15px !important; /* Standard balanced mobile base */
+  }
+
+  body {
+    padding-bottom: 75px !important; /* Extra clearance for sticky mobile bottom navigation */
+  }
+
+  .container {
+    padding: 0 0.5rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .desktop-only-location {
+    display: none !important;
+  }
+
+  /* Header Top Row & Logo */
+  .header-top-row {
+    padding: 0.45rem 0.65rem !important;
+    gap: 0.35rem !important;
+  }
+
+  .header-logo-text {
+    font-size: 1.15rem !important;
+    font-weight: 900 !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  .header-logo-sub {
+    font-size: 0.55rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    white-space: nowrap !important;
+  }
+
+  /* Hide Delivery Location Sub-Bar on Mobile View */
+  .delivery-subbar-wrapper {
+    display: none !important;
+  }
+
+  /* Hide 4 Store Value Highlights on Mobile View Only */
+  .store-highlights-section,
+  .store-highlights-grid {
+    display: none !important;
+  }
+
+  /* Compact Hero Banner for Mobile View Only */
+  .hero-banner-section {
+    padding-top: 0.35rem !important;
+    margin-top: 0.15rem !important;
+  }
+
+  .hero-banner-card {
+    padding: 0.85rem 0.95rem !important;
+    border-radius: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .hero-banner-title {
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .hero-banner-highlights {
+    gap: 0.2rem !important;
+    margin-bottom: 0.65rem !important;
+    font-size: 0.725rem !important;
+  }
+
+  .hero-banner-highlights div {
+    font-size: 0.725rem !important;
+  }
+
+  .hero-banner-highlights svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  .hero-banner-btn {
+    padding: 0.4rem 0.85rem !important;
+    font-size: 0.75rem !important;
+    border-radius: 8px !important;
+  }
+
+  .hero-carousel-dots {
+    margin-top: 0.5rem !important;
+  }
+
+  /* Compact Quick Category Circles for Mobile View Only */
+  .quick-categories-row {
+    gap: 0.65rem !important;
+    padding-bottom: 0.35rem !important;
+  }
+
+  .quick-category-item {
+    min-width: 54px !important;
+    gap: 0.35rem !important;
+  }
+
+  .quick-category-circle {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+  }
+
+  .quick-category-circle svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .quick-category-label {
+    font-size: 0.65rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .promo-banners-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+  }
+
+  .promo-banner-card {
+    padding: 0.75rem 0.6rem !important;
+    border-radius: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .promo-banner-title {
+    font-size: 0.85rem !important;
+    line-height: 1.2 !important;
+    margin: 0.2rem 0 0.15rem 0 !important;
+  }
+
+  .promo-banner-desc {
+    font-size: 0.65rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.4rem !important;
+  }
+
+  .promo-banner-badge {
+    font-size: 0.55rem !important;
+    padding: 0.12rem 0.45rem !important;
+  }
+
+  .promo-banner-btn {
+    font-size: 0.7rem !important;
+    padding: 0.35rem 0.55rem !important;
+    border-radius: 8px !important;
+  }
+
+  /* Section Headings */
+  .section-title-heading {
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  /* Homepage & Catalog Mobile Product Grid */
+  .product-grid-responsive {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.35rem !important;
+    width: 100% !important;
+  }
+
+  .product-card-mobile {
+    padding: 0.5rem 0.45rem !important;
+    border-radius: 12px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .product-card-img {
+    height: 85px !important;
+    padding: 0.15rem !important;
+  }
+
+  .product-card-title,
+  .catalog-card-title {
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    height: 2.5em !important;
+    line-height: 1.25 !important;
+    margin: 0.15rem 0 0.25rem 0 !important;
+    color: #0f172a !important;
+  }
+
+  .product-card-rating {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .product-card-price,
+  .catalog-card-price {
+    font-size: 1.0rem !important;
+    font-weight: 800 !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .product-card-badges {
+    display: none !important;
+  }
+
+  .product-card-btn,
+  .catalog-card-btn {
+    padding: 0.42rem 0.4rem !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+  }
+
+  /* Catalog Page Specifics */
+  .products-page-title {
+    font-size: 1.25rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.01em !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .catalog-layout-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.65rem !important;
+  }
+
+  .catalog-filter-sidebar {
+    padding: 0.65rem 0.75rem !important;
+    border-radius: 12px !important;
+  }
+
+  .catalog-products-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.35rem !important;
+    width: 100% !important;
+  }
+
+  .catalog-product-card {
+    padding: 0.5rem 0.45rem !important;
+    border-radius: 12px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .catalog-card-img {
+    height: 90px !important;
+    padding: 0.2rem !important;
+  }
+
+  /* PDP Product Details Page Mobile Overrides */
+  .pdp-container {
+    padding: 0.75rem 0.65rem !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  .pdp-breadcrumb {
+    font-size: 0.775rem !important;
+    margin-bottom: 0.85rem !important;
+    gap: 0.3rem !important;
+  }
+
+  .pdp-layout-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+    width: 100% !important;
+  }
+
+  .pdp-image-card {
+    padding: 0.85rem !important;
+    border-radius: 14px !important;
+    background-color: #ffffff !important;
+  }
+
+  .pdp-image-card img {
+    max-height: 230px !important;
+    width: 100% !important;
+    object-fit: contain !important;
+  }
+
+  .pdp-trust-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+    margin-top: 0.65rem !important;
+  }
+
+  .pdp-trust-card {
+    padding: 0.6rem 0.55rem !important;
+    font-size: 0.775rem !important;
+    font-weight: 600 !important;
+    gap: 0.4rem !important;
+    border-radius: 10px !important;
+  }
+
+  .pdp-brand {
+    font-size: 0.8rem !important;
+  }
+
+  .pdp-title {
+    font-size: 1.35rem !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    margin: 0.15rem 0 0.4rem 0 !important;
+  }
+
+  .pdp-meta-bar {
+    font-size: 0.8rem !important;
+    gap: 0.65rem !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  .pdp-price-box {
+    padding: 0.85rem 1rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 14px !important;
+  }
+
+  .pdp-price-val {
+    font-size: 1.65rem !important;
+  }
+
+  .pdp-install-banner {
+    padding: 0.65rem 0.75rem !important;
+    font-size: 0.8rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 10px !important;
+  }
+
+  .pdp-actions-container {
+    margin: 1rem 0 !important;
+    gap: 0.55rem !important;
+  }
+
+  .pdp-buttons-row {
+    display: flex !important;
+    gap: 0.55rem !important;
+  }
+
+  .pdp-btn {
+    padding: 0.7rem 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 800 !important;
+    border-radius: 10px !important;
+  }
+
+  .pdp-spec-table {
+    font-size: 0.8rem !important;
+  }
+
+  .pdp-spec-table td {
+    padding: 0.5rem 0.65rem !important;
+  }
+
+  /* Compact Mobile Footer */
+  .store-footer {
+    margin-top: 0.35rem !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 5rem !important;
+  }
+
+  .footer-highlights-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.45rem !important;
+    padding-bottom: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .footer-nav-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  .footer-nav-grid > div:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Extra Small Mobile Devices (e.g. 320px x 650px, Galaxy S9 / iPhone SE) */
+@media (max-width: 380px) {
+  html, body {
+    font-size: 14px !important;
+  }
+
+  .header-logo-text {
+    font-size: 1.05rem !important;
+  }
+
+  .header-logo-sub {
+    font-size: 0.52rem !important;
+  }
+
+  .section-title-heading {
+    font-size: 0.98rem !important;
+  }
+
+  .hero-banner-title {
+    font-size: 1.05rem !important;
+  }
+
+  .products-page-title {
+    font-size: 1.15rem !important;
+  }
+
+  .product-card-title,
+  .catalog-card-title {
+    font-size: 0.8rem !important;
+  }
+
+  .product-card-price,
+  .catalog-card-price {
+    font-size: 0.95rem !important;
+  }
+
+  .product-card-btn,
+  .catalog-card-btn {
+    font-size: 0.775rem !important;
+  }
+
+  .catalog-card-img,
+  .product-card-img {
+    height: 80px !important;
+  }
+
+  /* 320px Ultra Small Screen PDP Overrides */
+  .pdp-container {
+    padding: 0.5rem 0.4rem !important;
+  }
+
+  .pdp-image-card {
+    padding: 0.65rem !important;
+  }
+
+  .pdp-image-card img {
+    max-height: 190px !important;
+  }
+
+  .pdp-title {
+    font-size: 1.25rem !important;
+  }
+
+  .pdp-price-val {
+    font-size: 1.5rem !important;
+  }
+
+  .pdp-btn {
+    padding: 0.6rem 0.4rem !important;
+    font-size: 0.825rem !important;
+  }
+
+  .pdp-trust-card {
+    padding: 0.5rem 0.45rem !important;
+    font-size: 0.725rem !important;
+  }
+}
+
+@media (min-width: 641px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}

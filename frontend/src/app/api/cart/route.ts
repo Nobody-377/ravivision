@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
 
     if (!product || product.status !== 'ACTIVE' || product.stock <= 0) {
       return NextResponse.json(
-        { success: false, error: { code: 'OUT_OF_STOCK', message: 'This item is currently out of stock.' } },
+        { success: false, error: { code: 'OUT_OF_STOCK', message: 'Unavailable' } },
         { status: 400 }
       );
     }
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
             success: false,
             error: {
               code: 'MAX_STOCK_EXCEEDED',
-              message: `Only ${product.stock} units available in store inventory.`,
+              message: 'Unavailable',
             },
           },
           { status: 400 }
@@ -229,7 +229,7 @@ export async function PUT(request: NextRequest) {
 
       if (qtyNum > existingCartItem.product.stock) {
         return NextResponse.json(
-          { success: false, error: { code: 'MAX_STOCK_EXCEEDED', message: `Only ${existingCartItem.product.stock} units available in stock.` } },
+          { success: false, error: { code: 'MAX_STOCK_EXCEEDED', message: 'Unavailable' } },
           { status: 400 }
         );
       }

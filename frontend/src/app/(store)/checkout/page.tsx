@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { PhoneCall, CreditCard, Banknote, CheckCircle2, AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { PhoneCall, CreditCard, Banknote, CheckCircle2, AlertCircle, ArrowLeft, Loader2, Phone, Zap, Check } from 'lucide-react';
 import { formatINR } from '@/lib/currency';
 import { CallToOrderModal } from '@/components/call-to-order/CallToOrderModal';
 
@@ -424,7 +424,7 @@ function CheckoutContent() {
                     {customerName || customer.name}
                   </h3>
                   <div style={{ fontSize: '0.875rem', color: '#059669', fontWeight: 600, marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    📞 +91 {customerPhone || customer.mobileNumber}
+                    <Phone size={14} color="#059669" /> +91 {customerPhone || customer.mobileNumber}
                   </div>
                 </div>
                 <button
@@ -560,7 +560,17 @@ function CheckoutContent() {
               {pincodeChecked && (
                 <div style={{ fontSize: '0.8125rem', color: '#16a34a', fontWeight: 700, marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                   <CheckCircle2 size={16} />
-                  <span>{oneDayAvailable ? '⚡ One-day local delivery confirmed!' : '✓ Local delivery confirmed!'} (Delivery Fee: ₹{deliveryCharge})</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                    {oneDayAvailable ? (
+                      <>
+                        <Zap size={14} fill="#d97706" color="#d97706" /> One-day local delivery confirmed!
+                      </>
+                    ) : (
+                      <>
+                        <Check size={14} /> Local delivery confirmed!
+                      </>
+                    )} (Delivery Fee: ₹{deliveryCharge})
+                  </span>
                 </div>
               )}
 
