@@ -220,6 +220,9 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
           whiteSpace: 'nowrap',
         }}>
           <div className="container" style={{ display: 'flex', gap: '1.25rem', fontSize: '0.875rem', fontWeight: 600 }}>
+            <Link href="/track-order" style={{ color: '#059669', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+              📦 Track Order
+            </Link>
             <Link href="/products" style={{ color: 'var(--primary-blue)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
               All Products
             </Link>

@@ -149,6 +149,7 @@ export function Footer({ storeConfig }: FooterProps) {
           <div>
             <h5 style={{ color: '#0f172a', fontWeight: 700, fontSize: '1rem', marginBottom: '1rem' }}>Customer Care</h5>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.6rem', padding: 0 }}>
+              <li><Link href="/track-order" style={{ color: '#0d52bf', fontWeight: 700, textDecoration: 'none' }}>Track Order Status</Link></li>
               <li><Link href="/cart" style={{ color: '#475569', textDecoration: 'none' }}>Shopping Cart</Link></li>
               <li><Link href="/checkout" style={{ color: '#475569', textDecoration: 'none' }}>Guest Checkout</Link></li>
               <li><span style={{ color: '#64748b' }}>Cash on Delivery (COD)</span></li>
