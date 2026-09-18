@@ -418,7 +418,7 @@ function CheckoutContent() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                    <CheckCircle2 size={15} color="#2563eb" /> 1. Customer Information (Auto-Filled)
+                    <CheckCircle2 size={15} color="#2563eb" /> 1. Customer Information
                   </div>
                   <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
                     {customerName || customer.name}
