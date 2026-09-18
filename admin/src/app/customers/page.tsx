@@ -14,41 +14,10 @@ export default function CustomersPage() {
   const fetchCustomerData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/orders');
+      const res = await fetch('/api/admin/customers');
       if (res.ok) {
         const data = await res.json();
-        const orders = data.data || [];
-
-        // Group customer metrics by mobile number / email
-        const map = new Map<string, any>();
-        orders.forEach((o: any) => {
-          const key = o.mobileNumber || o.customerEmail || o.customerName;
-          if (!map.has(key)) {
-            map.set(key, {
-              customerId: o.userId || `CUST-${o.id.substring(0, 8)}`,
-              name: o.customerName,
-              mobile: o.mobileNumber,
-              email: o.customerEmail || 'N/A',
-              address: o.address,
-              landmark: o.landmark || 'N/A',
-              pincode: o.pincode,
-              city: o.city,
-              state: o.state || 'N/A',
-              ordersCount: 1,
-              totalSpent: Number(o.totalAmount || 0),
-              lastOrderDate: o.createdAt,
-            });
-          } else {
-            const existing = map.get(key);
-            existing.ordersCount += 1;
-            existing.totalSpent += Number(o.totalAmount || 0);
-            if (new Date(o.createdAt) > new Date(existing.lastOrderDate)) {
-              existing.lastOrderDate = o.createdAt;
-            }
-          }
-        });
-
-        setCustomers(Array.from(map.values()));
+        setCustomers(data.data || []);
       }
     } catch (err) {
       console.error(err);

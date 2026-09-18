@@ -83,6 +83,29 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ path
     return NextResponse.json({ success: true, data: products });
   }
 
+  // GET /api/admin/customers
+  if (route === 'customers') {
+    const session = await verifyAdminAuth(req);
+    if (!session) return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED' } }, { status: 401 });
+
+    const customers = await prisma.customer.findMany({
+      include: { orders: { select: { id: true, totalAmount: true, createdAt: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const data = customers.map((c) => ({
+      id: c.id,
+      name: c.name,
+      mobileNumber: c.mobileNumber,
+      pincode: c.pincode,
+      createdAt: c.createdAt,
+      ordersCount: c.orders.length,
+      totalSpent: c.orders.reduce((acc, o) => acc + o.totalAmount.toNumber(), 0),
+    }));
+
+    return NextResponse.json({ success: true, data });
+  }
+
   // GET /api/admin/settings
   if (route === 'settings') {
     const session = await verifyAdminAuth(req);
@@ -402,20 +425,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ path
 
   // PUT /api/admin/settings
   if (route === 'settings') {
-    const { codEnabled, storePhone } = body;
-    if (typeof codEnabled === 'boolean') {
-      await prisma.storeSetting.upsert({
-        where: { key: 'COD_ENABLED' },
-        update: { value: String(codEnabled) },
-        create: { key: 'COD_ENABLED', value: String(codEnabled) },
-      });
-    }
-    if (storePhone) {
-      await prisma.storeSetting.upsert({
-        where: { key: 'STORE_PHONE' },
-        update: { value: String(storePhone).trim() },
-        create: { key: 'STORE_PHONE', value: String(storePhone).trim() },
-      });
+    const fields = ['storeName', 'phone', 'whatsapp', 'email', 'address', 'city', 'state', 'pincode', 'openingHours', 'codEnabled'];
+    for (const field of fields) {
+      if (body[field] !== undefined) {
+        await prisma.storeSetting.upsert({
+          where: { key: field },
+          update: { value: String(body[field]).trim() },
+          create: { key: field, value: String(body[field]).trim() },
+        });
+      }
     }
 
     const updatedConfig = await getStoreConfig();

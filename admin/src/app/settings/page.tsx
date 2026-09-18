@@ -56,6 +56,18 @@ export default function AdminOperationsPage() {
     }
   };
 
+  // Store Profile & Operating Hours State
+  const [storeNameSetting, setStoreNameSetting] = useState('Ravi Electronics');
+  const [storePhoneSetting, setStorePhoneSetting] = useState('9631410611');
+  const [addressSetting, setAddressSetting] = useState('4WHG+7H Kargahar');
+  const [citySetting, setCitySetting] = useState('Kargahar');
+  const [stateSetting, setStateSetting] = useState('Bihar');
+  const [pincodeSetting, setPincodeSetting] = useState('821107');
+  const [openingHoursSetting, setOpeningHoursSetting] = useState('24/7 Open');
+  const [storeSaving, setStoreSaving] = useState(false);
+  const [storeSuccess, setStoreSuccess] = useState('');
+  const [storeError, setStoreError] = useState('');
+
   // New Delivery Zone Modal State
   const [showAddZoneModal, setShowAddZoneModal] = useState(false);
   const [pincode, setPincode] = useState('');
@@ -81,6 +93,26 @@ export default function AdminOperationsPage() {
     }
   };
 
+  const fetchStoreSettings = async () => {
+    try {
+      const res = await fetch('/api/admin/settings');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.data) {
+          setStoreNameSetting(data.data.storeName || 'Ravi Electronics');
+          setStorePhoneSetting(data.data.phone || '9631410611');
+          setAddressSetting(data.data.address || '4WHG+7H Kargahar');
+          setCitySetting(data.data.city || 'Kargahar');
+          setStateSetting(data.data.state || 'Bihar');
+          setPincodeSetting(data.data.pincode || '821107');
+          setOpeningHoursSetting(data.data.openingHours || '24/7 Open');
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch store settings:', err);
+    }
+  };
+
   const fetchZones = async () => {
     setLoading(true);
     try {
@@ -98,8 +130,42 @@ export default function AdminOperationsPage() {
 
   useEffect(() => {
     fetchAdminProfile();
+    fetchStoreSettings();
     fetchZones();
   }, []);
+
+  const handleSaveStoreSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStoreSaving(true);
+    setStoreSuccess('');
+    setStoreError('');
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeName: storeNameSetting,
+          phone: storePhoneSetting,
+          address: addressSetting,
+          city: citySetting,
+          state: stateSetting,
+          pincode: pincodeSetting,
+          openingHours: openingHoursSetting,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStoreSuccess('Store Profile & Operating Settings updated successfully!');
+      } else {
+        setStoreError(data.error?.message || 'Failed to update store settings.');
+      }
+    } catch {
+      setStoreError('Network error updating store settings.');
+    } finally {
+      setStoreSaving(false);
+    }
+  };
 
   const handleUpdateCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -237,6 +303,193 @@ export default function AdminOperationsPage() {
           {/* Top Security Info Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
             
+            {/* Store Profile & Operating Hours Card */}
+            <div className="table-container" style={{ padding: '1.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                <div style={{ padding: '0.6rem', background: '#ecfdf5', borderRadius: '12px', color: '#059669' }}>
+                  <ShieldCheck size={22} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>Store Profile & Operating Settings</h3>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Manage store name, address, contact phone & operating hours</p>
+                </div>
+              </div>
+
+              {storeSuccess && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#ecfdf5', color: '#047857', padding: '0.65rem 0.85rem', borderRadius: '10px', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                  <CheckCircle2 size={16} /> <span>{storeSuccess}</span>
+                </div>
+              )}
+
+              {storeError && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fff1f2', color: '#be123c', padding: '0.65rem 0.85rem', borderRadius: '10px', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                  <AlertCircle size={16} /> <span>{storeError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSaveStoreSettings} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.35rem' }}>
+                      Shop Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={storeNameSetting}
+                      onChange={(e) => setStoreNameSetting(e.target.value)}
+                      style={{
+                        width: '100%',
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '10px',
+                        padding: '0.65rem 0.85rem',
+                        color: '#0f172a',
+                        fontSize: '0.875rem',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.35rem' }}>
+                      Store Support Phone
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={storePhoneSetting}
+                      onChange={(e) => setStorePhoneSetting(e.target.value)}
+                      style={{
+                        width: '100%',
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '10px',
+                        padding: '0.65rem 0.85rem',
+                        color: '#0f172a',
+                        fontSize: '0.875rem',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.35rem' }}>
+                    Store Address / Location Code
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={addressSetting}
+                    onChange={(e) => setAddressSetting(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '10px',
+                      padding: '0.65rem 0.85rem',
+                      color: '#0f172a',
+                      fontSize: '0.875rem',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.35rem' }}>
+                      City / Tehsil
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={citySetting}
+                      onChange={(e) => setCitySetting(e.target.value)}
+                      style={{
+                        width: '100%',
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '10px',
+                        padding: '0.65rem 0.85rem',
+                        color: '#0f172a',
+                        fontSize: '0.875rem',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.35rem' }}>
+                      State
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={stateSetting}
+                      onChange={(e) => setStateSetting(e.target.value)}
+                      style={{
+                        width: '100%',
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '10px',
+                        padding: '0.65rem 0.85rem',
+                        color: '#0f172a',
+                        fontSize: '0.875rem',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.35rem' }}>
+                      Pincode
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={pincodeSetting}
+                      onChange={(e) => setPincodeSetting(e.target.value)}
+                      style={{
+                        width: '100%',
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '10px',
+                        padding: '0.65rem 0.85rem',
+                        color: '#0f172a',
+                        fontSize: '0.875rem',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#64748b', marginBottom: '0.35rem' }}>
+                    Operating Hours
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={openingHoursSetting}
+                    onChange={(e) => setOpeningHoursSetting(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '10px',
+                      padding: '0.65rem 0.85rem',
+                      color: '#0f172a',
+                      fontSize: '0.875rem',
+                    }}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={storeSaving}
+                  className="btn btn-emerald"
+                  style={{ alignSelf: 'flex-start', marginTop: '0.5rem' }}
+                >
+                  {storeSaving ? 'Saving Settings...' : 'Save Store Settings'}
+                </button>
+              </form>
+            </div>
+
             {/* Admin Credentials & Authentication Security Card */}
             <div className="table-container" style={{ padding: '1.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
