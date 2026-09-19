@@ -6,7 +6,7 @@ const router = Router();
 const CART_COOKIE_NAME = 'ravi_cart_session';
 
 function getOrCreateCartSessionId(req: Request, res: Response): string {
-  let sessionId = req.cookies[CART_COOKIE_NAME];
+  let sessionId = (req.headers['x-cart-session-id'] as string) || req.cookies[CART_COOKIE_NAME];
 
   if (!sessionId) {
     sessionId = crypto.randomBytes(24).toString('hex');

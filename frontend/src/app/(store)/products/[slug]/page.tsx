@@ -150,7 +150,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
                 alignItems: 'center',
               }}
             >
-              {!isOutOfStock ? 'IN STOCK' : 'NOT IN STOCK'}
+              {!isOutOfStock ? 'IN STOCK' : 'OUT OF STOCK'}
             </span>
           </div>
 

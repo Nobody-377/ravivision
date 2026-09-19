@@ -10,6 +10,10 @@ import checkoutCodRouter from './routes/checkoutCod.js';
 import checkoutRazorpayRouter from './routes/checkoutRazorpay.js';
 import pincodeRouter from './routes/pincode.js';
 import adminRouter from './routes/admin.js';
+import productsRouter from './routes/products.js';
+import categoriesRouter from './routes/categories.js';
+import customerAuthRouter from './routes/customerAuth.js';
+import ordersRouter from './routes/orders.js';
 import { ensureDatabaseInitialized } from './lib/auto-init.js';
 
 const app: Express = express();
@@ -58,10 +62,15 @@ app.use('/api/checkout/cod', checkoutCodRouter);
 app.use('/api/checkout/razorpay', checkoutRazorpayRouter);
 app.use('/api/pincode', pincodeRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/products', productsRouter);
+app.use('/api/categories', categoriesRouter);
+app.use('/api/auth/customer', customerAuthRouter);
+app.use('/api/orders', ordersRouter);
 
 // Start Server & Auto-Init DB
-app.listen(PORT, async () => {
-  console.log(`⚡ [Ravi Vision Backend]: Server running on port ${PORT}`);
+const SERVER_PORT = Number(PORT);
+app.listen(SERVER_PORT, '0.0.0.0', async () => {
+  console.log(`⚡ [Ravi Vision Backend]: Server running on http://0.0.0.0:${SERVER_PORT} (Listening for Mobile & Web)`);
   await ensureDatabaseInitialized();
 });
 

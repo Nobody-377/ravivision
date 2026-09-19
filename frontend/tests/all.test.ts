@@ -488,6 +488,32 @@ test('Admin Credentials Update - Validates username change, password hashing, an
   assert.strictEqual(newPassValid, true);
 });
 
+// Security Regression Test: deepmerge-ts CWE-674 Mitigation
+test('Security - deepmerge-ts package version is >= 8.0.0 (CWE-674 mitigation)', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const resolvedPath = require.resolve('deepmerge-ts');
+  const pkgPath = path.join(resolvedPath, '..', '..', 'package.json');
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  const majorVersion = parseInt(pkg.version.split('.')[0], 10);
+  assert.ok(majorVersion >= 8, `deepmerge-ts version must be >= 8.0.0, found ${pkg.version}`);
+
+  const { deepmerge } = require('deepmerge-ts');
+  const left: any = { a: 1 };
+  left.self = left;
+  const right: any = { b: 2 };
+  right.self = right;
+
+  try {
+    const result = deepmerge(left, right);
+    assert.ok(result, 'deepmerge completed without RangeError call stack overflow');
+  } catch (err: any) {
+    assert.notStrictEqual(err?.name, 'RangeError', 'Must not fail with RangeError: Maximum call stack size exceeded');
+  }
+});
+
+
+
 
 
 

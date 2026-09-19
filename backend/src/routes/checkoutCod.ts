@@ -10,7 +10,7 @@ const CART_COOKIE_NAME = 'ravi_cart_session';
 // POST /api/checkout/cod
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const sessionId = req.cookies[CART_COOKIE_NAME];
+    const sessionId = (req.headers['x-cart-session-id'] as string) || req.cookies[CART_COOKIE_NAME];
 
     if (!sessionId) {
       return res.status(400).json({
@@ -19,16 +19,14 @@ router.post('/', async (req: Request, res: Response) => {
       });
     }
 
-    const {
-      customerName,
-      customerPhone,
-      customerEmail,
-      shippingAddress,
-      landmark,
-      city,
-      state,
-      pincode,
-    } = req.body;
+    const customerName = (req.body.customerName || '').trim();
+    const customerPhone = (req.body.customerPhone || req.body.mobileNumber || '').trim();
+    const customerEmail = req.body.customerEmail ? String(req.body.customerEmail).trim() : null;
+    const shippingAddress = (req.body.shippingAddress || req.body.address || '').trim();
+    const landmark = req.body.landmark ? String(req.body.landmark).trim() : null;
+    const city = (req.body.city || 'Kargahar').trim();
+    const state = (req.body.state || 'Bihar').trim();
+    const pincode = (req.body.pincode || '821107').trim();
 
     const storeConfig = await getStoreConfig();
     if (!storeConfig.codEnabled) {

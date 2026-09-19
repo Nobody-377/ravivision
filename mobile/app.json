@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Ravi Vision",
+    "slug": "ravivision",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "ravivision",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0d52bf"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0d52bf"
+      }
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}

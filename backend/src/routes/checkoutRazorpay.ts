@@ -42,8 +42,9 @@ router.post('/create-order', async (req: Request, res: Response) => {
       checkoutSessionId,
     } = req.body;
 
+    const headerSession = req.headers['x-cart-session-id'] as string;
     const sessionCookie = req.cookies[CART_COOKIE_NAME];
-    const cleanCheckoutSessionId = sanitizeString(checkoutSessionId || sessionCookie || '');
+    const cleanCheckoutSessionId = sanitizeString(req.body.checkoutSessionId || headerSession || sessionCookie || '');
 
     if (!cleanCheckoutSessionId) {
       return res.status(400).json({
@@ -102,14 +103,14 @@ router.post('/create-order', async (req: Request, res: Response) => {
     }
 
     // 2. Input Sanitization & Validation
-    const cleanName = sanitizeString(customerName || '');
-    const cleanPhone = sanitizeString(customerPhone || '');
-    const cleanEmail = customerEmail ? sanitizeString(customerEmail) : null;
-    const cleanAddress = sanitizeString(shippingAddress || '');
-    const cleanLandmark = landmark ? sanitizeString(landmark) : null;
-    const cleanCity = sanitizeString(city || 'Local Area');
-    const cleanState = sanitizeString(state || 'State');
-    const cleanPincode = sanitizeString(pincode || '');
+    const cleanName = sanitizeString(req.body.customerName || '');
+    const cleanPhone = sanitizeString(req.body.customerPhone || req.body.mobileNumber || '');
+    const cleanEmail = req.body.customerEmail ? sanitizeString(req.body.customerEmail) : null;
+    const cleanAddress = sanitizeString(req.body.shippingAddress || req.body.address || '');
+    const cleanLandmark = req.body.landmark ? sanitizeString(req.body.landmark) : null;
+    const cleanCity = sanitizeString(req.body.city || 'Kargahar');
+    const cleanState = sanitizeString(req.body.state || 'Bihar');
+    const cleanPincode = sanitizeString(req.body.pincode || '821107');
 
     if (!cleanName || !cleanPhone || !cleanAddress || !cleanPincode) {
       return res.status(400).json({
@@ -132,7 +133,21 @@ router.post('/create-order', async (req: Request, res: Response) => {
       });
     }
 
-    if (!Array.isArray(items) || items.length === 0) {
+    let cartItems = req.body.items;
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      const dbCart = await prisma.cart.findUnique({
+        where: { sessionId: cleanCheckoutSessionId },
+        include: { items: true },
+      });
+      if (dbCart && dbCart.items.length > 0) {
+        cartItems = dbCart.items.map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+        }));
+      }
+    }
+
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
       return res.status(400).json({
         success: false,
         error: { code: 'EMPTY_CART', message: 'Cart items are required to create an order.' },
@@ -154,8 +169,8 @@ router.post('/create-order', async (req: Request, res: Response) => {
     const deliveryFee = Number(zone.deliveryCharge || 0);
 
     // 4. Fetch products directly from DB & calculate prices server-side
-    const productIds = items.map((i: any) => i.productId).filter(Boolean);
-    if (productIds.length !== items.length) {
+    const productIds = cartItems.map((i: any) => i.productId).filter(Boolean);
+    if (productIds.length !== cartItems.length) {
       return res.status(400).json({
         success: false,
         error: { code: 'INVALID_ITEMS', message: 'One or more items are missing valid product IDs.' },
@@ -169,7 +184,7 @@ router.post('/create-order', async (req: Request, res: Response) => {
     let subtotal = 0;
     const validatedItems: { product: any; quantity: number; unitPrice: number; totalPrice: number }[] = [];
 
-    for (const item of items) {
+    for (const item of cartItems) {
       const dbProd = dbProducts.find((p) => p.id === item.productId);
       if (!dbProd) {
         return res.status(400).json({
