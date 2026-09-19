@@ -28,6 +28,7 @@ import {
   PhoneCall,
   ArrowRight,
   Sparkles,
+  Tv,
 } from 'lucide-react-native';
 
 const FALLBACK_PRODUCTS: ProductCardData[] = [
@@ -114,11 +115,12 @@ export default function HomeScreen() {
   };
 
   const quickCategories = [
+    { name: 'Televisions', icon: <Tv size={22} color="#4f46e5" />, category: 'Televisions' },
     { name: 'Refrigerators', icon: <Snowflake size={22} color="#0284c7" />, category: 'Refrigerators' },
-    { name: 'Air Conditioners', icon: <Wind size={22} color="#0d9488" />, category: 'Air Conditioners' },
-    { name: 'Coolers', icon: <Fan size={22} color="#2563eb" />, category: 'Coolers' },
     { name: 'Washing Machines', icon: <Shirt size={22} color="#4f46e5" />, category: 'Washing Machines' },
-    { name: 'Inverters', icon: <BatteryCharging size={22} color="#d97706" />, category: 'Inverters & Batteries' },
+    { name: 'ACs', icon: <Wind size={22} color="#0d9488" />, category: 'ACs' },
+    { name: 'Fans', icon: <Fan size={22} color="#0284c7" />, category: 'Fans' },
+    { name: 'Inverters', icon: <BatteryCharging size={22} color="#d97706" />, category: 'Inverters' },
     { name: 'All Categories', icon: <LayoutGrid size={22} color="#475569" />, category: '' },
   ];
 

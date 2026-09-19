@@ -137,6 +137,7 @@ model Product {
   specialDeliveryNotes String?
   images               ProductImage[]
   cartItems            CartItem[]
+  reviews              ProductReview[]
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
 }
@@ -148,6 +149,18 @@ model ProductImage {
   url       String
   isPrimary Boolean  @default(false)
   sortOrder Int      @default(0)
+}
+
+model ProductReview {
+  id           String   @id @default(uuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating       Int
+  reviewerName String
+  comment      String?
+  createdAt    DateTime @default(now())
+
+  @@index([productId])
 }
 
 // ------------------------------------------------------

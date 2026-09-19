@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Phone, MapPin, Clock, Shield, Truck, CreditCard } from 'lucide-react';
+import { Phone, Clock, Shield, Truck, CreditCard } from 'lucide-react';
 
 interface FooterProps {
   storeConfig: {
@@ -57,17 +57,6 @@ export function Footer({ storeConfig }: FooterProps) {
             </p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.875rem' }}>
-              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
-                <MapPin size={18} color="#0d52bf" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>
-                  {storeConfig.address ? (
-                    `${storeConfig.address}, ${storeConfig.city || 'Kargahar'}, ${storeConfig.state || 'Bihar'} ${storeConfig.pincode || '821107'}`
-                  ) : (
-                    '4WHG+7H Kargahar, Kargahar, Bihar 821107'
-                  )}
-                </span>
-              </div>
-
               <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
                 <Phone size={18} color="#0d52bf" style={{ flexShrink: 0 }} />
                 <span>
@@ -93,12 +82,13 @@ export function Footer({ storeConfig }: FooterProps) {
             <h5 style={{ color: '#0f172a', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.85rem' }}>Primary Categories</h5>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.55rem', padding: 0, margin: 0, fontSize: '0.85rem' }}>
               <li><Link href="/products" style={{ color: '#475569', textDecoration: 'none' }}>All Products</Link></li>
+              <li><Link href="/products?category=televisions" style={{ color: '#475569', textDecoration: 'none' }}>Televisions</Link></li>
               <li><Link href="/products?category=refrigerators" style={{ color: '#475569', textDecoration: 'none' }}>Refrigerators</Link></li>
               <li><Link href="/products?category=washing-machines" style={{ color: '#475569', textDecoration: 'none' }}>Washing Machines</Link></li>
-              <li><Link href="/products?category=air-conditioners" style={{ color: '#475569', textDecoration: 'none' }}>Air Conditioners</Link></li>
-              <li><Link href="/products?category=fans" style={{ color: '#475569', textDecoration: 'none' }}>Fans & Coolers</Link></li>
-              <li><Link href="/products?category=inverters-batteries" style={{ color: '#475569', textDecoration: 'none' }}>Inverters & Batteries</Link></li>
-              <li><Link href="/products?category=ro" style={{ color: '#475569', textDecoration: 'none' }}>RO Water Purifiers</Link></li>
+              <li><Link href="/products?category=acs" style={{ color: '#475569', textDecoration: 'none' }}>ACs</Link></li>
+              <li><Link href="/products?category=fans" style={{ color: '#475569', textDecoration: 'none' }}>Fans</Link></li>
+              <li><Link href="/products?category=inverters" style={{ color: '#475569', textDecoration: 'none' }}>Inverters</Link></li>
+              <li><Link href="/products?category=kitchen-appliances" style={{ color: '#475569', textDecoration: 'none' }}>Kitchen Appliances</Link></li>
             </ul>
           </div>
 

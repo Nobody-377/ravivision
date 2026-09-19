@@ -198,12 +198,34 @@ input, select, textarea {
   gap: 0.5rem;
 }
 
-/* Base Catalog Products Grid & Cards */
+/* Base Catalog Layout & Grid for Desktop */
+.catalog-layout-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  margin-top: 0.5rem;
+}
+
+.catalog-filter-sidebar {
+  background-color: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 1.15rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  position: sticky;
+  top: 90px;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
 .catalog-products-grid {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
   gap: 1rem !important;
 }
+
 
 .catalog-product-card {
   background-color: #ffffff;
@@ -486,15 +508,39 @@ input, select, textarea {
     margin-bottom: 0.25rem !important;
   }
 
+  .products-page-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 0.5rem !important;
+    box-sizing: border-box !important;
+  }
+
   .catalog-layout-grid {
-    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 0.65rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .catalog-filter-sidebar {
+    position: static !important;
+    max-height: none !important;
     padding: 0.65rem 0.75rem !important;
     border-radius: 12px !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+    align-self: stretch !important;
   }
+
+  .catalog-filter-accordion,
+  .catalog-filter-sidebar details,
+  .catalog-filter-sidebar summary {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
 
   .catalog-products-grid {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -731,3 +777,107 @@ input, select, textarea {
     display: none !important;
   }
 }
+
+/* Hero Carousel Animations & Navigation styles */
+@keyframes fadeInSlide {
+  from {
+    opacity: 0.35;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-slide-content {
+  animation: fadeInSlide 0.45s ease-out forwards;
+}
+
+.hero-banner-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  color: #ffffff;
+  padding: 1.5rem;
+  box-shadow: 0 10px 25px rgba(9, 54, 128, 0.25);
+  transition: background-image 0.6s ease-in-out;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-position: center right;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.hero-nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  background-color: rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+.hero-nav-arrow.left {
+  left: 10px;
+}
+
+.hero-nav-arrow.right {
+  right: 10px;
+}
+
+.hero-nav-arrow:hover {
+  background-color: rgba(0, 0, 0, 0.65) !important;
+  transform: translateY(-50%) scale(1.1) !important;
+}
+
+.hero-carousel-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  position: relative;
+  z-index: 3;
+}
+
+.hero-dot-btn {
+  height: 7px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.hero-dot-btn.active {
+  width: 22px;
+  background-color: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+.hero-dot-btn.inactive {
+  width: 7px;
+  background-color: rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+}
+
+.hero-dot-btn.inactive:hover {
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+

@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { CallToOrderModal } from '../call-to-order/CallToOrderModal';
 import { CustomerAuthModal } from '../auth/CustomerAuthModal';
+import { PincodeModal, LocationData } from '../pincode/PincodeModal';
 
 interface HeaderProps {
   storeConfig: {
@@ -53,27 +54,26 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
   const [customer, setCustomer] = useState<{ id: string; name: string; mobileNumber: string; pincode: string } | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [callModalOpen, setCallModalOpen] = useState(false);
-  const [showSubHeader, setShowSubHeader] = useState(true);
+  const [pincodeModalOpen, setPincodeModalOpen] = useState(false);
+
+  const [location, setLocation] = useState<LocationData>({
+    pincode: '821107',
+    area: 'Kargahar',
+    city: 'Rohtas, Bihar',
+    isServiceable: true,
+  });
 
   useEffect(() => {
-    let lastScrollY = window.scrollY;
-
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY <= 10) {
-        setShowSubHeader(true);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 40) {
-        setShowSubHeader(false);
-      } else if (currentScrollY < lastScrollY) {
-        setShowSubHeader(true);
+    try {
+      const savedLoc = localStorage.getItem('user_pincode_location');
+      if (savedLoc) {
+        const parsed = JSON.parse(savedLoc);
+        if (parsed && parsed.pincode && parsed.area) {
+          setLocation(parsed);
+          return;
+        }
       }
-
-      lastScrollY = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    } catch {}
   }, []);
 
   useEffect(() => {
@@ -82,6 +82,26 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
       .then((data) => {
         if (data.success && data.customer) {
           setCustomer(data.customer);
+          if (data.customer.pincode) {
+            fetch(`/api/pincode/check?pincode=${encodeURIComponent(data.customer.pincode)}`)
+              .then((r) => r.json())
+              .then((resData) => {
+                if (resData.success && resData.data && resData.data.isServiceable) {
+                  const loc: LocationData = {
+                    pincode: resData.data.pincode,
+                    area: resData.data.area || 'Local Area',
+                    city: resData.data.city || 'Rohtas, Bihar',
+                    isServiceable: true,
+                    oneDayDelivery: resData.data.oneDayDelivery,
+                  };
+                  setLocation(loc);
+                  try {
+                    localStorage.setItem('user_pincode_location', JSON.stringify(loc));
+                  } catch {}
+                }
+              })
+              .catch(() => {});
+          }
         }
       })
       .catch(() => {});
@@ -165,7 +185,9 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
           {/* Right Header Controls: Location Pill, Wishlist, Cart */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
             {/* Location Pill */}
-            <div
+            <button
+              type="button"
+              onClick={() => setPincodeModalOpen(true)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -176,13 +198,16 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
                 padding: '0.35rem 0.65rem',
                 borderRadius: '9999px',
                 fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
               }}
               className="desktop-only-location"
+              title="Click to Change Delivery Location"
             >
               <MapPin size={14} color="#2563eb" />
-              <span>Kargahar</span>
-              <span style={{ color: '#64748b', fontSize: '0.7rem' }}>Within 100 km</span>
-            </div>
+              <span>{location.area}</span>
+              <span style={{ color: '#64748b', fontSize: '0.7rem' }}>({location.pincode})</span>
+            </button>
 
             {/* Cart Icon */}
             <Link
@@ -300,60 +325,72 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
             </button>
           </form>
         </div>
+      </header>
 
-        {/* Row 3: Delivery Location & Fast Delivery Pill Sub-bar (Hidden on mobile view!) */}
+      {/* Row 3: Delivery Location & Fast Delivery Pill Sub-bar (Natural Page Scroll) */}
+      <div
+        className="delivery-subbar-wrapper"
+        style={{
+          backgroundColor: '#f8fafc',
+          borderBottom: '1px solid #e2e8f0',
+          fontSize: '0.75rem',
+          color: '#334155',
+          position: 'relative',
+          zIndex: 90,
+        }}
+      >
         <div
-          className="delivery-subbar-wrapper"
+          className="container delivery-subbar-container"
           style={{
-            backgroundColor: '#f8fafc',
-            borderTop: '1px solid #f1f5f9',
-            maxHeight: showSubHeader ? '40px' : '0px',
-            opacity: showSubHeader ? 1 : 0,
-            overflow: 'hidden',
-            transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease',
-            fontSize: '0.75rem',
-            color: '#334155',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0.35rem 1rem',
           }}
         >
-          <div
-            className="container delivery-subbar-container"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0.35rem 1rem',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', whiteSpace: 'nowrap' }}>
-              <MapPin size={14} color="#2563eb" style={{ flexShrink: 0 }} />
-              <span>
-                Deliver to <strong style={{ color: '#0f172a' }}>821305 (Kargahar)</strong>
-              </span>
-              <Link href="/products" style={{ color: '#2563eb', fontWeight: 600, textDecoration: 'none', marginLeft: '0.15rem' }}>
-                Change
-              </Link>
-            </div>
-
-            <div
-              className="delivery-subbar-pill"
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', whiteSpace: 'nowrap' }}>
+            <MapPin size={14} color="#2563eb" style={{ flexShrink: 0 }} />
+            <span>
+              Deliver to <strong style={{ color: '#0f172a' }}>{location.pincode} ({location.area})</strong>
+            </span>
+            <button
+              type="button"
+              onClick={() => setPincodeModalOpen(true)}
               style={{
-                backgroundColor: '#dcfce7',
-                color: '#15803d',
-                padding: '0.2rem 0.6rem',
-                borderRadius: '9999px',
+                color: '#2563eb',
                 fontWeight: 700,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.3rem',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                marginLeft: '0.25rem',
+                fontSize: '0.75rem',
+                padding: 0,
+                textDecoration: 'underline',
               }}
             >
-              <Truck size={13} /> 1-Day Local Delivery <ChevronRight size={13} />
-            </div>
+              Change
+            </button>
+          </div>
+
+          <div
+            className="delivery-subbar-pill"
+            style={{
+              backgroundColor: '#dcfce7',
+              color: '#15803d',
+              padding: '0.2rem 0.6rem',
+              borderRadius: '9999px',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+            }}
+          >
+            <Truck size={13} /> {location.oneDayDelivery !== false ? '1-Day Local Delivery' : 'Standard Delivery'} <ChevronRight size={13} />
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Mobile Drawer Menu Overlay */}
       {mobileMenuOpen && (
@@ -386,22 +423,38 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
               </button>
             </div>
 
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', fontSize: '0.9rem', fontWeight: 600 }}>
-              <Link href="/" onClick={() => setMobileMenuOpen(false)} style={{ color: '#0f172a', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Home size={18} className="text-blue-600" /> Home Page
-              </Link>
-              <Link href="/products" onClick={() => setMobileMenuOpen(false)} style={{ color: '#0f172a', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <ShoppingBag size={18} className="text-blue-600" /> All Products Catalog
-              </Link>
-              <Link href="/track-order" onClick={() => setMobileMenuOpen(false)} style={{ color: '#059669', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Package size={18} className="text-emerald-600" /> Track Order Status
-              </Link>
-              <Link href="/cart" onClick={() => setMobileMenuOpen(false)} style={{ color: '#0f172a', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <ShoppingCart size={18} className="text-blue-600" /> Shopping Cart ({cartCount})
-              </Link>
-              <Link href="/admin" onClick={() => setMobileMenuOpen(false)} style={{ color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Settings size={18} className="text-blue-600" /> Admin Portal
-              </Link>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.9rem', fontWeight: 600 }}>
+              {[
+                { label: 'Home Page', href: '/', icon: Home },
+                { label: 'All Products Catalog', href: '/products', icon: ShoppingBag },
+                { label: 'Track Order Status', href: '/track-order', icon: Package },
+                { label: `Shopping Cart (${cartCount})`, href: '/cart', icon: ShoppingCart },
+              ].map((item) => {
+                const IconComp = item.icon;
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{
+                      color: isActive ? '#2563eb' : '#0f172a',
+                      textDecoration: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.65rem',
+                      padding: '0.55rem 0.65rem',
+                      borderRadius: '8px',
+                      backgroundColor: isActive ? '#eff6ff' : 'transparent',
+                      fontWeight: isActive ? 700 : 600,
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <IconComp size={18} color={isActive ? '#2563eb' : '#334155'} />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
             </nav>
           </div>
         </div>
@@ -421,6 +474,19 @@ export function Header({ storeConfig, departments, categories = [], cartCount = 
         onSuccess={(loggedInCustomer) => {
           setCustomer(loggedInCustomer);
         }}
+      />
+
+      <PincodeModal
+        isOpen={pincodeModalOpen}
+        onClose={() => setPincodeModalOpen(false)}
+        currentPincode={location.pincode}
+        onSelectLocation={(newLoc) => {
+          setLocation(newLoc);
+          try {
+            localStorage.setItem('user_pincode_location', JSON.stringify(newLoc));
+          } catch {}
+        }}
+        onCallToOrder={() => setCallModalOpen(true)}
       />
     </>
   );

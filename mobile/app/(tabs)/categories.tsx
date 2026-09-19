@@ -53,7 +53,7 @@ export default function CategoriesScreen() {
           <LoadingState message="Loading catalog taxonomy..." />
         ) : taxonomy.length === 0 ? (
           <View style={styles.fallbackBox}>
-            {['Refrigerators', 'Air Conditioners', 'Coolers', 'Washing Machines', 'Fans', 'Inverters & Batteries', 'TV & Audio', 'Kitchen Appliances'].map((cat, idx) => (
+            {['Televisions', 'Refrigerators', 'Washing Machines', 'ACs', 'Fans', 'Microwaves', 'Inverters', 'Kitchen Appliances', 'Coolers', 'Home Appliances', 'Geysers', 'Wiring Materials'].map((cat, idx) => (
               <TouchableOpacity
                 key={idx}
                 style={styles.catRow}

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { formatINR } from '@/lib/currency';
 import { getStoreConfig } from '@/lib/store-config';
 import { PincodeChecker } from '@/components/pincode/PincodeChecker';
+import { ProductReviewsSection } from '@/components/reviews/ProductReviewsSection';
 import { ShoppingCart, PhoneCall, ShieldCheck, Wrench, Truck, Check, ChevronRight } from 'lucide-react';
 import { ProductActions } from './ProductActions';
 
@@ -237,6 +238,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
             </div>
           )}
 
+          {/* Customer Ratings & Real-Time Review Section */}
+          <ProductReviewsSection productId={product.id} productName={product.name} />
         </div>
       </div>
     </div>

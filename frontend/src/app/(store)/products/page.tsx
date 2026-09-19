@@ -2,7 +2,9 @@ import React from 'react';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { formatINR } from '@/lib/currency';
-import { Search, Filter, CheckCircle, Store, ArrowRight, ChevronDown } from 'lucide-react';
+import { getStoreConfig } from '@/lib/store-config';
+import { Search, Filter, CheckCircle, Store, ArrowRight, ChevronDown, PhoneCall } from 'lucide-react';
+import { CatalogFilterSidebar } from '@/components/navigation/CatalogFilterSidebar';
 
 interface ProductsPageProps {
   searchParams: Promise<{
@@ -18,6 +20,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  const storeConfig = await getStoreConfig();
   const params = await searchParams;
   const search = params.search?.trim() || '';
   const departmentSlug = params.department?.trim() || '';
@@ -144,8 +147,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     <div className="container products-page-container">
       
       {/* Page Title & Search Header */}
-      <div className="products-page-header">
-        <h1 className="products-page-title">
+      <div className="products-page-header" style={{ marginBottom: '1.25rem' }}>
+        <h1 className="products-page-title" style={{ margin: 0 }}>
           {search ? `Search Results for "${search}"` : 'Store Product Catalog'}
         </h1>
       </div>
@@ -155,10 +158,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         className="category-quick-pills"
         style={{
           display: 'flex',
-          gap: '0.45rem',
+          gap: '0.75rem',
           overflowX: 'auto',
-          paddingBottom: '0.6rem',
-          marginBottom: '1rem',
+          paddingBottom: '0.65rem',
+          marginBottom: '1.25rem',
           scrollbarWidth: 'none',
         }}
       >
@@ -166,15 +169,17 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           href="/products"
           style={{
             whiteSpace: 'nowrap',
-            padding: '0.35rem 0.85rem',
+            padding: '0.45rem 1.15rem',
             borderRadius: '9999px',
-            fontSize: '0.8125rem',
+            fontSize: '0.85rem',
             fontWeight: !categorySlug ? 800 : 600,
             backgroundColor: !categorySlug ? 'var(--primary-blue)' : '#f1f5f9',
             color: !categorySlug ? '#ffffff' : '#334155',
             textDecoration: 'none',
             flexShrink: 0,
             border: !categorySlug ? 'none' : '1px solid #e2e8f0',
+            boxShadow: !categorySlug ? '0 2px 8px rgba(13, 82, 191, 0.25)' : 'none',
+            transition: 'all 0.15s ease',
           }}
         >
           All Products
@@ -187,15 +192,17 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               href={`/products?category=${encodeURIComponent(cat.slug)}`}
               style={{
                 whiteSpace: 'nowrap',
-                padding: '0.35rem 0.85rem',
+                padding: '0.45rem 1.15rem',
                 borderRadius: '9999px',
-                fontSize: '0.8125rem',
+                fontSize: '0.85rem',
                 fontWeight: isActive ? 800 : 600,
                 backgroundColor: isActive ? 'var(--primary-blue)' : '#f1f5f9',
                 color: isActive ? '#ffffff' : '#334155',
                 textDecoration: 'none',
                 flexShrink: 0,
                 border: isActive ? 'none' : '1px solid #e2e8f0',
+                boxShadow: isActive ? '0 2px 8px rgba(13, 82, 191, 0.25)' : 'none',
+                transition: 'all 0.15s ease',
               }}
             >
               {cat.name}
@@ -204,80 +211,15 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         })}
       </div>
 
-      <div className="catalog-layout-grid">
+      <div className="catalog-layout-grid" style={{ width: '100%' }}>
         
         {/* Left Sidebar Filter Panel */}
-        <aside className="card catalog-filter-sidebar">
-          <details className="catalog-filter-accordion">
-            <summary style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', userSelect: 'none' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Filter size={18} color="var(--primary-blue)" /> Filter Catalog & Subcategories
-              </div>
-              <ChevronDown size={18} color="#64748b" />
-            </summary>
-
-            <div style={{ marginTop: '0.85rem', paddingTop: '0.85rem', borderTop: '1px solid var(--border-light)' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.65rem', letterSpacing: '0.05em' }}>
-                Categories & Types
-              </div>
-
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.875rem' }}>
-                <li>
-                  <Link
-                    href="/products"
-                    style={{
-                      color: !departmentSlug && !categorySlug && !subcategorySlug ? 'var(--primary-blue)' : 'var(--text-body)',
-                      fontWeight: !departmentSlug && !categorySlug && !subcategorySlug ? 700 : 500,
-                      textDecoration: 'none',
-                      display: 'block',
-                      padding: '0.2rem 0',
-                    }}
-                  >
-                    All Products
-                  </Link>
-                </li>
-                {categories.map((cat) => (
-                  <li key={cat.id}>
-                    <Link
-                      href={`/products?category=${encodeURIComponent(cat.slug)}`}
-                      style={{
-                        color: categorySlug === cat.slug && !subcategorySlug ? 'var(--primary-blue)' : 'var(--text-heading)',
-                        fontWeight: categorySlug === cat.slug ? 800 : 700,
-                        textDecoration: 'none',
-                        display: 'block',
-                        padding: '0.15rem 0',
-                        fontSize: '0.875rem',
-                      }}
-                    >
-                      {cat.name}
-                    </Link>
-
-                    {cat.subcategories.length > 0 && (
-                      <ul style={{ listStyle: 'none', paddingLeft: '0.75rem', margin: '0.2rem 0 0.4rem 0', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                        {cat.subcategories.map((sub) => (
-                          <li key={sub.id}>
-                            <Link
-                              href={`/products?category=${encodeURIComponent(cat.slug)}&subcategory=${encodeURIComponent(sub.slug)}`}
-                              style={{
-                                color: subcategorySlug === sub.slug ? 'var(--primary-blue)' : 'var(--text-muted)',
-                                fontWeight: subcategorySlug === sub.slug ? 700 : 400,
-                                fontSize: '0.8125rem',
-                                textDecoration: 'none',
-                                display: 'block',
-                              }}
-                            >
-                              {sub.name}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </details>
-        </aside>
+        <CatalogFilterSidebar
+          categories={categories}
+          departmentSlug={departmentSlug}
+          categorySlug={categorySlug}
+          subcategorySlug={subcategorySlug}
+        />
 
         {/* Right Main Products Grid */}
         <div>
@@ -359,30 +301,34 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
               })}
             </div>
           ) : (
-            <div className="card" style={{ padding: '2rem 1rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '16px' }}>
-              <Store size={40} color="var(--text-muted)" style={{ margin: '0 auto 1rem auto' }} />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '0.5rem' }}>
-                No Products Match Your Search Filter
+            <div className="card" style={{ padding: '2.5rem 1.25rem', textAlign: 'center', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto' }}>
+                <Store size={28} />
+              </div>
+
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.4rem' }}>
+                No Products Found
               </h3>
-              <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', maxWidth: '560px', margin: '0 auto 1.25rem auto', lineHeight: 1.4 }}>
-                The catalog definitions exist in the store database. Sellable products with specific prices, stock counts, and photos can be created and activated via the Admin Dashboard.
+              <p style={{ fontSize: '0.85rem', color: '#64748b', maxWidth: '480px', margin: '0 auto 1.25rem auto', lineHeight: 1.5 }}>
+                We couldn't find any products matching your selected category or filter right now. Try clearing your filters, exploring another category, or contact our store team for stock inquiries.
               </p>
 
-              {catalogDefinitions.length > 0 && (
-                <div style={{ marginTop: '1.25rem', textAlign: 'left', backgroundColor: '#ffffff', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
-                  <h4 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-heading)', marginBottom: '0.5rem' }}>
-                    Matching Catalog Categories / Product Types:
-                  </h4>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                    {catalogDefinitions.map((def) => (
-                      <li key={def.id} style={{ fontSize: '0.8125rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <CheckCircle size={15} color="var(--primary-blue)" style={{ flexShrink: 0 }} />
-                        <span><strong>{def.productType}</strong> ({def.subcategory.category.name}) — <em>{def.exampleBrands || 'All Brands'}</em></span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                <Link
+                  href="/products"
+                  className="btn btn-primary"
+                  style={{ padding: '0.55rem 1.15rem', fontSize: '0.825rem', fontWeight: 700, borderRadius: '10px' }}
+                >
+                  View All Products
+                </Link>
+                <a
+                  href={`tel:${storeConfig.phone || '9631410611'}`}
+                  className="btn btn-phone"
+                  style={{ padding: '0.55rem 1.15rem', fontSize: '0.825rem', fontWeight: 700, borderRadius: '10px', textDecoration: 'none' }}
+                >
+                  <PhoneCall size={14} /> Call Store for Stock
+                </a>
+              </div>
             </div>
           )}
         </div>

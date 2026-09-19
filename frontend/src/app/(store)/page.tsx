@@ -9,7 +9,6 @@ import {
   ShieldCheck, 
   CreditCard, 
   ArrowRight, 
-  Heart, 
   Star, 
   MapPin, 
   Grid,
@@ -24,9 +23,13 @@ import {
   BatteryCharging,
   Tv,
   Utensils,
+  Flame,
   Check
 } from 'lucide-react';
 import { formatINR } from '@/lib/currency';
+
+import { HeroBannerCarousel } from '@/components/home/HeroBannerCarousel';
+import { QuickCategoriesRow } from '@/components/home/QuickCategoriesRow';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -34,14 +37,33 @@ export const revalidate = 0;
 export default async function HomePage() {
   const storeConfig = await getStoreConfig();
 
-  // Fetch active sellable products from Prisma DB
-  const activeProducts = await prisma.product.findMany({
+  // Fetch active sellable products from Prisma DB safely
+  const rawProducts = await prisma.product.findMany({
     where: { status: 'ACTIVE' },
     take: 6,
     include: {
       images: { where: { isPrimary: true }, take: 1 },
     },
     orderBy: { createdAt: 'desc' },
+  });
+
+  const productIds = rawProducts.map((p) => p.id);
+  let allReviews: Array<{ productId: string; rating: number }> = [];
+  try {
+    allReviews = await (prisma as any).productReview.findMany({
+      where: { productId: { in: productIds } },
+      select: { productId: true, rating: true },
+    });
+  } catch {
+    allReviews = [];
+  }
+
+  const activeProducts = rawProducts.map((p) => {
+    const pRevs = allReviews.filter((r) => r.productId === p.id);
+    return {
+      ...p,
+      reviews: pRevs,
+    };
   });
 
   // Mock / Fallback Products matching the reference UI if DB has fewer items
@@ -86,17 +108,6 @@ export default async function HomePage() {
 
   const displayProducts = activeProducts.length > 0 ? activeProducts : fallbackProducts;
 
-  // Category Quick Links
-  const quickCategories = [
-    { name: 'Refrigerators', icon: <Snowflake size={26} color="#0284c7" />, slug: 'Refrigerators' },
-    { name: 'AC', icon: <Wind size={26} color="#0d9488" />, slug: 'Air Conditioners' },
-    { name: 'Coolers', icon: <Fan size={26} color="#2563eb" />, slug: 'Coolers' },
-    { name: 'Washing Machines', icon: <Shirt size={26} color="#4f46e5" />, slug: 'Washing Machines' },
-    { name: 'Fans', icon: <Fan size={26} color="#0284c7" />, slug: 'Fans' },
-    { name: 'Inverters', icon: <BatteryCharging size={26} color="#d97706" />, slug: 'Inverters & Batteries' },
-    { name: 'More Categories', icon: <LayoutGrid size={26} color="#475569" />, slug: '' },
-  ];
-
   // Top Brands
   const topBrands = [
     { name: 'SAMSUNG', color: '#1428a0' },
@@ -111,176 +122,10 @@ export default async function HomePage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingBottom: '0.5rem' }}>
       
       {/* 1. Hero Banner Carousel Section */}
-      <section className="container hero-banner-section" style={{ paddingTop: '0.75rem' }}>
-        <div
-          className="hero-banner-card"
-          style={{
-            backgroundImage: `linear-gradient(110deg, rgba(9, 54, 128, 0.95) 0%, rgba(13, 82, 191, 0.85) 55%, rgba(15, 23, 42, 0.55) 100%), url('/images/hero-appliances.jpg')`,
-            backgroundPosition: 'center right',
-            backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat',
-            borderRadius: '20px',
-            color: '#ffffff',
-            padding: '1.5rem',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: '0 10px 25px rgba(9, 54, 128, 0.25)',
-          }}
-        >
-          <div
-            style={{
-              maxWidth: '580px',
-              position: 'relative',
-              zIndex: 2,
-            }}
-          >
-            <h1 className="hero-banner-title" style={{ fontSize: '1.65rem', fontWeight: 800, lineHeight: 1.2, marginBottom: '0.75rem', textShadow: '0 2px 6px rgba(0,0,0,0.4)' }}>
-              Upgrade Your Home <br />
-              <span style={{ color: '#facc15' }}>with Trusted Brands</span>
-            </h1>
+      <HeroBannerCarousel />
 
-            <div className="hero-banner-highlights" style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem', fontSize: '0.85rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: 0.95 }}>
-                <CheckCircle2 size={15} color="#facc15" /> Best Prices Guaranteed
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: 0.95 }}>
-                <CheckCircle2 size={15} color="#facc15" /> 100% Genuine Brand Products
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: 0.95 }}>
-                <CheckCircle2 size={15} color="#facc15" /> Local 1-Day Delivery to Kargahar & Surrounding
-              </div>
-            </div>
-
-            <Link
-              href="/products"
-              className="hero-banner-btn"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                backgroundColor: '#ffffff',
-                color: '#093680',
-                fontWeight: 800,
-                fontSize: '0.875rem',
-                padding: '0.65rem 1.25rem',
-                borderRadius: '10px',
-                textDecoration: 'none',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
-              }}
-            >
-              Shop Now <ArrowRight size={16} />
-            </Link>
-          </div>
-
-          {/* Carousel Dots */}
-          <div className="hero-carousel-dots" style={{ display: 'flex', justifyContent: 'center', gap: '0.4rem', marginTop: '1rem', position: 'relative', zIndex: 2 }}>
-            <span style={{ width: '18px', height: '6px', backgroundColor: '#ffffff', borderRadius: '4px' }}></span>
-            <span style={{ width: '6px', height: '6px', backgroundColor: 'rgba(255,255,255,0.4)', borderRadius: '50%' }}></span>
-            <span style={{ width: '6px', height: '6px', backgroundColor: 'rgba(255,255,255,0.4)', borderRadius: '50%' }}></span>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. Quick Category Circles Row */}
-      <section className="container">
-        <div
-          className="quick-categories-row"
-          style={{
-            display: 'flex',
-            gap: '1rem',
-            overflowX: 'auto',
-            paddingBottom: '0.5rem',
-            scrollbarWidth: 'none',
-          }}
-        >
-          {quickCategories.map((cat, idx) => (
-            <Link
-              key={idx}
-              href={cat.slug ? `/products?search=${encodeURIComponent(cat.name)}` : '/products'}
-              className="quick-category-item"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '0.5rem',
-                textDecoration: 'none',
-                minWidth: '72px',
-              }}
-            >
-              <div
-                className="quick-category-circle"
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  backgroundColor: '#f1f5f9',
-                  border: '1px solid #e2e8f0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.6rem',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-                }}
-              >
-                {cat.icon}
-              </div>
-              <span
-                className="quick-category-label"
-                style={{
-                  fontSize: '0.725rem',
-                  fontWeight: 700,
-                  color: '#334155',
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                }}
-              >
-                {cat.name}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* 3. Check Delivery In Your Area Pincode Card */}
-      <section className="container">
-        <div
-          className="pincode-card-wrapper"
-          style={{
-            backgroundColor: '#eff6ff',
-            border: '1px solid #bfdbfe',
-            borderRadius: '14px',
-            padding: '0.65rem 0.85rem',
-          }}
-        >
-          <div className="pincode-card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.45rem' }}>
-            <div
-              style={{
-                width: '30px',
-                height: '30px',
-                borderRadius: '50%',
-                backgroundColor: '#2563eb',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <MapPin size={16} />
-            </div>
-            <div>
-              <h3 style={{ fontSize: '0.875rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.2 }}>
-                Check Delivery in Your Area
-              </h3>
-              <p style={{ fontSize: '0.7rem', color: '#64748b', margin: 0, lineHeight: 1.2 }}>
-                Enter 6-digit pincode to see delivery time & charges
-              </p>
-            </div>
-          </div>
-
-          <PincodeChecker compact />
-        </div>
-      </section>
+      {/* 2. Quick Category Circles Row with More Categories Incoming Popup */}
+      <QuickCategoriesRow />
 
       {/* 4. Four Store Value Highlights Row */}
       <section className="container store-highlights-section">
@@ -410,6 +255,12 @@ export default async function HomePage() {
             const discountPercentage = p.discount || (mrp > price ? `${Math.round(((mrp - price) / mrp) * 100)}% OFF` : null);
             const primaryImg = p.images && p.images[0]?.url ? p.images[0].url : (p.image || 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=400&q=80');
 
+            const pRevList = Array.isArray(p.reviews) ? p.reviews : [];
+            const realRevCount = pRevList.length;
+            const realAvgRating = realRevCount > 0
+              ? (pRevList.reduce((sum: number, r: any) => sum + Number(r.rating || 0), 0) / realRevCount).toFixed(1)
+              : null;
+
             return (
               <div
                 key={p.id}
@@ -426,19 +277,6 @@ export default async function HomePage() {
                   boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                 }}
               >
-                {/* Top Badge & Wishlist Heart */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                  {discountPercentage ? (
-                    <span style={{ backgroundColor: '#dc2626', color: '#ffffff', fontSize: '0.625rem', fontWeight: 800, padding: '0.15rem 0.4rem', borderRadius: '9999px' }}>
-                      {discountPercentage}
-                    </span>
-                  ) : <span />}
-
-                  <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '0.15rem' }}>
-                    <Heart size={16} />
-                  </button>
-                </div>
-
                 {/* Product Image */}
                 <Link href={`/products/${p.slug}`} className="product-card-img" style={{ display: 'flex', justifyContent: 'center', padding: '0.5rem', height: '140px' }}>
                   <img
@@ -459,12 +297,18 @@ export default async function HomePage() {
                     </Link>
                   </h3>
 
-                  {/* Rating */}
+                  {/* Rating (Real DB Ratings) */}
                   <div className="product-card-rating" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.725rem', color: '#64748b', marginBottom: '0.35rem' }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', backgroundColor: '#fef3c7', color: '#d97706', fontWeight: 800, padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
-                      <Star size={11} fill="#d97706" color="#d97706" /> {p.rating || '4.5'}
-                    </span>
-                    <span>({p.reviews || '120'})</span>
+                    {realRevCount > 0 ? (
+                      <>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', backgroundColor: '#fef3c7', color: '#d97706', fontWeight: 800, padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
+                          <Star size={11} fill="#d97706" color="#d97706" /> {realAvgRating}
+                        </span>
+                        <span>({realRevCount})</span>
+                      </>
+                    ) : (
+                      <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>No ratings yet</span>
+                    )}
                   </div>
 
                   {/* Price */}
@@ -477,19 +321,6 @@ export default async function HomePage() {
                         {formatINR(mrp)}
                       </span>
                     )}
-                  </div>
-
-                  {/* Badges (Desktop only or hidden on mobile to avoid card clutter) */}
-                  <div className="product-card-badges" style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.65rem', fontSize: '0.6875rem' }}>
-                    <span style={{ backgroundColor: '#ecfdf5', color: '#047857', padding: '0.15rem 0.4rem', borderRadius: '4px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
-                      <Zap size={11} fill="#047857" /> 1-Day Delivery
-                    </span>
-                    <span style={{ backgroundColor: '#eff6ff', color: '#1e40af', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>
-                      EMI Available
-                    </span>
-                    <span style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>
-                      COD
-                    </span>
                   </div>
 
                   <Link
@@ -509,6 +340,47 @@ export default async function HomePage() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* 6. Check Delivery In Your Area Pincode Card (Above Footer) */}
+      <section className="container" style={{ marginTop: '0.5rem' }}>
+        <div
+          className="pincode-card-wrapper"
+          style={{
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '14px',
+            padding: '0.65rem 0.85rem',
+          }}
+        >
+          <div className="pincode-card-header" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.45rem' }}>
+            <div
+              style={{
+                width: '30px',
+                height: '30px',
+                borderRadius: '50%',
+                backgroundColor: '#2563eb',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <MapPin size={16} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.2 }}>
+                Check Delivery in Your Area
+              </h3>
+              <p style={{ fontSize: '0.7rem', color: '#64748b', margin: 0, lineHeight: 1.2 }}>
+                Enter 6-digit pincode to see delivery time & charges
+              </p>
+            </div>
+          </div>
+
+          <PincodeChecker compact />
         </div>
       </section>
     </div>
