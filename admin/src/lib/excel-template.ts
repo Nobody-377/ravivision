@@ -1,4 +1,10 @@
-import * as xlsx from 'xlsx';
+/**
+ * Native browser Excel template downloader — no third-party library required.
+ * Generates a proper .xlsx file using the Open XML SpreadsheetML spec
+ * via the browser's built-in Blob/URL APIs.
+ * Re-uses the exportToExcel helper from excel-export.ts.
+ */
+import { exportToExcel } from './excel-export';
 
 export function downloadProductImportTemplate() {
   const templateData = [
@@ -79,28 +85,5 @@ export function downloadProductImportTemplate() {
     },
   ];
 
-  const worksheet = xlsx.utils.json_to_sheet(templateData);
-
-  // Set column widths for readability
-  worksheet['!cols'] = [
-    { wch: 45 }, // Product Name
-    { wch: 15 }, // Brand
-    { wch: 18 }, // SKU
-    { wch: 18 }, // Selling Price
-    { wch: 14 }, // MRP
-    { wch: 10 }, // Stock
-    { wch: 12 }, // Status
-    { wch: 60 }, // Image URLs
-    { wch: 65 }, // Specifications
-    { wch: 45 }, // Warranty
-    { wch: 25 }, // Requires Installation
-    { wch: 50 }, // Installation Details
-    { wch: 65 }, // Description
-  ];
-
-  const workbook = xlsx.utils.book_new();
-  xlsx.utils.book_append_sheet(workbook, worksheet, 'Product_Import_Catalog');
-
-  // Trigger browser download
-  xlsx.writeFile(workbook, 'RaviVision_Product_Import_Template.xlsx');
+  exportToExcel('RaviVision_Product_Import_Template', 'Product_Import_Catalog', templateData);
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import * as xlsx from 'xlsx';
+// Native CSV parser — no xlsx library needed
 import AdminSidebar from '@/components/AdminSidebar';
 import AdminHeader from '@/components/AdminHeader';
 import { ProductImageUploader } from '@/components/ProductImageUploader';
@@ -148,7 +148,30 @@ export default function InventoryPage() {
     setShowExcelModal(true);
   };
 
-  // Client-side Excel Spreadsheet Parser
+  // Native CSV parser — converts CSV text to array of row objects
+  function parseCsv(text: string): any[] {
+    const lines = text.split(/\r?\n/).filter((l) => l.trim());
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(',').map((h) => h.replace(/^"|"$/g, '').trim());
+    return lines.slice(1).map((line) => {
+      // Handle quoted fields with commas inside
+      const values: string[] = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') { inQuotes = !inQuotes; }
+        else if (ch === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
+        else { current += ch; }
+      }
+      values.push(current.trim());
+      const obj: any = {};
+      headers.forEach((h, i) => { obj[h] = values[i] ?? ''; });
+      return obj;
+    });
+  }
+
+  // Client-side file parser (CSV only; .xlsx files are sent raw to backend)
   const handleExcelFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -156,20 +179,24 @@ export default function InventoryPage() {
     setExcelFileName(file.name);
     setExcelReport(null);
 
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      try {
-        const buffer = evt.target?.result;
-        const workbook = xlsx.read(buffer, { type: 'binary' });
-        const firstSheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[firstSheetName];
-        const jsonRows: any[] = xlsx.utils.sheet_to_json(sheet);
-        setExcelParsedRows(jsonRows);
-      } catch (err: any) {
-        alert('Error parsing Excel spreadsheet file: ' + (err.message || 'Invalid format'));
-      }
-    };
-    reader.readAsBinaryString(file);
+    const isCsv = file.name.toLowerCase().endsWith('.csv');
+    if (isCsv) {
+      // Parse CSV client-side
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const text = evt.target?.result as string;
+          const jsonRows = parseCsv(text);
+          setExcelParsedRows(jsonRows);
+        } catch (err: any) {
+          alert('Error parsing CSV file: ' + (err.message || 'Invalid format'));
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      // For .xlsx/.xls: mark as "xlsx upload" — raw file will be sent to backend
+      setExcelParsedRows([{ __xlsxRawFile: true }]);
+    }
   };
 
   // Submit Excel Batch Import

@@ -1,4 +1,4 @@
-import * as xlsx from 'xlsx';
+import ExcelJS from 'exceljs';
 import { prisma } from './prisma.js';
 
 export interface CatalogImportReport {
@@ -137,64 +137,53 @@ export async function importCatalogFromExcel(filePath: string): Promise<CatalogI
   };
 
   try {
-    const workbook = xlsx.readFile(filePath);
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(filePath);
+
     const requiredHeaders = ['department', 'category', 'subcategory', 'product / product type'];
 
-    let targetSheetName: string | null = null;
+    let targetWorksheet: ExcelJS.Worksheet | null = null;
     let headerRowIndex = -1;
     let colMap: Record<string, number> = {};
 
-    for (const sheetName of workbook.SheetNames) {
-      const sheet = workbook.Sheets[sheetName];
-      const data: any[][] = xlsx.utils.sheet_to_json(sheet, { header: 1 });
-
-      for (let r = 0; r < data.length; r++) {
-        const row = data[r];
-        if (!Array.isArray(row)) {
-          report.ignoredNonCatalogContent++;
-          continue;
-        }
-
-        const normalizedRow = row.map((cell) => (cell ? cell.toString().trim().toLowerCase() : ''));
+    // Find the sheet & header row containing all required columns
+    for (const worksheet of workbook.worksheets) {
+      let found = false;
+      worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+        if (found) return;
+        const values = (row.values as any[]).slice(1); // ExcelJS row.values is 1-indexed, index 0 is undefined
+        const normalizedRow = values.map((cell: any) =>
+          cell !== null && cell !== undefined ? cell.toString().trim().toLowerCase() : ''
+        );
         const hasAllRequired = requiredHeaders.every((req) => normalizedRow.includes(req));
-
         if (hasAllRequired) {
-          targetSheetName = sheetName;
-          headerRowIndex = r;
-          normalizedRow.forEach((cellText, colIdx) => {
+          targetWorksheet = worksheet;
+          headerRowIndex = rowNumber;
+          normalizedRow.forEach((cellText: string, colIdx: number) => {
             if (cellText) {
-              colMap[cellText] = colIdx;
+              colMap[cellText] = colIdx + 1; // ExcelJS columns are 1-indexed
             }
           });
-          report.ignoredNonCatalogContent += r;
-          break;
+          report.ignoredNonCatalogContent += rowNumber - 1;
+          found = true;
         }
-      }
-
-      if (!targetSheetName) {
-        report.ignoredNonCatalogContent += data.length;
-      } else {
-        for (const otherSheet of workbook.SheetNames) {
-          if (otherSheet !== targetSheetName) {
-            const otherData: any[][] = xlsx.utils.sheet_to_json(workbook.Sheets[otherSheet], { header: 1 });
-            report.ignoredNonCatalogContent += otherData.length;
-          }
-        }
-        break;
+      });
+      if (targetWorksheet) break;
+      else {
+        report.ignoredNonCatalogContent += worksheet.rowCount;
       }
     }
 
-    if (!targetSheetName || headerRowIndex === -1) {
+    if (!targetWorksheet || headerRowIndex === -1) {
       throw new Error('Authoritative catalog header row not found in any workbook sheet.');
     }
 
-    const targetSheet = workbook.Sheets[targetSheetName];
-    const rawRows: any[][] = xlsx.utils.sheet_to_json(targetSheet, { header: 1 });
-
-    const getColValue = (row: any[], headerKey: string): string => {
-      const idx = colMap[headerKey.toLowerCase()];
-      if (idx === undefined || !row[idx]) return '';
-      return row[idx].toString().trim();
+    const getColValue = (row: ExcelJS.Row, headerKey: string): string => {
+      const colIdx = colMap[headerKey.toLowerCase()];
+      if (!colIdx) return '';
+      const cell = row.getCell(colIdx);
+      if (!cell || cell.value === null || cell.value === undefined) return '';
+      return cell.value.toString().trim();
     };
 
     const mapToPrimaryCategory = (dept: string, cat: string): string => {
@@ -242,18 +231,44 @@ export async function importCatalogFromExcel(filePath: string): Promise<CatalogI
 
     let processedCount = 0;
 
-    for (let r = headerRowIndex + 1; r < rawRows.length; r++) {
-      const row = rawRows[r];
-
-      if (!Array.isArray(row) || row.length === 0) {
-        report.ignoredRows++;
-        continue;
-      }
+    (targetWorksheet as ExcelJS.Worksheet).eachRow({ includeEmpty: false }, async (row, rowNumber) => {
+      if (rowNumber <= headerRowIndex) return;
 
       const departmentName = getColValue(row, 'department');
       const rawCategoryName = getColValue(row, 'category');
       const subcategoryName = getColValue(row, 'subcategory');
       const productType = getColValue(row, 'product / product type');
+
+      if (!departmentName || !rawCategoryName || !subcategoryName || !productType) {
+        report.ignoredRows++;
+        return;
+      }
+
+      processedCount++;
+      report.validCatalogRows++;
+    });
+
+    // Second pass — async DB operations (eachRow cannot be async)
+    const rows: Array<{
+      departmentName: string;
+      rawCategoryName: string;
+      subcategoryName: string;
+      productType: string;
+      websiteMenuLabel: string;
+      isCore: boolean;
+      exampleBrands: string | null;
+      keyAttributes: string | null;
+      serviceDeliveryFlag: string | null;
+    }> = [];
+
+    (targetWorksheet as ExcelJS.Worksheet).eachRow({ includeEmpty: false }, (row, rowNumber) => {
+      if (rowNumber <= headerRowIndex) return;
+      const departmentName = getColValue(row, 'department');
+      const rawCategoryName = getColValue(row, 'category');
+      const subcategoryName = getColValue(row, 'subcategory');
+      const productType = getColValue(row, 'product / product type');
+      if (!departmentName || !rawCategoryName || !subcategoryName || !productType) return;
+
       const websiteMenuLabel = getColValue(row, 'website menu label') || productType;
       const coreFutureVal = getColValue(row, 'core / future');
       const isCore = coreFutureVal.toLowerCase() === 'core';
@@ -261,12 +276,17 @@ export async function importCatalogFromExcel(filePath: string): Promise<CatalogI
       const keyAttributes = getColValue(row, 'key selling attributes') || null;
       const serviceDeliveryFlag = getColValue(row, 'service / delivery flag') || null;
 
-      if (!departmentName || !rawCategoryName || !subcategoryName || !productType) {
-        report.ignoredRows++;
-        continue;
-      }
+      rows.push({ departmentName, rawCategoryName, subcategoryName, productType, websiteMenuLabel, isCore, exampleBrands, keyAttributes, serviceDeliveryFlag });
+    });
 
-      processedCount++;
+    // Reset count — re-count via DB ops
+    report.validCatalogRows = 0;
+    let dbProcessedCount = 0;
+
+    for (const r of rows) {
+      const { departmentName, rawCategoryName, subcategoryName, productType, websiteMenuLabel, isCore, exampleBrands, keyAttributes, serviceDeliveryFlag } = r;
+
+      dbProcessedCount++;
 
       const deptSlug = slugify(departmentName);
       const department = await prisma.department.upsert({
@@ -291,34 +311,17 @@ export async function importCatalogFromExcel(filePath: string): Promise<CatalogI
       });
 
       let productDefinition = await prisma.productDefinition.findFirst({
-        where: {
-          subcategoryId: subcategory.id,
-          productType,
-        },
+        where: { subcategoryId: subcategory.id, productType },
       });
 
       if (productDefinition) {
         productDefinition = await prisma.productDefinition.update({
           where: { id: productDefinition.id },
-          data: {
-            websiteMenuLabel,
-            isCore,
-            exampleBrands,
-            keyAttributes,
-            serviceDeliveryFlag,
-          },
+          data: { websiteMenuLabel, isCore, exampleBrands, keyAttributes, serviceDeliveryFlag },
         });
       } else {
         productDefinition = await prisma.productDefinition.create({
-          data: {
-            subcategoryId: subcategory.id,
-            productType,
-            websiteMenuLabel,
-            isCore,
-            exampleBrands,
-            keyAttributes,
-            serviceDeliveryFlag,
-          },
+          data: { subcategoryId: subcategory.id, productType, websiteMenuLabel, isCore, exampleBrands, keyAttributes, serviceDeliveryFlag },
         });
       }
 
@@ -326,12 +329,12 @@ export async function importCatalogFromExcel(filePath: string): Promise<CatalogI
       if (exampleBrands) {
         const brandList = exampleBrands.split(',').map((b) => b.trim());
         if (brandList.length > 0) {
-          primaryBrand = brandList[processedCount % brandList.length];
+          primaryBrand = brandList[dbProcessedCount % brandList.length];
         }
       }
 
       const productSlug = slugify(`${primaryBrand}-${productType}`);
-      const sku = `RV-${slugify(primaryBrand).substring(0, 3).toUpperCase()}-${processedCount.toString().padStart(3, '0')}`;
+      const sku = `RV-${slugify(primaryBrand).substring(0, 3).toUpperCase()}-${dbProcessedCount.toString().padStart(3, '0')}`;
       const pricing = generateDemoPriceAndMRP(categoryName, subcategoryName, productType);
 
       const requiresInstallation =
@@ -350,8 +353,6 @@ export async function importCatalogFromExcel(filePath: string): Promise<CatalogI
         specsJson = JSON.stringify(specMap);
       }
 
-      const initialStatus = 'ACTIVE';
-
       await prisma.product.upsert({
         where: { slug: productSlug },
         update: {
@@ -362,10 +363,10 @@ export async function importCatalogFromExcel(filePath: string): Promise<CatalogI
           price: pricing.price,
           mrp: pricing.mrp,
           stock: pricing.stock,
-          status: initialStatus,
+          status: 'ACTIVE',
           isDemoData: true,
-          isFeatured: processedCount % 4 === 0,
-          isBestSeller: processedCount % 6 === 0,
+          isFeatured: dbProcessedCount % 4 === 0,
+          isBestSeller: dbProcessedCount % 6 === 0,
           requiresInstallation,
           installationDetails: requiresInstallation ? 'Local technician installation provided upon delivery.' : null,
           specifications: specsJson,
@@ -380,10 +381,10 @@ export async function importCatalogFromExcel(filePath: string): Promise<CatalogI
           price: pricing.price,
           mrp: pricing.mrp,
           stock: pricing.stock,
-          status: initialStatus,
+          status: 'ACTIVE',
           isDemoData: true,
-          isFeatured: processedCount % 4 === 0,
-          isBestSeller: processedCount % 6 === 0,
+          isFeatured: dbProcessedCount % 4 === 0,
+          isBestSeller: dbProcessedCount % 6 === 0,
           requiresInstallation,
           installationDetails: requiresInstallation ? 'Local technician installation provided upon delivery.' : null,
           specifications: specsJson,
