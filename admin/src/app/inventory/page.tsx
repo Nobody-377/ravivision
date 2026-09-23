@@ -53,6 +53,9 @@ export default function InventoryPage() {
   const [excelImporting, setExcelImporting] = useState(false);
   const [excelReport, setExcelReport] = useState<any | null>(null);
 
+  // Category Taxonomy state
+  const [categoriesTaxonomy, setCategoriesTaxonomy] = useState<any[]>([]);
+
   // Common Form States (used for Add and Edit)
   const [formName, setFormName] = useState('');
   const [formBrand, setFormBrand] = useState('');
@@ -67,6 +70,8 @@ export default function InventoryPage() {
   const [formWarrantyInfo, setFormWarrantyInfo] = useState('');
   const [formRequiresInstallation, setFormRequiresInstallation] = useState<boolean>(false);
   const [formInstallationDetails, setFormInstallationDetails] = useState('');
+  const [formCategoryId, setFormCategoryId] = useState<string>('');
+  const [formSubcategoryId, setFormSubcategoryId] = useState<string>('');
   
   // Gallery Image URLs List
   const [formImageUrls, setFormImageUrls] = useState<string[]>(['']);
@@ -91,8 +96,21 @@ export default function InventoryPage() {
     }
   };
 
+  const fetchCategoriesTaxonomy = async () => {
+    try {
+      const res = await fetch('/api/admin/categories');
+      if (res.ok) {
+        const json = await res.json();
+        setCategoriesTaxonomy(json.data || []);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchCategoriesTaxonomy();
   }, []);
 
   const resetForm = () => {
@@ -109,6 +127,8 @@ export default function InventoryPage() {
     setFormWarrantyInfo('1 Year Brand Warranty');
     setFormRequiresInstallation(false);
     setFormInstallationDetails('');
+    setFormCategoryId('');
+    setFormSubcategoryId('');
     setFormImageUrls(['']);
     setFormSpecsPairs([
       { key: 'Color', value: '' },
@@ -198,6 +218,11 @@ export default function InventoryPage() {
     setFormWarrantyInfo(product.warrantyInfo || '');
     setFormRequiresInstallation(Boolean(product.requiresInstallation));
     setFormInstallationDetails(product.installationDetails || '');
+
+    const resolvedCatId = product.categoryId || product.category?.id || product.subcategory?.categoryId || '';
+    const resolvedSubcatId = product.subcategoryId || product.subcategory?.id || '';
+    setFormCategoryId(resolvedCatId);
+    setFormSubcategoryId(resolvedSubcatId);
 
     // Existing Images
     if (product.images && product.images.length > 0) {
@@ -303,6 +328,8 @@ export default function InventoryPage() {
           warrantyInfo: formWarrantyInfo,
           requiresInstallation: formRequiresInstallation,
           installationDetails: formInstallationDetails,
+          categoryId: formCategoryId || null,
+          subcategoryId: formSubcategoryId || null,
           imageUrls: cleanImageUrls,
           specifications: specsObj,
         }),
@@ -349,6 +376,8 @@ export default function InventoryPage() {
           warrantyInfo: formWarrantyInfo,
           requiresInstallation: formRequiresInstallation,
           installationDetails: formInstallationDetails,
+          categoryId: formCategoryId || null,
+          subcategoryId: formSubcategoryId || null,
           imageUrls: cleanImageUrls,
           specifications: specsObj,
         }),
@@ -447,6 +476,13 @@ export default function InventoryPage() {
                 <button onClick={handleOpenAddModal} className="btn btn-primary" style={{ fontSize: '0.85rem' }}>
                   <Plus size={16} /> Insert New Product
                 </button>
+                <a 
+                  href="/categories" 
+                  className="btn btn-secondary" 
+                  style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', background: '#f1f5f9', color: '#1e293b', border: '1px solid #cbd5e1' }}
+                >
+                  <Tag size={16} color="#2563eb" /> Categories & Subcategories
+                </a>
                 <button onClick={handleOpenExcelModal} className="btn btn-purple" style={{ fontSize: '0.85rem', backgroundColor: '#8b5cf6', color: '#fff' }}>
                   <FileUp size={16} /> Bulk Import via Excel
                 </button>
@@ -477,6 +513,9 @@ export default function InventoryPage() {
                   {filteredProducts.map((p) => {
                     const isLowStock = p.stock <= (p.lowStockThreshold || 2);
                     const primaryImage = p.images && p.images.length > 0 ? p.images[0].url : null;
+                    const catName = p.category?.name || p.subcategory?.category?.name || p.productDefinition?.subcategory?.category?.name;
+                    const subcatName = p.subcategory?.name || p.productDefinition?.subcategory?.name;
+
                     return (
                       <tr key={p.id}>
                         <td>
@@ -498,7 +537,17 @@ export default function InventoryPage() {
                         </td>
                         <td>
                           <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.9rem' }}>{p.name}</div>
-                          <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                            {catName && (
+                              <span style={{ fontSize: '0.675rem', background: '#eff6ff', color: '#2563eb', padding: '0.15rem 0.45rem', borderRadius: '6px', fontWeight: 700, border: '1px solid #bfdbfe' }}>
+                                📁 {catName}
+                              </span>
+                            )}
+                            {subcatName && (
+                              <span style={{ fontSize: '0.675rem', background: '#f0fdf4', color: '#16a34a', padding: '0.15rem 0.45rem', borderRadius: '6px', fontWeight: 700, border: '1px solid #bbf7d0' }}>
+                                🏷️ {subcatName}
+                              </span>
+                            )}
                             {p.isFeatured && <span className="badge badge-purple" style={{ fontSize: '0.675rem' }}>★ Featured</span>}
                             {p.isBestSeller && <span className="badge badge-emerald" style={{ fontSize: '0.675rem' }}>🔥 Best Seller</span>}
                             {p.requiresInstallation && <span className="badge badge-blue" style={{ fontSize: '0.675rem' }}>🔧 Installation</span>}
@@ -810,6 +859,52 @@ export default function InventoryPage() {
                   </div>
                 </div>
 
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
+                      Product Category
+                    </label>
+                    <select
+                      value={formCategoryId}
+                      onChange={(e) => {
+                        setFormCategoryId(e.target.value);
+                        setFormSubcategoryId('');
+                      }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
+                    >
+                      <option value="">-- Select Category --</option>
+                      {categoriesTaxonomy.flatMap((d: any) => d.categories || []).map((cat: any) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
+                      Product Subcategory
+                    </label>
+                    <select
+                      value={formSubcategoryId}
+                      onChange={(e) => setFormSubcategoryId(e.target.value)}
+                      disabled={!formCategoryId}
+                      style={{ width: '100%', background: !formCategoryId ? '#f1f5f9' : '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
+                    >
+                      <option value="">-- Select Subcategory --</option>
+                      {(
+                        categoriesTaxonomy
+                          .flatMap((d: any) => d.categories || [])
+                          .find((c: any) => c.id === formCategoryId)?.subcategories || []
+                      ).map((sub: any) => (
+                        <option key={sub.id} value={sub.id}>
+                          {sub.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
                 <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1rem' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#0f172a' }}>
                     <input
@@ -1095,6 +1190,52 @@ export default function InventoryPage() {
                       <option value="DRAFT">DRAFT</option>
                       <option value="OUT_OF_STOCK">OUT OF STOCK</option>
                       <option value="INACTIVE">INACTIVE</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
+                      Product Category
+                    </label>
+                    <select
+                      value={formCategoryId}
+                      onChange={(e) => {
+                        setFormCategoryId(e.target.value);
+                        setFormSubcategoryId('');
+                      }}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
+                    >
+                      <option value="">-- Select Category --</option>
+                      {categoriesTaxonomy.flatMap((d: any) => d.categories || []).map((cat: any) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
+                      Product Subcategory
+                    </label>
+                    <select
+                      value={formSubcategoryId}
+                      onChange={(e) => setFormSubcategoryId(e.target.value)}
+                      disabled={!formCategoryId}
+                      style={{ width: '100%', background: !formCategoryId ? '#f1f5f9' : '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
+                    >
+                      <option value="">-- Select Subcategory --</option>
+                      {(
+                        categoriesTaxonomy
+                          .flatMap((d: any) => d.categories || [])
+                          .find((c: any) => c.id === formCategoryId)?.subcategories || []
+                      ).map((sub: any) => (
+                        <option key={sub.id} value={sub.id}>
+                          {sub.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>

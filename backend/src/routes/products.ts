@@ -28,25 +28,37 @@ router.get('/', async (req: Request, res: Response) => {
     }
 
     if (category) {
-      whereClause.productDefinition = {
-        subcategory: {
-          category: {
-            name: { equals: category, mode: 'insensitive' },
-          },
-        },
-      };
-    }
-
-    if (department) {
-      whereClause.productDefinition = {
-        subcategory: {
-          category: {
-            department: {
-              name: { equals: department, mode: 'insensitive' },
+      whereClause.OR = [
+        { category: { name: { equals: category, mode: 'insensitive' } } },
+        { subcategory: { category: { name: { equals: category, mode: 'insensitive' } } } },
+        {
+          productDefinition: {
+            subcategory: {
+              category: {
+                name: { equals: category, mode: 'insensitive' },
+              },
             },
           },
         },
-      };
+      ];
+    }
+
+    if (department) {
+      whereClause.OR = [
+        { category: { department: { name: { equals: department, mode: 'insensitive' } } } },
+        { subcategory: { category: { department: { name: { equals: department, mode: 'insensitive' } } } } },
+        {
+          productDefinition: {
+            subcategory: {
+              category: {
+                department: {
+                  name: { equals: department, mode: 'insensitive' },
+                },
+              },
+            },
+          },
+        },
+      ];
     }
 
     if (brand) {
@@ -58,6 +70,8 @@ router.get('/', async (req: Request, res: Response) => {
         where: whereClause,
         include: {
           images: { orderBy: { sortOrder: 'asc' } },
+          category: { include: { department: true } },
+          subcategory: { include: { category: { include: { department: true } } } },
           productDefinition: {
             include: {
               subcategory: {
@@ -85,6 +99,10 @@ router.get('/', async (req: Request, res: Response) => {
       const mrpNum = p.mrp ? Number(p.mrp) : priceNum;
       const discount = mrpNum > priceNum ? `${Math.round(((mrpNum - priceNum) / mrpNum) * 100)}% OFF` : null;
 
+      const catName = p.subcategory?.category?.name || p.category?.name || p.productDefinition?.subcategory?.category?.name || 'Electronics';
+      const subcatName = p.subcategory?.name || p.productDefinition?.subcategory?.name || '';
+      const deptName = p.subcategory?.category?.department?.name || p.category?.department?.name || p.productDefinition?.subcategory?.category?.department?.name || 'General';
+
       return {
         id: p.id,
         sku: p.sku,
@@ -100,9 +118,12 @@ router.get('/', async (req: Request, res: Response) => {
         isAvailable: p.status === 'ACTIVE' && p.stock > 0,
         image: primaryImg,
         images: p.images.map((img: any) => img.url),
-        categoryName: p.productDefinition?.subcategory?.category?.name || 'Electronics',
-        departmentName: p.productDefinition?.subcategory?.category?.department?.name || 'General',
-        specs: p.specifications ? JSON.parse(p.specifications) : {},
+        categoryId: p.categoryId || p.subcategory?.categoryId || null,
+        subcategoryId: p.subcategoryId || null,
+        categoryName: catName,
+        subcategoryName: subcatName,
+        departmentName: deptName,
+        specs: p.specifications ? (typeof p.specifications === 'string' ? JSON.parse(p.specifications) : p.specifications) : {},
       };
     });
 
@@ -137,6 +158,8 @@ router.get('/:slugOrId', async (req: Request, res: Response) => {
       },
       include: {
         images: { orderBy: { sortOrder: 'asc' } },
+        category: { include: { department: true } },
+        subcategory: { include: { category: { include: { department: true } } } },
         productDefinition: {
           include: {
             subcategory: {
@@ -165,6 +188,10 @@ router.get('/:slugOrId', async (req: Request, res: Response) => {
     const mrpNum = product.mrp ? Number(product.mrp) : priceNum;
     const discount = mrpNum > priceNum ? `${Math.round(((mrpNum - priceNum) / mrpNum) * 100)}% OFF` : null;
 
+    const catName = product.subcategory?.category?.name || product.category?.name || product.productDefinition?.subcategory?.category?.name || 'Electronics';
+    const subcatName = product.subcategory?.name || product.productDefinition?.subcategory?.name || '';
+    const deptName = product.subcategory?.category?.department?.name || product.category?.department?.name || product.productDefinition?.subcategory?.category?.department?.name || 'General';
+
     const formatted = {
       id: product.id,
       sku: product.sku,
@@ -180,9 +207,12 @@ router.get('/:slugOrId', async (req: Request, res: Response) => {
       isAvailable: product.status === 'ACTIVE' && product.stock > 0,
       image: primaryImg,
       images: product.images.map((img: any) => img.url),
-      categoryName: product.productDefinition?.subcategory?.category?.name || 'Electronics',
-      departmentName: product.productDefinition?.subcategory?.category?.department?.name || 'General',
-      specs: product.specifications ? JSON.parse(product.specifications) : {},
+      categoryId: product.categoryId || product.subcategory?.categoryId || null,
+      subcategoryId: product.subcategoryId || null,
+      categoryName: catName,
+      subcategoryName: subcatName,
+      departmentName: deptName,
+      specs: product.specifications ? (typeof product.specifications === 'string' ? JSON.parse(product.specifications) : product.specifications) : {},
     };
 
     return res.json({

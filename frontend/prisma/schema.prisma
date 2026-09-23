@@ -73,6 +73,7 @@ model Category {
   name          String
   slug          String        @unique
   subcategories Subcategory[]
+  products      Product[]
   createdAt     DateTime      @default(now())
 }
 
@@ -83,6 +84,7 @@ model Subcategory {
   name               String
   slug               String              @unique
   productDefinitions ProductDefinition[]
+  products           Product[]
   createdAt          DateTime            @default(now())
 }
 
@@ -114,6 +116,10 @@ enum ProductStatus {
 
 model Product {
   id                   String             @id @default(uuid())
+  categoryId           String?
+  category             Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  subcategoryId        String?
+  subcategory          Subcategory?       @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
   productDefinitionId  String?
   productDefinition    ProductDefinition? @relation(fields: [productDefinitionId], references: [id], onDelete: SetNull)
   name                 String

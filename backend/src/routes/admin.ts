@@ -441,10 +441,204 @@ router.patch('/orders/:id/payment-status', requireAdminAuth, async (req: Request
   }
 });
 
+// ------------------------------------------------------
+// Category & Subcategory Taxonomy Management
+// ------------------------------------------------------
+
+// GET /api/admin/categories - Fetch complete category hierarchy with product counts
+router.get('/categories', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const departments = await prisma.department.findMany({
+      include: {
+        categories: {
+          include: {
+            subcategories: {
+              include: {
+                _count: { select: { products: true } },
+              },
+              orderBy: { name: 'asc' },
+            },
+            _count: { select: { products: true } },
+          },
+          orderBy: { name: 'asc' },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    return res.json({ success: true, data: departments });
+  } catch (error: any) {
+    console.error('Error fetching admin categories:', error);
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
+  }
+});
+
+// POST /api/admin/categories - Create a new Category
+router.post('/categories', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { name, departmentId } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, error: { code: 'INVALID_INPUT', message: 'Category name is required.' } });
+    }
+
+    const cleanName = name.trim();
+    let targetDeptId = departmentId;
+
+    if (!targetDeptId) {
+      let dept = await prisma.department.findFirst();
+      if (!dept) {
+        dept = await prisma.department.create({
+          data: {
+            name: 'Electronics & Appliances',
+            slug: 'electronics-appliances',
+          },
+        });
+      }
+      targetDeptId = dept.id;
+    }
+
+    const baseSlug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+
+    const category = await prisma.category.create({
+      data: {
+        name: cleanName,
+        slug,
+        departmentId: targetDeptId,
+      },
+      include: {
+        subcategories: true,
+        department: true,
+      },
+    });
+
+    return res.json({ success: true, data: category });
+  } catch (error: any) {
+    console.error('Error creating category:', error);
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
+  }
+});
+
+// PATCH /api/admin/categories/:id - Update Category name
+router.patch('/categories/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, error: { code: 'INVALID_INPUT', message: 'Category name is required.' } });
+    }
+
+    const cleanName = name.trim();
+    const baseSlug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+
+    const updated = await prisma.category.update({
+      where: { id },
+      data: {
+        name: cleanName,
+        slug,
+      },
+      include: { subcategories: true },
+    });
+
+    return res.json({ success: true, data: updated });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
+  }
+});
+
+// DELETE /api/admin/categories/:id - Delete Category
+router.delete('/categories/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    await prisma.category.delete({ where: { id } });
+    return res.json({ success: true, message: 'Category deleted successfully.' });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
+  }
+});
+
+// POST /api/admin/subcategories - Create a new Subcategory
+router.post('/subcategories', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const { name, categoryId } = req.body;
+    if (!name || !name.trim() || !categoryId) {
+      return res.status(400).json({ success: false, error: { code: 'INVALID_INPUT', message: 'Subcategory name and parent Category ID are required.' } });
+    }
+
+    const cleanName = name.trim();
+    const baseSlug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+
+    const subcategory = await prisma.subcategory.create({
+      data: {
+        name: cleanName,
+        slug,
+        categoryId,
+      },
+    });
+
+    return res.json({ success: true, data: subcategory });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
+  }
+});
+
+// PATCH /api/admin/subcategories/:id - Update Subcategory name
+router.patch('/subcategories/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, error: { code: 'INVALID_INPUT', message: 'Subcategory name is required.' } });
+    }
+
+    const cleanName = name.trim();
+    const baseSlug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+
+    const updated = await prisma.subcategory.update({
+      where: { id },
+      data: {
+        name: cleanName,
+        slug,
+      },
+    });
+
+    return res.json({ success: true, data: updated });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
+  }
+});
+
+// DELETE /api/admin/subcategories/:id - Delete Subcategory
+router.delete('/subcategories/:id', requireAdminAuth, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    await prisma.subcategory.delete({ where: { id } });
+    return res.json({ success: true, message: 'Subcategory deleted successfully.' });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
+  }
+});
+
 // GET /api/admin/products
 router.get('/products', requireAdminAuth, async (req: Request, res: Response) => {
   const products = await prisma.product.findMany({
-    include: { images: true },
+    include: {
+      images: { orderBy: { sortOrder: 'asc' } },
+      category: true,
+      subcategory: true,
+      productDefinition: {
+        include: {
+          subcategory: {
+            include: {
+              category: true,
+            },
+          },
+        },
+      },
+    },
     orderBy: { updatedAt: 'desc' },
   });
   return res.json({ success: true, data: products });
@@ -470,6 +664,8 @@ router.patch('/products/:id', requireAdminAuth, async (req: Request, res: Respon
       requiresInstallation,
       installationDetails,
       imageUrls,
+      categoryId,
+      subcategoryId,
     } = req.body;
 
     const existingProduct = await prisma.product.findUnique({ where: { id } });
@@ -499,6 +695,8 @@ router.patch('/products/:id', requireAdminAuth, async (req: Request, res: Respon
         specifications: parsedSpecs !== undefined ? parsedSpecs : undefined,
         requiresInstallation: requiresInstallation !== undefined ? Boolean(requiresInstallation) : undefined,
         installationDetails: installationDetails !== undefined ? installationDetails : undefined,
+        categoryId: categoryId !== undefined ? (categoryId || null) : undefined,
+        subcategoryId: subcategoryId !== undefined ? (subcategoryId || null) : undefined,
       },
     });
 
@@ -519,7 +717,11 @@ router.patch('/products/:id', requireAdminAuth, async (req: Request, res: Respon
 
     const updated = await prisma.product.findUnique({
       where: { id },
-      include: { images: { orderBy: { sortOrder: 'asc' } } },
+      include: {
+        images: { orderBy: { sortOrder: 'asc' } },
+        category: true,
+        subcategory: true,
+      },
     });
 
     return res.json({ success: true, data: updated });
@@ -548,6 +750,8 @@ router.post('/products', requireAdminAuth, async (req: Request, res: Response) =
       specifications,
       requiresInstallation,
       installationDetails,
+      categoryId,
+      subcategoryId,
     } = req.body;
 
     if (!name || !brand || !sku || price === undefined) {
@@ -601,6 +805,8 @@ router.post('/products', requireAdminAuth, async (req: Request, res: Response) =
         specifications: parsedSpecs,
         requiresInstallation: Boolean(requiresInstallation),
         installationDetails: installationDetails || null,
+        categoryId: categoryId || null,
+        subcategoryId: subcategoryId || null,
         images: imageList.length > 0
           ? {
               create: imageList.map((url, idx) => ({
@@ -611,7 +817,11 @@ router.post('/products', requireAdminAuth, async (req: Request, res: Response) =
             }
           : undefined,
       },
-      include: { images: { orderBy: { sortOrder: 'asc' } } },
+      include: {
+        images: { orderBy: { sortOrder: 'asc' } },
+        category: true,
+        subcategory: true,
+      },
     });
 
     return res.json({ success: true, data: product });
@@ -705,6 +915,49 @@ router.post('/products/import-excel', requireAdminAuth, async (req: Request, res
           }
         }
 
+        // Category & Subcategory resolution
+        const categoryName = String(row.category || row['Category'] || row['Category Name'] || row.categoryName || '').trim();
+        const subcategoryName = String(row.subcategory || row['Subcategory'] || row['Subcategory Name'] || row.subcategoryName || '').trim();
+
+        let matchedCategoryId: string | null = null;
+        let matchedSubcategoryId: string | null = null;
+
+        if (categoryName) {
+          let cat = await prisma.category.findFirst({
+            where: { name: { equals: categoryName, mode: 'insensitive' } },
+          });
+
+          if (!cat) {
+            let dept = await prisma.department.findFirst();
+            if (!dept) {
+              dept = await prisma.department.create({
+                data: { name: 'Electronics & Appliances', slug: 'electronics-appliances' },
+              });
+            }
+            const catSlug = `${categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-4)}`;
+            cat = await prisma.category.create({
+              data: { name: categoryName, slug: catSlug, departmentId: dept.id },
+            });
+          }
+          matchedCategoryId = cat.id;
+
+          if (subcategoryName) {
+            let sub = await prisma.subcategory.findFirst({
+              where: {
+                categoryId: cat.id,
+                name: { equals: subcategoryName, mode: 'insensitive' },
+              },
+            });
+            if (!sub) {
+              const subSlug = `${subcategoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-4)}`;
+              sub = await prisma.subcategory.create({
+                data: { name: subcategoryName, slug: subSlug, categoryId: cat.id },
+              });
+            }
+            matchedSubcategoryId = sub.id;
+          }
+        }
+
         const existingProduct = await prisma.product.findUnique({ where: { sku } });
 
         if (existingProduct) {
@@ -722,6 +975,8 @@ router.post('/products/import-excel', requireAdminAuth, async (req: Request, res
               requiresInstallation: reqInst,
               installationDetails: instDetails,
               specifications: specsJson || existingProduct.specifications,
+              categoryId: matchedCategoryId || existingProduct.categoryId,
+              subcategoryId: matchedSubcategoryId || existingProduct.subcategoryId,
             },
           });
 
@@ -753,6 +1008,8 @@ router.post('/products/import-excel', requireAdminAuth, async (req: Request, res
               requiresInstallation: reqInst,
               installationDetails: instDetails,
               specifications: specsJson,
+              categoryId: matchedCategoryId,
+              subcategoryId: matchedSubcategoryId,
               images: imageList.length > 0
                 ? {
                     create: imageList.map((url, idx) => ({

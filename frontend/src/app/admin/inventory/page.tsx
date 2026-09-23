@@ -49,6 +49,9 @@ export default function InventoryPage() {
   const [excelImporting, setExcelImporting] = useState(false);
   const [excelReport, setExcelReport] = useState<any | null>(null);
 
+  // Category Taxonomy state
+  const [categoriesTaxonomy, setCategoriesTaxonomy] = useState<any[]>([]);
+
   // Common Form States (used for Add and Edit)
   const [formName, setFormName] = useState('');
   const [formBrand, setFormBrand] = useState('');
@@ -63,6 +66,8 @@ export default function InventoryPage() {
   const [formWarrantyInfo, setFormWarrantyInfo] = useState('');
   const [formRequiresInstallation, setFormRequiresInstallation] = useState<boolean>(false);
   const [formInstallationDetails, setFormInstallationDetails] = useState('');
+  const [formCategoryId, setFormCategoryId] = useState<string>('');
+  const [formSubcategoryId, setFormSubcategoryId] = useState<string>('');
   
   // Gallery Image URLs List
   const [formImageUrls, setFormImageUrls] = useState<string[]>(['']);
@@ -87,8 +92,21 @@ export default function InventoryPage() {
     }
   };
 
+  const fetchCategoriesTaxonomy = async () => {
+    try {
+      const res = await fetch('/api/admin/categories');
+      if (res.ok) {
+        const json = await res.json();
+        setCategoriesTaxonomy(json.data || []);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchCategoriesTaxonomy();
   }, []);
 
   const resetForm = () => {
@@ -105,6 +123,8 @@ export default function InventoryPage() {
     setFormWarrantyInfo('1 Year Brand Warranty');
     setFormRequiresInstallation(false);
     setFormInstallationDetails('');
+    setFormCategoryId('');
+    setFormSubcategoryId('');
     setFormImageUrls(['']);
     setFormSpecsPairs([
       { key: 'Color', value: '' },
