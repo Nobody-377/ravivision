@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS, RADII, SHADOWS, SPACING } from '../../theme/tokens';
 import { Price } from '../common/Price';
 import { Badge } from '../common/Badge';
-import { ShoppingBag } from 'lucide-react-native';
+import { ShoppingBag, ImageOff } from 'lucide-react-native';
 import { getApiBaseUrl } from '../../api/client';
 
 export interface ProductCardData {
@@ -26,10 +26,15 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, onAddToCart }) => {
-  const fallbackImage = 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=400&q=80';
+  const hasValidPhoto = !!(
+    product.image &&
+    typeof product.image === 'string' &&
+    product.image.trim() !== '' &&
+    !product.image.includes('unsplash.com')
+  );
 
   const getImageUri = (img?: string) => {
-    if (!img) return fallbackImage;
+    if (!img) return '';
     if (img.startsWith('http://') || img.startsWith('https://')) return img;
     const baseUrl = getApiBaseUrl();
     return `${baseUrl}${img.startsWith('/') ? '' : '/'}${img}`;
@@ -38,11 +43,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, onAd
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
       <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: getImageUri(product.image) }}
-          style={styles.image}
-          resizeMode="cover"
-        />
+        {hasValidPhoto ? (
+          <Image
+            source={{ uri: getImageUri(product.image) }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={styles.noPhotoContainer}>
+            <ImageOff size={22} color={COLORS.textMuted} />
+            <Text style={styles.noPhotoText}>Photos will be updated soon</Text>
+          </View>
+        )}
         {product.discount && (
           <View style={styles.discountBadge}>
             <Badge label={product.discount} variant="discount" />
@@ -98,6 +110,22 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
+  },
+  noPhotoContainer: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#f1f5f9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.xs,
+  },
+  noPhotoText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginTop: 4,
+    lineHeight: 13,
   },
   discountBadge: {
     position: 'absolute',

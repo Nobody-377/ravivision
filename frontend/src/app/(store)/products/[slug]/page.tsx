@@ -6,7 +6,7 @@ import { formatINR } from '@/lib/currency';
 import { getStoreConfig } from '@/lib/store-config';
 import { PincodeChecker } from '@/components/pincode/PincodeChecker';
 import { ProductReviewsSection } from '@/components/reviews/ProductReviewsSection';
-import { ShoppingCart, PhoneCall, ShieldCheck, Wrench, Truck, Check, ChevronRight } from 'lucide-react';
+import { ShoppingCart, PhoneCall, ShieldCheck, Wrench, Truck, Check, ChevronRight, Image as ImageIcon } from 'lucide-react';
 import { ProductActions } from './ProductActions';
 
 interface ProductDetailPageProps {
@@ -88,31 +88,41 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         
         {/* Left: Product Image / Gallery */}
         <div>
-          <div className="card pdp-image-card" style={{ padding: '1.75rem', textAlign: 'center', backgroundColor: '#ffffff' }}>
-            {product.images.length > 0 ? (
-              <img
-                src={product.images[0].url}
-                alt={product.name}
-                style={{ maxWidth: '100%', maxHeight: '360px', objectFit: 'contain', margin: '0 auto' }}
-              />
-            ) : (
-              <div style={{
-                height: '280px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: 'var(--surface-subtle)',
-                color: 'var(--text-muted)',
-                borderRadius: 'var(--radius-sm)',
-              }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary-blue)', marginBottom: '0.5rem' }}>
-                  {product.brand}
-                </div>
-                <div style={{ fontSize: '0.875rem' }}>Official Product Placeholder</div>
+          {(() => {
+            const validImages = (product.images || []).filter((img: any) => img?.url && !img.url.includes('unsplash.com'));
+            return (
+              <div className="card pdp-image-card" style={{ padding: '1.75rem', textAlign: 'center', backgroundColor: '#ffffff' }}>
+                {validImages.length > 0 ? (
+                  <img
+                    src={validImages[0].url}
+                    alt={product.name}
+                    style={{ maxWidth: '100%', maxHeight: '360px', objectFit: 'contain', margin: '0 auto' }}
+                  />
+                ) : (
+                  <div style={{
+                    height: '280px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'var(--surface-subtle)',
+                    color: 'var(--text-muted)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '1rem',
+                    textAlign: 'center'
+                  }}>
+                    <ImageIcon size={44} color="#94a3b8" style={{ marginBottom: '0.75rem' }} />
+                    <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--primary-blue)', marginBottom: '0.25rem' }}>
+                      {product.brand}
+                    </div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#64748b' }}>
+                      Photos will be updated soon
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            );
+          })()}
 
           {/* Key Trust Signals */}
           <div className="pdp-trust-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '1rem' }}>

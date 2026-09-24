@@ -473,155 +473,6 @@ router.get('/categories', requireAdminAuth, async (req: Request, res: Response) 
   }
 });
 
-// POST /api/admin/categories - Create a new Category
-router.post('/categories', requireAdminAuth, async (req: Request, res: Response) => {
-  try {
-    const { name, departmentId } = req.body;
-    if (!name || !name.trim()) {
-      return res.status(400).json({ success: false, error: { code: 'INVALID_INPUT', message: 'Category name is required.' } });
-    }
-
-    const cleanName = name.trim();
-    let targetDeptId = departmentId;
-
-    if (!targetDeptId) {
-      let dept = await prisma.department.findFirst();
-      if (!dept) {
-        dept = await prisma.department.create({
-          data: {
-            name: 'Electronics & Appliances',
-            slug: 'electronics-appliances',
-          },
-        });
-      }
-      targetDeptId = dept.id;
-    }
-
-    const baseSlug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
-
-    const category = await prisma.category.create({
-      data: {
-        name: cleanName,
-        slug,
-        departmentId: targetDeptId,
-      },
-      include: {
-        subcategories: true,
-        department: true,
-      },
-    });
-
-    return res.json({ success: true, data: category });
-  } catch (error: any) {
-    console.error('Error creating category:', error);
-    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
-  }
-});
-
-// PATCH /api/admin/categories/:id - Update Category name
-router.patch('/categories/:id', requireAdminAuth, async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id as string;
-    const { name } = req.body;
-    if (!name || !name.trim()) {
-      return res.status(400).json({ success: false, error: { code: 'INVALID_INPUT', message: 'Category name is required.' } });
-    }
-
-    const cleanName = name.trim();
-    const baseSlug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
-
-    const updated = await prisma.category.update({
-      where: { id },
-      data: {
-        name: cleanName,
-        slug,
-      },
-      include: { subcategories: true },
-    });
-
-    return res.json({ success: true, data: updated });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
-  }
-});
-
-// DELETE /api/admin/categories/:id - Delete Category
-router.delete('/categories/:id', requireAdminAuth, async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id as string;
-    await prisma.category.delete({ where: { id } });
-    return res.json({ success: true, message: 'Category deleted successfully.' });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
-  }
-});
-
-// POST /api/admin/subcategories - Create a new Subcategory
-router.post('/subcategories', requireAdminAuth, async (req: Request, res: Response) => {
-  try {
-    const { name, categoryId } = req.body;
-    if (!name || !name.trim() || !categoryId) {
-      return res.status(400).json({ success: false, error: { code: 'INVALID_INPUT', message: 'Subcategory name and parent Category ID are required.' } });
-    }
-
-    const cleanName = name.trim();
-    const baseSlug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
-
-    const subcategory = await prisma.subcategory.create({
-      data: {
-        name: cleanName,
-        slug,
-        categoryId,
-      },
-    });
-
-    return res.json({ success: true, data: subcategory });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
-  }
-});
-
-// PATCH /api/admin/subcategories/:id - Update Subcategory name
-router.patch('/subcategories/:id', requireAdminAuth, async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id as string;
-    const { name } = req.body;
-    if (!name || !name.trim()) {
-      return res.status(400).json({ success: false, error: { code: 'INVALID_INPUT', message: 'Subcategory name is required.' } });
-    }
-
-    const cleanName = name.trim();
-    const baseSlug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
-
-    const updated = await prisma.subcategory.update({
-      where: { id },
-      data: {
-        name: cleanName,
-        slug,
-      },
-    });
-
-    return res.json({ success: true, data: updated });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
-  }
-});
-
-// DELETE /api/admin/subcategories/:id - Delete Subcategory
-router.delete('/subcategories/:id', requireAdminAuth, async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id as string;
-    await prisma.subcategory.delete({ where: { id } });
-    return res.json({ success: true, message: 'Subcategory deleted successfully.' });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, error: { code: 'SERVER_ERROR', message: error.message } });
-  }
-});
-
 // GET /api/admin/products
 router.get('/products', requireAdminAuth, async (req: Request, res: Response) => {
   const products = await prisma.product.findMany({
@@ -666,6 +517,10 @@ router.patch('/products/:id', requireAdminAuth, async (req: Request, res: Respon
       imageUrls,
       categoryId,
       subcategoryId,
+      categoryName,
+      category,
+      subcategoryName,
+      subcategory,
     } = req.body;
 
     const existingProduct = await prisma.product.findUnique({ where: { id } });
@@ -676,6 +531,51 @@ router.patch('/products/:id', requireAdminAuth, async (req: Request, res: Respon
     let parsedSpecs: string | null | undefined = undefined;
     if (specifications !== undefined) {
       parsedSpecs = typeof specifications === 'object' ? JSON.stringify(specifications) : specifications;
+    }
+
+    let targetCategoryId: string | null | undefined = categoryId !== undefined ? (categoryId || null) : undefined;
+    let targetSubcategoryId: string | null | undefined = subcategoryId !== undefined ? (subcategoryId || null) : undefined;
+
+    const catInput = (categoryName || category)?.trim();
+    const subInput = (subcategoryName || subcategory)?.trim();
+
+    if (catInput) {
+      let cat = await prisma.category.findFirst({
+        where: { name: { equals: catInput, mode: 'insensitive' } },
+      });
+      if (!cat) {
+        let dept = await prisma.department.findFirst();
+        if (!dept) {
+          dept = await prisma.department.create({
+            data: { name: 'Electronics & Appliances', slug: 'electronics-appliances' },
+          });
+        }
+        const baseCatSlug = catInput.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const catSlug = `${baseCatSlug}-${Date.now().toString().slice(-4)}`;
+        cat = await prisma.category.create({
+          data: { name: catInput, slug: catSlug, departmentId: dept.id },
+        });
+      }
+      targetCategoryId = cat.id;
+
+      if (subInput) {
+        let sub = await prisma.subcategory.findFirst({
+          where: {
+            categoryId: cat.id,
+            name: { equals: subInput, mode: 'insensitive' },
+          },
+        });
+        if (!sub) {
+          const baseSubSlug = subInput.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          const subSlug = `${baseSubSlug}-${Date.now().toString().slice(-4)}`;
+          sub = await prisma.subcategory.create({
+            data: { name: subInput, slug: subSlug, categoryId: cat.id },
+          });
+        }
+        targetSubcategoryId = sub.id;
+      } else if (subcategoryName !== undefined || subcategory !== undefined) {
+        targetSubcategoryId = null;
+      }
     }
 
     await prisma.product.update({
@@ -695,8 +595,8 @@ router.patch('/products/:id', requireAdminAuth, async (req: Request, res: Respon
         specifications: parsedSpecs !== undefined ? parsedSpecs : undefined,
         requiresInstallation: requiresInstallation !== undefined ? Boolean(requiresInstallation) : undefined,
         installationDetails: installationDetails !== undefined ? installationDetails : undefined,
-        categoryId: categoryId !== undefined ? (categoryId || null) : undefined,
-        subcategoryId: subcategoryId !== undefined ? (subcategoryId || null) : undefined,
+        categoryId: targetCategoryId,
+        subcategoryId: targetSubcategoryId,
       },
     });
 
@@ -752,6 +652,10 @@ router.post('/products', requireAdminAuth, async (req: Request, res: Response) =
       installationDetails,
       categoryId,
       subcategoryId,
+      categoryName,
+      category,
+      subcategoryName,
+      subcategory,
     } = req.body;
 
     if (!name || !brand || !sku || price === undefined) {
@@ -788,6 +692,49 @@ router.post('/products', requireAdminAuth, async (req: Request, res: Response) =
       imageList.push(imageUrl.trim());
     }
 
+    let targetCategoryId: string | null = categoryId || null;
+    let targetSubcategoryId: string | null = subcategoryId || null;
+
+    const catInput = (categoryName || category)?.trim();
+    const subInput = (subcategoryName || subcategory)?.trim();
+
+    if (catInput) {
+      let cat = await prisma.category.findFirst({
+        where: { name: { equals: catInput, mode: 'insensitive' } },
+      });
+      if (!cat) {
+        let dept = await prisma.department.findFirst();
+        if (!dept) {
+          dept = await prisma.department.create({
+            data: { name: 'Electronics & Appliances', slug: 'electronics-appliances' },
+          });
+        }
+        const baseCatSlug = catInput.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const catSlug = `${baseCatSlug}-${Date.now().toString().slice(-4)}`;
+        cat = await prisma.category.create({
+          data: { name: catInput, slug: catSlug, departmentId: dept.id },
+        });
+      }
+      targetCategoryId = cat.id;
+
+      if (subInput) {
+        let sub = await prisma.subcategory.findFirst({
+          where: {
+            categoryId: cat.id,
+            name: { equals: subInput, mode: 'insensitive' },
+          },
+        });
+        if (!sub) {
+          const baseSubSlug = subInput.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          const subSlug = `${baseSubSlug}-${Date.now().toString().slice(-4)}`;
+          sub = await prisma.subcategory.create({
+            data: { name: subInput, slug: subSlug, categoryId: cat.id },
+          });
+        }
+        targetSubcategoryId = sub.id;
+      }
+    }
+
     const product = await prisma.product.create({
       data: {
         name: cleanName,
@@ -805,8 +752,8 @@ router.post('/products', requireAdminAuth, async (req: Request, res: Response) =
         specifications: parsedSpecs,
         requiresInstallation: Boolean(requiresInstallation),
         installationDetails: installationDetails || null,
-        categoryId: categoryId || null,
-        subcategoryId: subcategoryId || null,
+        categoryId: targetCategoryId,
+        subcategoryId: targetSubcategoryId,
         images: imageList.length > 0
           ? {
               create: imageList.map((url, idx) => ({

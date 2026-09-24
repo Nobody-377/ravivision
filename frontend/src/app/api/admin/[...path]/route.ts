@@ -77,7 +77,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ path
     if (!session) return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED' } }, { status: 401 });
 
     const products = await prisma.product.findMany({
-      include: { images: true },
+      include: { images: true, category: true, subcategory: true },
       orderBy: { updatedAt: 'desc' },
     });
     return NextResponse.json({ success: true, data: products });
@@ -245,7 +245,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pat
     const session = await verifyAdminAuth(req);
     if (!session) return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED' } }, { status: 401 });
 
-    const { name, brand, sku, price, mrp, stock, status, isFeatured, isBestSeller, description, warrantyInfo, imageUrl, imageUrls, specifications, requiresInstallation, installationDetails } = body;
+    const { name, brand, sku, price, mrp, stock, status, isFeatured, isBestSeller, description, warrantyInfo, imageUrl, imageUrls, specifications, requiresInstallation, installationDetails, categoryId, subcategoryId, categoryName, category, subcategoryName, subcategory } = body;
     if (!name || !brand || !sku || price === undefined) {
       return NextResponse.json({ success: false, error: { code: 'INVALID_INPUT', message: 'Product title, brand, SKU, and price are required.' } }, { status: 400 });
     }
@@ -274,6 +274,49 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pat
       imageList.push(imageUrl.trim());
     }
 
+    let targetCategoryId: string | null = categoryId || null;
+    let targetSubcategoryId: string | null = subcategoryId || null;
+
+    const catInput = (categoryName || category)?.trim();
+    const subInput = (subcategoryName || subcategory)?.trim();
+
+    if (catInput) {
+      let cat = await prisma.category.findFirst({
+        where: { name: { equals: catInput, mode: 'insensitive' } },
+      });
+      if (!cat) {
+        let dept = await prisma.department.findFirst();
+        if (!dept) {
+          dept = await prisma.department.create({
+            data: { name: 'Electronics & Appliances', slug: 'electronics-appliances' },
+          });
+        }
+        const baseCatSlug = catInput.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const catSlug = `${baseCatSlug}-${Date.now().toString().slice(-4)}`;
+        cat = await prisma.category.create({
+          data: { name: catInput, slug: catSlug, departmentId: dept.id },
+        });
+      }
+      targetCategoryId = cat.id;
+
+      if (subInput) {
+        let sub = await prisma.subcategory.findFirst({
+          where: {
+            categoryId: cat.id,
+            name: { equals: subInput, mode: 'insensitive' },
+          },
+        });
+        if (!sub) {
+          const baseSubSlug = subInput.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          const subSlug = `${baseSubSlug}-${Date.now().toString().slice(-4)}`;
+          sub = await prisma.subcategory.create({
+            data: { name: subInput, slug: subSlug, categoryId: cat.id },
+          });
+        }
+        targetSubcategoryId = sub.id;
+      }
+    }
+
     const product = await prisma.product.create({
       data: {
         name: cleanName,
@@ -291,6 +334,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pat
         specifications: parsedSpecs,
         requiresInstallation: Boolean(requiresInstallation),
         installationDetails: installationDetails || null,
+        categoryId: targetCategoryId,
+        subcategoryId: targetSubcategoryId,
         images: imageList.length > 0
           ? {
               create: imageList.map((url, idx) => ({
@@ -301,7 +346,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pat
             }
           : undefined,
       },
-      include: { images: { orderBy: { sortOrder: 'asc' } } },
+      include: { images: { orderBy: { sortOrder: 'asc' } }, category: true, subcategory: true },
     });
 
     return NextResponse.json({ success: true, data: product });
@@ -547,7 +592,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pa
   // PATCH /api/admin/products/:id
   if (path[0] === 'products' && path.length === 2) {
     const id = path[1];
-    const { name, brand, sku, stock, price, mrp, status, isFeatured, isBestSeller, description, warrantyInfo, specifications, requiresInstallation, installationDetails, imageUrls } = body;
+    const { name, brand, sku, stock, price, mrp, status, isFeatured, isBestSeller, description, warrantyInfo, specifications, requiresInstallation, installationDetails, imageUrls, categoryId, subcategoryId, categoryName, category, subcategoryName, subcategory } = body;
 
     const existingProduct = await prisma.product.findUnique({ where: { id } });
     if (!existingProduct) {
@@ -557,6 +602,51 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pa
     let parsedSpecs: string | null | undefined = undefined;
     if (specifications !== undefined) {
       parsedSpecs = typeof specifications === 'object' ? JSON.stringify(specifications) : specifications;
+    }
+
+    let targetCategoryId: string | null | undefined = categoryId !== undefined ? (categoryId || null) : undefined;
+    let targetSubcategoryId: string | null | undefined = subcategoryId !== undefined ? (subcategoryId || null) : undefined;
+
+    const catInput = (categoryName || category)?.trim();
+    const subInput = (subcategoryName || subcategory)?.trim();
+
+    if (catInput) {
+      let cat = await prisma.category.findFirst({
+        where: { name: { equals: catInput, mode: 'insensitive' } },
+      });
+      if (!cat) {
+        let dept = await prisma.department.findFirst();
+        if (!dept) {
+          dept = await prisma.department.create({
+            data: { name: 'Electronics & Appliances', slug: 'electronics-appliances' },
+          });
+        }
+        const baseCatSlug = catInput.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const catSlug = `${baseCatSlug}-${Date.now().toString().slice(-4)}`;
+        cat = await prisma.category.create({
+          data: { name: catInput, slug: catSlug, departmentId: dept.id },
+        });
+      }
+      targetCategoryId = cat.id;
+
+      if (subInput) {
+        let sub = await prisma.subcategory.findFirst({
+          where: {
+            categoryId: cat.id,
+            name: { equals: subInput, mode: 'insensitive' },
+          },
+        });
+        if (!sub) {
+          const baseSubSlug = subInput.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          const subSlug = `${baseSubSlug}-${Date.now().toString().slice(-4)}`;
+          sub = await prisma.subcategory.create({
+            data: { name: subInput, slug: subSlug, categoryId: cat.id },
+          });
+        }
+        targetSubcategoryId = sub.id;
+      } else if (subcategoryName !== undefined || subcategory !== undefined) {
+        targetSubcategoryId = null;
+      }
     }
 
     await prisma.product.update({
@@ -576,6 +666,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pa
         specifications: parsedSpecs !== undefined ? parsedSpecs : undefined,
         requiresInstallation: requiresInstallation !== undefined ? Boolean(requiresInstallation) : undefined,
         installationDetails: installationDetails !== undefined ? installationDetails : undefined,
+        categoryId: targetCategoryId,
+        subcategoryId: targetSubcategoryId,
       },
     });
 
@@ -596,7 +688,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pa
 
     const updated = await prisma.product.findUnique({
       where: { id },
-      include: { images: { orderBy: { sortOrder: 'asc' } } },
+      include: { images: { orderBy: { sortOrder: 'asc' } }, category: true, subcategory: true },
     });
 
     return NextResponse.json({ success: true, data: updated });

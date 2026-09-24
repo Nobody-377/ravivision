@@ -120,7 +120,8 @@ function buildZipBlob(parts: Record<string, string>): Blob {
   }
   const cd = concat(...centrals);
   const eocd = concat(new Uint8Array([0x50,0x4b,0x05,0x06]),u16le(0),u16le(0),u16le(locals.length),u16le(locals.length),u32le(cd.length),u32le(offset),u16le(0));
-  return new Blob([concat(...locals,cd,eocd)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const zipBuffer = concat(...locals, cd, eocd);
+  return new Blob([zipBuffer.buffer as ArrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 }
 
 // ─── Public API ──────────────────────────────────────────────────────────────

@@ -29,6 +29,7 @@ import {
   Plus,
   Minus,
   CheckCircle2,
+  ImageOff,
 } from 'lucide-react-native';
 
 export default function ProductDetailsScreen() {
@@ -118,22 +119,31 @@ export default function ProductDetailsScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Main Product Image Gallery */}
-        <View style={styles.imageBox}>
-          <Image
-            source={{
-              uri:
-                selectedImage ||
-                'https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=400&q=80',
-            }}
-            style={styles.mainImage}
-            resizeMode="contain"
-          />
-          {product.discount && (
-            <View style={styles.discountBadge}>
-              <Badge label={product.discount} variant="discount" />
+        {(() => {
+          const hasPhoto = !!(selectedImage && !selectedImage.includes('unsplash.com'));
+          return (
+            <View style={styles.imageBox}>
+              {hasPhoto ? (
+                <Image
+                  source={{ uri: selectedImage }}
+                  style={styles.mainImage}
+                  resizeMode="contain"
+                />
+              ) : (
+                <View style={styles.noPhotoBox}>
+                  <ImageOff size={40} color={COLORS.textMuted} />
+                  <Text style={styles.noPhotoBrand}>{product.brand}</Text>
+                  <Text style={styles.noPhotoText}>Photos will be updated soon</Text>
+                </View>
+              )}
+              {product.discount && (
+                <View style={styles.discountBadge}>
+                  <Badge label={product.discount} variant="discount" />
+                </View>
+              )}
             </View>
-          )}
-        </View>
+          );
+        })()}
 
         {/* Thumbnail Selector */}
         {product.images && product.images.length > 1 && (
@@ -461,5 +471,26 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.textBody,
     lineHeight: 20,
+  },
+  noPhotoBox: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#f1f5f9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: SPACING.md,
+  },
+  noPhotoBrand: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: COLORS.primary,
+    marginTop: 8,
+    textTransform: 'uppercase',
+  },
+  noPhotoText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+    marginTop: 2,
   },
 });

@@ -16,7 +16,7 @@ import { EmptyState } from '../../src/components/common/EmptyState';
 import { LoadingState } from '../../src/components/common/LoadingState';
 import { COLORS, RADII, SHADOWS, SPACING } from '../../src/theme/tokens';
 import { useCartStore } from '../../src/store/useCartStore';
-import { Trash2, Plus, Minus, ArrowRight, ShieldCheck, ShoppingBag } from 'lucide-react-native';
+import { Trash2, Plus, Minus, ArrowRight, ShieldCheck, ShoppingBag, ImageOff } from 'lucide-react-native';
 
 export default function CartScreen() {
   const router = useRouter();
@@ -53,17 +53,21 @@ export default function CartScreen() {
           <>
             {/* Cart Items List */}
             <View style={styles.itemsCard}>
-              {items.map((item) => (
-                <View key={item.id} style={styles.itemRow}>
-                  <Image
-                    source={{
-                      uri:
-                        item.imageUrl ||
-                        'https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=400&q=80',
-                    }}
-                    style={styles.itemImg}
-                    resizeMode="cover"
-                  />
+              {items.map((item) => {
+                const hasPhoto = !!(item.imageUrl && !item.imageUrl.includes('unsplash.com'));
+                return (
+                  <View key={item.id} style={styles.itemRow}>
+                    {hasPhoto ? (
+                      <Image
+                        source={{ uri: item.imageUrl }}
+                        style={styles.itemImg}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={[styles.itemImg, { backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center', borderRadius: RADII.sm }]}>
+                        <ImageOff size={18} color={COLORS.textMuted} />
+                      </View>
+                    )}
 
                   <View style={styles.itemMeta}>
                     <Text style={styles.itemBrand}>{item.brand}</Text>
@@ -98,7 +102,8 @@ export default function CartScreen() {
                     </View>
                   </View>
                 </View>
-              ))}
+              );
+            })}
             </View>
 
             {/* Price Summary Breakdown */}

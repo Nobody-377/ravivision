@@ -24,7 +24,8 @@ import {
   Tv,
   Utensils,
   Flame,
-  Check
+  Check,
+  Image as ImageIcon
 } from 'lucide-react';
 import { formatINR } from '@/lib/currency';
 
@@ -78,7 +79,7 @@ export default async function HomePage() {
       discount: '15% OFF',
       rating: '4.5',
       reviews: '120',
-      image: 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=400&q=80',
+      image: '',
     },
     {
       id: 'fb-2',
@@ -90,7 +91,7 @@ export default async function HomePage() {
       discount: '12% OFF',
       rating: '4.4',
       reviews: '98',
-      image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&q=80',
+      image: '',
     },
     {
       id: 'fb-3',
@@ -102,7 +103,7 @@ export default async function HomePage() {
       discount: '20% OFF',
       rating: '4.3',
       reviews: '76',
-      image: 'https://images.unsplash.com/photo-1618941723684-84519965d1b7?w=400&q=80',
+      image: '',
     },
   ];
 
@@ -253,7 +254,9 @@ export default async function HomePage() {
             const price = Number(p.price || 0);
             const mrp = Number(p.mrp || price * 1.2);
             const discountPercentage = p.discount || (mrp > price ? `${Math.round(((mrp - price) / mrp) * 100)}% OFF` : null);
-            const primaryImg = p.images && p.images[0]?.url ? p.images[0].url : (p.image || 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=400&q=80');
+            const rawImg = p.images && p.images[0]?.url ? p.images[0].url : p.image;
+            const hasPhoto = rawImg && typeof rawImg === 'string' && rawImg.trim() !== '' && !rawImg.includes('unsplash.com');
+            const primaryImg = hasPhoto ? rawImg : null;
 
             const pRevList = Array.isArray(p.reviews) ? p.reviews : [];
             const realRevCount = pRevList.length;
@@ -278,12 +281,32 @@ export default async function HomePage() {
                 }}
               >
                 {/* Product Image */}
-                <Link href={`/products/${p.slug}`} className="product-card-img" style={{ display: 'flex', justifyContent: 'center', padding: '0.5rem', height: '140px' }}>
-                  <img
-                    src={primaryImg}
-                    alt={p.name}
-                    style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
-                  />
+                <Link href={`/products/${p.slug}`} className="product-card-img" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.5rem', height: '140px', backgroundColor: '#f8fafc', borderRadius: '12px', overflow: 'hidden' }}>
+                  {primaryImg ? (
+                    <img
+                      src={primaryImg}
+                      alt={p.name}
+                      style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                    />
+                  ) : (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.35rem',
+                      height: '100%',
+                      width: '100%',
+                      color: '#64748b',
+                      padding: '0.5rem',
+                      textAlign: 'center'
+                    }}>
+                      <ImageIcon size={26} color="#94a3b8" />
+                      <span style={{ fontSize: '0.725rem', fontWeight: 600, lineHeight: 1.2, color: '#64748b' }}>
+                        Photos will be updated soon
+                      </span>
+                    </div>
+                  )}
                 </Link>
 
                 {/* Details */}

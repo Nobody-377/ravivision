@@ -19,7 +19,6 @@ const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Orders & Tracking', href: '/orders', icon: ShoppingBag },
   { name: 'Inventory & Stock', href: '/inventory', icon: Package },
-  { name: 'Categories & Subcategories', href: '/categories', icon: FolderTree },
   { name: 'Customer Directory', href: '/customers', icon: Users },
   { name: 'Payment Transactions', href: '/payments', icon: CreditCard },
   { name: 'Excel Reports', href: '/reports', icon: FileSpreadsheet },

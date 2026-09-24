@@ -31,6 +31,20 @@ interface SpecPair {
   value: string;
 }
 
+const STORE_CATEGORIES = [
+  'Televisions',
+  'Refrigerators',
+  'Washing Machines',
+  'ACs',
+  'Fans',
+  'Microwaves',
+  'Inverters',
+  'Kitchen Appliances',
+  'Coolers',
+  'Home Appliances',
+  'Geysers',
+];
+
 export default function InventoryPage() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
@@ -68,6 +82,8 @@ export default function InventoryPage() {
   const [formInstallationDetails, setFormInstallationDetails] = useState('');
   const [formCategoryId, setFormCategoryId] = useState<string>('');
   const [formSubcategoryId, setFormSubcategoryId] = useState<string>('');
+  const [formCategoryName, setFormCategoryName] = useState<string>('Televisions');
+  const [formSubcategoryName, setFormSubcategoryName] = useState<string>('');
   
   // Gallery Image URLs List
   const [formImageUrls, setFormImageUrls] = useState<string[]>(['']);
@@ -125,6 +141,8 @@ export default function InventoryPage() {
     setFormInstallationDetails('');
     setFormCategoryId('');
     setFormSubcategoryId('');
+    setFormCategoryName('Televisions');
+    setFormSubcategoryName('');
     setFormImageUrls(['']);
     setFormSpecsPairs([
       { key: 'Color', value: '' },
@@ -239,6 +257,8 @@ export default function InventoryPage() {
     setFormWarrantyInfo(product.warrantyInfo || '');
     setFormRequiresInstallation(Boolean(product.requiresInstallation));
     setFormInstallationDetails(product.installationDetails || '');
+    setFormCategoryName(product.category?.name || product.categoryName || 'Televisions');
+    setFormSubcategoryName(product.subcategory?.name || product.subcategoryName || '');
 
     // Existing Images
     if (product.images && product.images.length > 0) {
@@ -344,6 +364,8 @@ export default function InventoryPage() {
           warrantyInfo: formWarrantyInfo,
           requiresInstallation: formRequiresInstallation,
           installationDetails: formInstallationDetails,
+          categoryName: formCategoryName,
+          subcategoryName: formSubcategoryName,
           imageUrls: cleanImageUrls,
           specifications: specsObj,
         }),
@@ -390,6 +412,8 @@ export default function InventoryPage() {
           warrantyInfo: formWarrantyInfo,
           requiresInstallation: formRequiresInstallation,
           installationDetails: formInstallationDetails,
+          categoryName: formCategoryName,
+          subcategoryName: formSubcategoryName,
           imageUrls: cleanImageUrls,
           specifications: specsObj,
         }),
@@ -551,7 +575,15 @@ export default function InventoryPage() {
                         </td>
                         <td>
                           <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '0.9rem' }}>{p.name}</div>
-                          <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                            <span style={{ fontWeight: 700, fontSize: '0.7rem', color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', padding: '0.1rem 0.45rem', borderRadius: '6px' }}>
+                              {p.category?.name || p.categoryName || 'General'}
+                            </span>
+                            {(p.subcategory?.name || p.subcategoryName) && (
+                              <span style={{ fontSize: '0.7rem', color: '#475569', background: '#f1f5f9', border: '1px solid #cbd5e1', padding: '0.1rem 0.45rem', borderRadius: '6px' }}>
+                                › {p.subcategory?.name || p.subcategoryName}
+                              </span>
+                            )}
                             {p.isFeatured && <span className="badge badge-purple" style={{ fontSize: '0.675rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}><Star size={11} fill="#9333ea" /> Featured</span>}
                             {p.isBestSeller && <span className="badge badge-emerald" style={{ fontSize: '0.675rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}><Flame size={11} fill="#10b981" /> Best Seller</span>}
                             {p.requiresInstallation && <span className="badge badge-blue" style={{ fontSize: '0.675rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}><Wrench size={11} /> Installation</span>}
@@ -863,6 +895,39 @@ export default function InventoryPage() {
                   </div>
                 </div>
 
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
+                      Category *
+                    </label>
+                    <select
+                      required
+                      value={formCategoryName}
+                      onChange={(e) => setFormCategoryName(e.target.value)}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}
+                    >
+                      {STORE_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
+                      Subcategory (Write down)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Smart 4K TVs / Double Door / Split AC"
+                      value={formSubcategoryName}
+                      onChange={(e) => setFormSubcategoryName(e.target.value)}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
+                    />
+                  </div>
+                </div>
+
                 <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1rem' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: '#0f172a' }}>
                     <input
@@ -1149,6 +1214,39 @@ export default function InventoryPage() {
                       <option value="OUT_OF_STOCK">OUT OF STOCK</option>
                       <option value="INACTIVE">INACTIVE</option>
                     </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
+                      Category *
+                    </label>
+                    <select
+                      required
+                      value={formCategoryName}
+                      onChange={(e) => setFormCategoryName(e.target.value)}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}
+                    >
+                      {STORE_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
+                      Subcategory (Write down)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Smart 4K TVs / Double Door / Split AC"
+                      value={formSubcategoryName}
+                      onChange={(e) => setFormSubcategoryName(e.target.value)}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
+                    />
                   </div>
                 </div>
 

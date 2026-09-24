@@ -217,7 +217,8 @@ function buildZipBlob(parts: Record<string, string>): Blob {
     u16le(0)            // comment length
   );
 
-  return new Blob([concat(...localHeaders, centralDir, eocd)], {
+  const zipBuffer = concat(...localHeaders, centralDir, eocd);
+  return new Blob([zipBuffer.buffer as ArrayBuffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   });
 }

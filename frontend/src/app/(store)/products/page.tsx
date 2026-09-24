@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { formatINR } from '@/lib/currency';
 import { getStoreConfig } from '@/lib/store-config';
-import { Search, Filter, CheckCircle, Store, ArrowRight, ChevronDown, PhoneCall } from 'lucide-react';
+import { Search, Filter, CheckCircle, Store, ArrowRight, ChevronDown, PhoneCall, Image as ImageIcon } from 'lucide-react';
 import { CatalogFilterSidebar } from '@/components/navigation/CatalogFilterSidebar';
 
 interface ProductsPageProps {
@@ -65,30 +65,34 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     whereClause.brand = brandFilter;
   }
 
+  const categoryFilters: any[] = [];
   if (subcategorySlug) {
-    whereClause.productDefinition = {
-      subcategory: {
-        slug: subcategorySlug,
-      },
-    };
+    categoryFilters.push({
+      OR: [
+        { subcategory: { slug: subcategorySlug } },
+        { productDefinition: { subcategory: { slug: subcategorySlug } } },
+      ],
+    });
   } else if (categorySlug) {
-    whereClause.productDefinition = {
-      subcategory: {
-        category: {
-          slug: categorySlug,
-        },
-      },
-    };
+    categoryFilters.push({
+      OR: [
+        { category: { slug: categorySlug } },
+        { subcategory: { category: { slug: categorySlug } } },
+        { productDefinition: { subcategory: { category: { slug: categorySlug } } } },
+      ],
+    });
   } else if (departmentSlug) {
-    whereClause.productDefinition = {
-      subcategory: {
-        category: {
-          department: {
-            slug: departmentSlug,
-          },
-        },
-      },
-    };
+    categoryFilters.push({
+      OR: [
+        { category: { department: { slug: departmentSlug } } },
+        { subcategory: { category: { department: { slug: departmentSlug } } } },
+        { productDefinition: { subcategory: { category: { department: { slug: departmentSlug } } } } },
+      ],
+    });
+  }
+
+  if (categoryFilters.length > 0) {
+    whereClause.AND = categoryFilters;
   }
 
   const products = await prisma.product.findMany({
@@ -226,7 +230,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           {products.length > 0 ? (
             <div className="catalog-products-grid">
               {products.map((prod) => {
-                const primaryImg = prod.images && prod.images[0]?.url ? prod.images[0].url : 'https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=400&q=80';
+                const rawImg = prod.images && prod.images[0]?.url ? prod.images[0].url : (prod as any).image;
+                const hasPhoto = rawImg && typeof rawImg === 'string' && rawImg.trim() !== '' && !rawImg.includes('unsplash.com');
+                const primaryImg = hasPhoto ? rawImg : null;
                 const price = Number(prod.price || 0);
                 const mrp = Number(prod.mrp || 0);
 
@@ -244,12 +250,21 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                       </div>
 
                       {/* Product Image Thumbnail */}
-                      <Link href={`/products/${prod.slug}`} className="catalog-card-img" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px', padding: '0.25rem', marginBottom: '0.5rem', textDecoration: 'none' }}>
-                        <img
-                          src={primaryImg}
-                          alt={prod.name}
-                          style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
-                        />
+                      <Link href={`/products/${prod.slug}`} className="catalog-card-img" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '110px', padding: '0.25rem', marginBottom: '0.5rem', textDecoration: 'none', backgroundColor: '#f8fafc', borderRadius: '10px', overflow: 'hidden' }}>
+                        {primaryImg ? (
+                          <img
+                            src={primaryImg}
+                            alt={prod.name}
+                            style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                          />
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', height: '100%', width: '100%', color: '#64748b', padding: '0.25rem', textAlign: 'center' }}>
+                            <ImageIcon size={22} color="#94a3b8" />
+                            <span style={{ fontSize: '0.675rem', fontWeight: 600, lineHeight: 1.2, color: '#64748b' }}>
+                              Photos will be updated soon
+                            </span>
+                          </div>
+                        )}
                       </Link>
 
                       {/* Product Title */}

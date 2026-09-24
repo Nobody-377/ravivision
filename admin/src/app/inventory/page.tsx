@@ -35,6 +35,20 @@ interface SpecPair {
   value: string;
 }
 
+const STORE_CATEGORIES = [
+  'Televisions',
+  'Refrigerators',
+  'Washing Machines',
+  'ACs',
+  'Fans',
+  'Microwaves',
+  'Inverters',
+  'Kitchen Appliances',
+  'Coolers',
+  'Home Appliances',
+  'Geysers',
+];
+
 export default function InventoryPage() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
@@ -72,6 +86,8 @@ export default function InventoryPage() {
   const [formInstallationDetails, setFormInstallationDetails] = useState('');
   const [formCategoryId, setFormCategoryId] = useState<string>('');
   const [formSubcategoryId, setFormSubcategoryId] = useState<string>('');
+  const [formCategoryName, setFormCategoryName] = useState<string>('Televisions');
+  const [formSubcategoryName, setFormSubcategoryName] = useState<string>('');
   
   // Gallery Image URLs List
   const [formImageUrls, setFormImageUrls] = useState<string[]>(['']);
@@ -129,6 +145,8 @@ export default function InventoryPage() {
     setFormInstallationDetails('');
     setFormCategoryId('');
     setFormSubcategoryId('');
+    setFormCategoryName('Televisions');
+    setFormSubcategoryName('');
     setFormImageUrls(['']);
     setFormSpecsPairs([
       { key: 'Color', value: '' },
@@ -250,6 +268,8 @@ export default function InventoryPage() {
     const resolvedSubcatId = product.subcategoryId || product.subcategory?.id || '';
     setFormCategoryId(resolvedCatId);
     setFormSubcategoryId(resolvedSubcatId);
+    setFormCategoryName(product.category?.name || product.categoryName || 'Televisions');
+    setFormSubcategoryName(product.subcategory?.name || product.subcategoryName || '');
 
     // Existing Images
     if (product.images && product.images.length > 0) {
@@ -357,6 +377,8 @@ export default function InventoryPage() {
           installationDetails: formInstallationDetails,
           categoryId: formCategoryId || null,
           subcategoryId: formSubcategoryId || null,
+          categoryName: formCategoryName,
+          subcategoryName: formSubcategoryName,
           imageUrls: cleanImageUrls,
           specifications: specsObj,
         }),
@@ -405,6 +427,8 @@ export default function InventoryPage() {
           installationDetails: formInstallationDetails,
           categoryId: formCategoryId || null,
           subcategoryId: formSubcategoryId || null,
+          categoryName: formCategoryName,
+          subcategoryName: formSubcategoryName,
           imageUrls: cleanImageUrls,
           specifications: specsObj,
         }),
@@ -889,20 +913,17 @@ export default function InventoryPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
-                      Product Category
+                      Category *
                     </label>
                     <select
-                      value={formCategoryId}
-                      onChange={(e) => {
-                        setFormCategoryId(e.target.value);
-                        setFormSubcategoryId('');
-                      }}
-                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
+                      required
+                      value={formCategoryName}
+                      onChange={(e) => setFormCategoryName(e.target.value)}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}
                     >
-                      <option value="">-- Select Category --</option>
-                      {categoriesTaxonomy.flatMap((d: any) => d.categories || []).map((cat: any) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
+                      {STORE_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
                         </option>
                       ))}
                     </select>
@@ -910,25 +931,15 @@ export default function InventoryPage() {
 
                   <div>
                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
-                      Product Subcategory
+                      Subcategory (Write down)
                     </label>
-                    <select
-                      value={formSubcategoryId}
-                      onChange={(e) => setFormSubcategoryId(e.target.value)}
-                      disabled={!formCategoryId}
-                      style={{ width: '100%', background: !formCategoryId ? '#f1f5f9' : '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
-                    >
-                      <option value="">-- Select Subcategory --</option>
-                      {(
-                        categoriesTaxonomy
-                          .flatMap((d: any) => d.categories || [])
-                          .find((c: any) => c.id === formCategoryId)?.subcategories || []
-                      ).map((sub: any) => (
-                        <option key={sub.id} value={sub.id}>
-                          {sub.name}
-                        </option>
-                      ))}
-                    </select>
+                    <input
+                      type="text"
+                      placeholder="e.g. Smart 4K TVs / Double Door / Split AC"
+                      value={formSubcategoryName}
+                      onChange={(e) => setFormSubcategoryName(e.target.value)}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
+                    />
                   </div>
                 </div>
 
@@ -1224,20 +1235,17 @@ export default function InventoryPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
-                      Product Category
+                      Category *
                     </label>
                     <select
-                      value={formCategoryId}
-                      onChange={(e) => {
-                        setFormCategoryId(e.target.value);
-                        setFormSubcategoryId('');
-                      }}
-                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
+                      required
+                      value={formCategoryName}
+                      onChange={(e) => setFormCategoryName(e.target.value)}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}
                     >
-                      <option value="">-- Select Category --</option>
-                      {categoriesTaxonomy.flatMap((d: any) => d.categories || []).map((cat: any) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
+                      {STORE_CATEGORIES.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
                         </option>
                       ))}
                     </select>
@@ -1245,25 +1253,15 @@ export default function InventoryPage() {
 
                   <div>
                     <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.35rem' }}>
-                      Product Subcategory
+                      Subcategory (Write down)
                     </label>
-                    <select
-                      value={formSubcategoryId}
-                      onChange={(e) => setFormSubcategoryId(e.target.value)}
-                      disabled={!formCategoryId}
-                      style={{ width: '100%', background: !formCategoryId ? '#f1f5f9' : '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
-                    >
-                      <option value="">-- Select Subcategory --</option>
-                      {(
-                        categoriesTaxonomy
-                          .flatMap((d: any) => d.categories || [])
-                          .find((c: any) => c.id === formCategoryId)?.subcategories || []
-                      ).map((sub: any) => (
-                        <option key={sub.id} value={sub.id}>
-                          {sub.name}
-                        </option>
-                      ))}
-                    </select>
+                    <input
+                      type="text"
+                      placeholder="e.g. Smart 4K TVs / Double Door / Split AC"
+                      value={formSubcategoryName}
+                      onChange={(e) => setFormSubcategoryName(e.target.value)}
+                      style={{ width: '100%', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '0.65rem 0.85rem', color: '#0f172a', fontSize: '0.875rem' }}
+                    />
                   </div>
                 </div>
 
