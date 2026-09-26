@@ -766,7 +766,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pa
           });
         }
         targetSubcategoryId = sub.id;
-      } else if (subcategoryName !== undefined || subcategory !== undefined) {
+      } else {
+        // If changing category without specifying a subcategory, reset subcategoryId to avoid foreign key mismatches
         targetSubcategoryId = null;
       }
     }

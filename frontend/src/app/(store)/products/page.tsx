@@ -67,26 +67,31 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   const categoryFilters: any[] = [];
   if (subcategorySlug) {
+    const decodedSub = decodeURIComponent(subcategorySlug);
     categoryFilters.push({
       OR: [
-        { subcategory: { slug: subcategorySlug } },
-        { productDefinition: { subcategory: { slug: subcategorySlug } } },
+        { subcategory: { slug: { equals: subcategorySlug, mode: 'insensitive' } } },
+        { subcategory: { slug: { equals: decodedSub, mode: 'insensitive' } } },
+        { subcategory: { name: { equals: decodedSub, mode: 'insensitive' } } },
       ],
     });
   } else if (categorySlug) {
+    const decodedCat = decodeURIComponent(categorySlug);
     categoryFilters.push({
       OR: [
-        { category: { slug: categorySlug } },
-        { subcategory: { category: { slug: categorySlug } } },
-        { productDefinition: { subcategory: { category: { slug: categorySlug } } } },
+        { category: { slug: { equals: categorySlug, mode: 'insensitive' } } },
+        { category: { slug: { equals: decodedCat, mode: 'insensitive' } } },
+        { category: { name: { equals: decodedCat, mode: 'insensitive' } } },
+        { subcategory: { category: { slug: { equals: categorySlug, mode: 'insensitive' } } } },
       ],
     });
   } else if (departmentSlug) {
+    const decodedDept = decodeURIComponent(departmentSlug);
     categoryFilters.push({
       OR: [
-        { category: { department: { slug: departmentSlug } } },
-        { subcategory: { category: { department: { slug: departmentSlug } } } },
-        { productDefinition: { subcategory: { category: { department: { slug: departmentSlug } } } } },
+        { category: { department: { slug: { equals: departmentSlug, mode: 'insensitive' } } } },
+        { category: { department: { slug: { equals: decodedDept, mode: 'insensitive' } } } },
+        { category: { department: { name: { equals: decodedDept, mode: 'insensitive' } } } },
       ],
     });
   }
