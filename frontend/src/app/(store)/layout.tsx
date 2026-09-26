@@ -10,15 +10,25 @@ export default async function StoreLayout({
   children: React.ReactNode;
 }>) {
   const storeConfig = await getStoreConfig();
-  const departments = await prisma.department.findMany({
-    orderBy: { name: 'asc' },
-    select: { id: true, name: true, slug: true },
-  });
 
-  const categories = await prisma.category.findMany({
-    orderBy: { name: 'asc' },
-    select: { id: true, name: true, slug: true, department: { select: { name: true } } },
-  });
+  let departments: Array<{ id: string; name: string; slug: string }> = [];
+  let categories: Array<{ id: string; name: string; slug: string; department?: { name: string } | null }> = [];
+
+  try {
+    departments = await prisma.department.findMany({
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true, slug: true },
+    });
+
+    categories = await prisma.category.findMany({
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true, slug: true, department: { select: { name: true } } },
+    });
+  } catch (error) {
+    console.error('Failed to load departments or categories from DB in StoreLayout:', error);
+    departments = [];
+    categories = [];
+  }
 
   return (
     <>

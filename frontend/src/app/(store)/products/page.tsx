@@ -95,57 +95,66 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     whereClause.AND = categoryFilters;
   }
 
-  const products = await prisma.product.findMany({
-    where: whereClause,
-    include: {
-      images: { where: { isPrimary: true }, take: 1 },
-      productDefinition: {
-        include: {
-          subcategory: {
-            include: {
-              category: {
-                include: {
-                  department: true,
+  let products: any[] = [];
+  let categories: any[] = [];
+  let catalogDefinitions: any[] = [];
+
+  try {
+    products = await prisma.product.findMany({
+      where: whereClause,
+      include: {
+        images: { where: { isPrimary: true }, take: 1 },
+        productDefinition: {
+          include: {
+            subcategory: {
+              include: {
+                category: {
+                  include: {
+                    department: true,
+                  },
                 },
               },
             },
           },
         },
       },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+      orderBy: { createdAt: 'desc' },
+    });
 
-  // Fetch all primary categories with their subcategories for sidebar filtering
-  const categories = await prisma.category.findMany({
-    include: {
-      subcategories: {
-        orderBy: { name: 'asc' },
-      },
-    },
-    orderBy: { name: 'asc' },
-  });
-
-  // Also query catalog definitions if searching
-  const catalogDefinitions = search
-    ? await prisma.productDefinition.findMany({
-        where: {
-          OR: [
-            { productType: { contains: search } },
-            { websiteMenuLabel: { contains: search } },
-            { exampleBrands: { contains: search } },
-          ],
+    categories = await prisma.category.findMany({
+      include: {
+        subcategories: {
+          orderBy: { name: 'asc' },
         },
-        include: {
-          subcategory: {
-            include: {
-              category: true,
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    catalogDefinitions = search
+      ? await prisma.productDefinition.findMany({
+          where: {
+            OR: [
+              { productType: { contains: search } },
+              { websiteMenuLabel: { contains: search } },
+              { exampleBrands: { contains: search } },
+            ],
+          },
+          include: {
+            subcategory: {
+              include: {
+                category: true,
+              },
             },
           },
-        },
-        take: 12,
-      })
-    : [];
+          take: 12,
+        })
+      : [];
+  } catch (error) {
+    console.error('Failed to query ProductsPage DB:', error);
+    products = [];
+    categories = [];
+    catalogDefinitions = [];
+  }
 
   return (
     <div className="container products-page-container">

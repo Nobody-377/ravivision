@@ -49,6 +49,8 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedBrandFilter, setSelectedBrandFilter] = useState<string>('ALL');
+  const [showBestsellersOnly, setShowBestsellersOnly] = useState<boolean>(false);
   
   // Modals visibility
   const [showAddModal, setShowAddModal] = useState(false);
@@ -456,13 +458,34 @@ export default function InventoryPage() {
     }
   };
 
+  // Toggle Bestseller Status directly from inventory table
+  const handleToggleBestseller = async (id: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isBestSeller: !currentStatus }),
+      });
+      if (res.ok) {
+        setProducts(prev => prev.map(p => p.id === id ? { ...p, isBestSeller: !currentStatus } : p));
+      } else {
+        alert('Failed to update Bestseller status.');
+      }
+    } catch {
+      alert('Error updating Bestseller status.');
+    }
+  };
+
   const filteredProducts = products.filter(p => {
     const q = searchTerm.toLowerCase();
-    return (
+    const matchesSearch = (
       p.name?.toLowerCase().includes(q) ||
       p.sku?.toLowerCase().includes(q) ||
       p.brand?.toLowerCase().includes(q)
     );
+    const matchesBrand = selectedBrandFilter === 'ALL' || (p.brand && p.brand.toLowerCase() === selectedBrandFilter.toLowerCase());
+    const matchesBestseller = !showBestsellersOnly || p.isBestSeller === true;
+    return matchesSearch && matchesBrand && matchesBestseller;
   });
 
   const handleExportExcel = () => {
@@ -518,6 +541,67 @@ export default function InventoryPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
+              </div>
+
+              {/* Brand Filter Dropdown & Bestseller Filter Toggle */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <select
+                  value={selectedBrandFilter}
+                  onChange={(e) => setSelectedBrandFilter(e.target.value)}
+                  style={{
+                    height: '42px',
+                    padding: '0 0.85rem',
+                    borderRadius: '10px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    backgroundColor: '#ffffff',
+                    color: '#0f172a',
+                    outline: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <option value="ALL">All Brands (Inventory)</option>
+                  <option value="LG">LG</option>
+                  <option value="Havells">Havells</option>
+                  <option value="Samsung">Samsung</option>
+                  <option value="Voltas">Voltas</option>
+                  <option value="Daikin">Daikin</option>
+                  <option value="Haier">Haier</option>
+                  <option value="Godrej">Godrej</option>
+                  <option value="Whirlpool">Whirlpool</option>
+                  <option value="Panasonic">Panasonic</option>
+                  <option value="Sony">Sony</option>
+                  <option value="Bosch">Bosch</option>
+                  <option value="Bajaj">Bajaj</option>
+                  <option value="Crompton">Crompton</option>
+                  <option value="Orient">Orient</option>
+                  <option value="Usha">Usha</option>
+                  <option value="Philips">Philips</option>
+                  <option value="McCoy">McCoy</option>
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => setShowBestsellersOnly(!showBestsellersOnly)}
+                  style={{
+                    height: '42px',
+                    padding: '0 0.85rem',
+                    borderRadius: '10px',
+                    border: showBestsellersOnly ? '1.5px solid #10b981' : '1px solid #cbd5e1',
+                    backgroundColor: showBestsellersOnly ? '#ecfdf5' : '#ffffff',
+                    color: showBestsellersOnly ? '#047857' : '#475569',
+                    fontSize: '0.85rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                  }}
+                >
+                  <Flame size={15} color={showBestsellersOnly ? '#10b981' : '#64748b'} />
+                  {showBestsellersOnly ? 'Showing Bestsellers' : 'Filter Bestsellers'}
+                </button>
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -609,7 +693,28 @@ export default function InventoryPage() {
                           </span>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', gap: '0.35rem' }}>
+                          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleBestseller(p.id, p.isBestSeller)}
+                              title={p.isBestSeller ? 'Remove from Brand Bestsellers' : 'Show in Brand Bestsellers'}
+                              style={{
+                                background: p.isBestSeller ? '#ecfdf5' : '#f1f5f9',
+                                border: p.isBestSeller ? '1px solid #6ee7b7' : '1px solid #cbd5e1',
+                                color: p.isBestSeller ? '#047857' : '#64748b',
+                                borderRadius: '8px',
+                                padding: '0.35rem 0.55rem',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.2rem',
+                              }}
+                            >
+                              <Flame size={12} fill={p.isBestSeller ? '#10b981' : 'none'} color={p.isBestSeller ? '#10b981' : '#64748b'} />
+                              {p.isBestSeller ? 'Bestseller' : '+ Bestseller'}
+                            </button>
                             <button
                               onClick={() => handleOpenEdit(p)}
                               className="btn btn-secondary"

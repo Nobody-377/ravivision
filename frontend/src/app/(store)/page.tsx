@@ -30,6 +30,7 @@ import {
 import { formatINR } from '@/lib/currency';
 
 import { HeroBannerCarousel } from '@/components/home/HeroBannerCarousel';
+import { BrandBestSellersCarousel } from '@/components/home/BrandBestSellersCarousel';
 import { QuickCategoriesRow } from '@/components/home/QuickCategoriesRow';
 
 export const dynamic = 'force-dynamic';
@@ -38,15 +39,20 @@ export const revalidate = 0;
 export default async function HomePage() {
   const storeConfig = await getStoreConfig();
 
-  // Fetch active sellable products from Prisma DB safely
-  const rawProducts = await prisma.product.findMany({
-    where: { status: 'ACTIVE' },
-    take: 6,
-    include: {
-      images: { where: { isPrimary: true }, take: 1 },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+  let rawProducts: any[] = [];
+  try {
+    rawProducts = await prisma.product.findMany({
+      where: { status: 'ACTIVE' },
+      take: 6,
+      include: {
+        images: { where: { isPrimary: true }, take: 1 },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  } catch (error) {
+    console.error('Failed to fetch rawProducts from DB in HomePage:', error);
+    rawProducts = [];
+  }
 
   const productIds = rawProducts.map((p) => p.id);
   let allReviews: Array<{ productId: string; rating: number }> = [];
@@ -125,7 +131,10 @@ export default async function HomePage() {
       {/* 1. Hero Banner Carousel Section */}
       <HeroBannerCarousel />
 
-      {/* 2. Quick Category Circles Row with More Categories Incoming Popup */}
+      {/* 2. Top Brand Best Sellers Carousel (LG, Havells, Samsung, Voltas, Daikin, Haier, Godrej, Whirlpool, Panasonic, Sony, Bosch) */}
+      <BrandBestSellersCarousel />
+
+      {/* 3. Quick Category Circles Row with More Categories Incoming Popup */}
       <QuickCategoriesRow />
 
       {/* 4. Four Store Value Highlights Row */}
