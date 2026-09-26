@@ -391,6 +391,87 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pat
         const slugBase = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
         const slug = `${slugBase}-${Date.now().toString().slice(-4)}${i + 1}`;
 
+        const catInput = String(row.category || row['Category'] || row.categoryName || row['Category Name'] || '').trim();
+        const subInput = String(row.subcategory || row['Subcategory'] || row.subcategoryName || row['Subcategory Name'] || '').trim();
+        const isBestSellerVal = String(row.isBestSeller || row['Best Seller'] || row['Best Seller (Yes/No)'] || '').toLowerCase().includes('yes') || String(row.isBestSeller) === 'true';
+        const isFeaturedVal = String(row.isFeatured || row['Featured'] || row['Featured (Yes/No)'] || '').toLowerCase().includes('yes') || String(row.isFeatured) === 'true';
+        const descriptionVal = String(row.description || row['Description'] || '').trim();
+        const warrantyInfoVal = String(row.warrantyInfo || row['Warranty'] || row['Warranty Info'] || '1 Year Brand Warranty').trim();
+        const requiresInstallVal = String(row.requiresInstallation || row['Requires Installation'] || row['Requires Installation (Yes/No)'] || '').toLowerCase().includes('yes') || String(row.requiresInstallation) === 'true';
+        const installDetailsVal = String(row.installationDetails || row['Installation Details'] || '').trim();
+
+        // Image URLs parsing
+        const rawImages = row.imageUrls || row['Image URLs'] || row['Image URLs (comma separated)'] || row.image || row['Image'];
+        const imageList: string[] = [];
+        if (Array.isArray(rawImages)) {
+          imageList.push(...rawImages.map((u: any) => String(u).trim()).filter(Boolean));
+        } else if (typeof rawImages === 'string' && rawImages.trim()) {
+          imageList.push(...rawImages.split(',').map((u: string) => u.trim()).filter(Boolean));
+        }
+
+        // Specifications parsing
+        const rawSpecs = row.specifications || row['Specifications'] || row['Specifications (Key:Value pairs)'];
+        let specsJson: string | null = null;
+        if (typeof rawSpecs === 'object' && rawSpecs !== null) {
+          specsJson = JSON.stringify(rawSpecs);
+        } else if (typeof rawSpecs === 'string' && rawSpecs.trim()) {
+          if (rawSpecs.trim().startsWith('{')) {
+            specsJson = rawSpecs.trim();
+          } else {
+            const specMap: Record<string, string> = {};
+            rawSpecs.split(',').forEach((pairStr: string) => {
+              const parts = pairStr.split(':');
+              if (parts.length >= 2) {
+                specMap[parts[0].trim()] = parts.slice(1).join(':').trim();
+              }
+            });
+            if (Object.keys(specMap).length > 0) {
+              specsJson = JSON.stringify(specMap);
+            }
+          }
+        }
+
+        // Category & Subcategory resolution
+        let targetCategoryId: string | null = null;
+        let targetSubcategoryId: string | null = null;
+
+        if (catInput) {
+          let cat = await prisma.category.findFirst({
+            where: { name: { equals: catInput, mode: 'insensitive' } },
+          });
+          if (!cat) {
+            let dept = await prisma.department.findFirst();
+            if (!dept) {
+              dept = await prisma.department.create({
+                data: { name: 'Electronics & Appliances', slug: 'electronics-appliances' },
+              });
+            }
+            const baseCatSlug = catInput.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            const catSlug = `${baseCatSlug}-${Date.now().toString().slice(-4)}`;
+            cat = await prisma.category.create({
+              data: { name: catInput, slug: catSlug, departmentId: dept.id },
+            });
+          }
+          targetCategoryId = cat.id;
+
+          if (subInput) {
+            let sub = await prisma.subcategory.findFirst({
+              where: {
+                categoryId: cat.id,
+                name: { equals: subInput, mode: 'insensitive' },
+              },
+            });
+            if (!sub) {
+              const baseSubSlug = subInput.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+              const subSlug = `${baseSubSlug}-${Date.now().toString().slice(-4)}`;
+              sub = await prisma.subcategory.create({
+                data: { name: subInput, slug: subSlug, categoryId: cat.id },
+              });
+            }
+            targetSubcategoryId = sub.id;
+          }
+        }
+
         const existingProduct = await prisma.product.findUnique({ where: { sku } });
 
         if (existingProduct) {
@@ -403,11 +484,32 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pat
               mrp: mrpNum > 0 ? mrpNum : priceNum,
               stock: stockNum,
               status: statusVal === 'ACTIVE' || statusVal === 'DRAFT' || statusVal === 'OUT_OF_STOCK' || statusVal === 'INACTIVE' ? statusVal : 'ACTIVE',
+              isBestSeller: isBestSellerVal,
+              isFeatured: isFeaturedVal,
+              description: descriptionVal || undefined,
+              warrantyInfo: warrantyInfoVal,
+              requiresInstallation: requiresInstallVal,
+              installationDetails: installDetailsVal || undefined,
+              specifications: specsJson || undefined,
+              categoryId: targetCategoryId || undefined,
+              subcategoryId: targetSubcategoryId || undefined,
             },
           });
+
+          if (imageList.length > 0) {
+            await prisma.productImage.deleteMany({ where: { productId: existingProduct.id } });
+            await prisma.productImage.createMany({
+              data: imageList.map((url, idx) => ({
+                productId: existingProduct.id,
+                url,
+                isPrimary: idx === 0,
+                sortOrder: idx,
+              })),
+            });
+          }
           updatedCount++;
         } else {
-          await prisma.product.create({
+          const newProd = await prisma.product.create({
             data: {
               name,
               slug,
@@ -417,8 +519,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pat
               mrp: mrpNum > 0 ? mrpNum : priceNum,
               stock: stockNum,
               status: statusVal === 'ACTIVE' || statusVal === 'DRAFT' || statusVal === 'OUT_OF_STOCK' || statusVal === 'INACTIVE' ? statusVal : 'ACTIVE',
+              isBestSeller: isBestSellerVal,
+              isFeatured: isFeaturedVal,
+              description: descriptionVal || undefined,
+              warrantyInfo: warrantyInfoVal,
+              requiresInstallation: requiresInstallVal,
+              installationDetails: installDetailsVal || undefined,
+              specifications: specsJson || undefined,
+              categoryId: targetCategoryId,
+              subcategoryId: targetSubcategoryId,
             },
           });
+
+          if (imageList.length > 0) {
+            await prisma.productImage.createMany({
+              data: imageList.map((url, idx) => ({
+                productId: newProd.id,
+                url,
+                isPrimary: idx === 0,
+                sortOrder: idx,
+              })),
+            });
+          }
           createdCount++;
         }
       } catch (e: any) {
