@@ -142,25 +142,25 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Home</Link>
         <ChevronRight size={14} />
         <Link href="/products" style={{ color: 'inherit', textDecoration: 'none' }}>Products</Link>
-        {dept && (
+        {dept && dept.slug && (
           <>
             <ChevronRight size={14} />
             <Link
               href={`/products?department=${encodeURIComponent(dept.slug)}`}
               style={{ color: 'inherit', textDecoration: 'none' }}
             >
-              {dept.name}
+              {dept.name || 'Department'}
             </Link>
           </>
         )}
-        {cat && (
+        {cat && cat.slug && (
           <>
             <ChevronRight size={14} />
             <Link
               href={`/products?category=${encodeURIComponent(cat.slug)}`}
               style={{ color: 'inherit', textDecoration: 'none' }}
             >
-              {cat.name}
+              {cat.name || 'Category'}
             </Link>
           </>
         )}
