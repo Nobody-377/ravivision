@@ -109,6 +109,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       where: whereClause,
       include: {
         images: { where: { isPrimary: true }, take: 1 },
+        category: {
+          include: {
+            department: true,
+          },
+        },
+        subcategory: true,
         productDefinition: {
           include: {
             subcategory: {

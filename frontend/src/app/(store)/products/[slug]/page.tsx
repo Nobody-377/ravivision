@@ -131,8 +131,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   const isOutOfStock = product.stock <= 0 || product.status === 'OUT_OF_STOCK';
 
-  const dept = product.category?.department || product.productDefinition?.subcategory?.category?.department;
-  const cat = product.category || product.productDefinition?.subcategory?.category;
+  const cat = product.category ?? product.subcategory?.category ?? product.productDefinition?.subcategory?.category ?? null;
+  const dept = cat?.department ?? product.category?.department ?? product.productDefinition?.subcategory?.category?.department ?? null;
 
   return (
     <div className="container pdp-container" style={{ padding: '2rem 1rem' }}>

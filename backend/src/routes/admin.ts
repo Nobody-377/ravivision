@@ -578,6 +578,36 @@ router.patch('/products/:id', requireAdminAuth, async (req: Request, res: Respon
       }
     }
 
+    const effectiveCategoryId = targetCategoryId !== undefined ? targetCategoryId : existingProduct.categoryId;
+    const effectiveSubcategoryId = targetSubcategoryId !== undefined ? targetSubcategoryId : existingProduct.subcategoryId;
+
+    let targetProductDefinitionId: string | null | undefined = undefined;
+
+    // Validation: Verify subcategory belongs to category
+    if (effectiveSubcategoryId && effectiveCategoryId) {
+      const subCheck = await prisma.subcategory.findUnique({
+        where: { id: effectiveSubcategoryId },
+      });
+      if (!subCheck || subCheck.categoryId !== effectiveCategoryId) {
+        return res.status(400).json({
+          success: false,
+          error: { message: 'Selected subcategory does not belong to the selected category', code: 'INVALID_SUBCATEGORY' }
+        });
+      }
+    }
+
+    // Synchronize productDefinitionId pointer with new subcategory
+    if (targetCategoryId !== undefined || targetSubcategoryId !== undefined) {
+      if (effectiveSubcategoryId) {
+        const matchingDef = await prisma.productDefinition.findFirst({
+          where: { subcategoryId: effectiveSubcategoryId },
+        });
+        targetProductDefinitionId = matchingDef ? matchingDef.id : null;
+      } else {
+        targetProductDefinitionId = null;
+      }
+    }
+
     await prisma.product.update({
       where: { id },
       data: {
@@ -597,6 +627,7 @@ router.patch('/products/:id', requireAdminAuth, async (req: Request, res: Respon
         installationDetails: installationDetails !== undefined ? installationDetails : undefined,
         categoryId: targetCategoryId,
         subcategoryId: targetSubcategoryId,
+        productDefinitionId: targetProductDefinitionId,
       },
     });
 

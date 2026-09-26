@@ -728,6 +728,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pa
 
     let targetCategoryId: string | null | undefined = categoryId !== undefined ? (categoryId || null) : undefined;
     let targetSubcategoryId: string | null | undefined = subcategoryId !== undefined ? (subcategoryId || null) : undefined;
+    let targetProductDefinitionId: string | null | undefined = undefined;
 
     const catInput = (categoryName || category)?.trim();
     const subInput = (subcategoryName || subcategory)?.trim();
@@ -772,6 +773,34 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pa
       }
     }
 
+    const effectiveCategoryId = targetCategoryId !== undefined ? targetCategoryId : existingProduct.categoryId;
+    const effectiveSubcategoryId = targetSubcategoryId !== undefined ? targetSubcategoryId : existingProduct.subcategoryId;
+
+    // Validation: Verify subcategory belongs to category
+    if (effectiveSubcategoryId && effectiveCategoryId) {
+      const subCheck = await prisma.subcategory.findUnique({
+        where: { id: effectiveSubcategoryId },
+      });
+      if (!subCheck || subCheck.categoryId !== effectiveCategoryId) {
+        return NextResponse.json(
+          { success: false, error: { message: 'Selected subcategory does not belong to the selected category', code: 'INVALID_SUBCATEGORY' } },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Synchronize productDefinitionId pointer with new subcategory
+    if (targetCategoryId !== undefined || targetSubcategoryId !== undefined) {
+      if (effectiveSubcategoryId) {
+        const matchingDef = await prisma.productDefinition.findFirst({
+          where: { subcategoryId: effectiveSubcategoryId },
+        });
+        targetProductDefinitionId = matchingDef ? matchingDef.id : null;
+      } else {
+        targetProductDefinitionId = null;
+      }
+    }
+
     await prisma.product.update({
       where: { id },
       data: {
@@ -791,6 +820,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pa
         installationDetails: installationDetails !== undefined ? installationDetails : undefined,
         categoryId: targetCategoryId,
         subcategoryId: targetSubcategoryId,
+        productDefinitionId: targetProductDefinitionId,
       },
     });
 

@@ -396,6 +396,8 @@ export async function importCatalogFromExcel(filePath: string): Promise<CatalogI
       await prisma.product.upsert({
         where: { slug: productSlug },
         update: {
+          categoryId: category.id,
+          subcategoryId: subcategory.id,
           productDefinitionId: productDefinition.id,
           name: `${primaryBrand} ${productType}`,
           brand: primaryBrand,
@@ -413,6 +415,8 @@ export async function importCatalogFromExcel(filePath: string): Promise<CatalogI
           warrantyInfo: '1 Year Brand Manufacturer Warranty',
         },
         create: {
+          categoryId: category.id,
+          subcategoryId: subcategory.id,
           productDefinitionId: productDefinition.id,
           name: `${primaryBrand} ${productType}`,
           slug: productSlug,
