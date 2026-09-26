@@ -25,6 +25,12 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     where: { slug },
     include: {
       images: { orderBy: { sortOrder: 'asc' } },
+      category: {
+        include: {
+          department: true,
+        },
+      },
+      subcategory: true,
       productDefinition: {
         include: {
           subcategory: {
@@ -48,6 +54,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   const storeConfig = await getStoreConfig();
 
+  // Safely parse price and mrp numbers
+  const priceNum = Number(product.price || 0);
+  const mrpNum = Number(product.mrp || priceNum);
+
   // Parse specifications JSON
   let specsObj: Record<string, string> = {};
   if (product.specifications) {
@@ -60,6 +70,9 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   const isOutOfStock = product.stock <= 0 || product.status === 'OUT_OF_STOCK';
 
+  const dept = product.category?.department || product.productDefinition?.subcategory?.category?.department;
+  const cat = product.category || product.productDefinition?.subcategory?.category;
+
   return (
     <div className="container pdp-container" style={{ padding: '2rem 1rem' }}>
       
@@ -68,14 +81,25 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Home</Link>
         <ChevronRight size={14} />
         <Link href="/products" style={{ color: 'inherit', textDecoration: 'none' }}>Products</Link>
-        {product.productDefinition && (
+        {dept && (
           <>
             <ChevronRight size={14} />
             <Link
-              href={`/products?department=${encodeURIComponent(product.productDefinition.subcategory.category.department.slug)}`}
+              href={`/products?department=${encodeURIComponent(dept.slug)}`}
               style={{ color: 'inherit', textDecoration: 'none' }}
             >
-              {product.productDefinition.subcategory.category.department.name}
+              {dept.name}
+            </Link>
+          </>
+        )}
+        {cat && (
+          <>
+            <ChevronRight size={14} />
+            <Link
+              href={`/products?category=${encodeURIComponent(cat.slug)}`}
+              style={{ color: 'inherit', textDecoration: 'none' }}
+            >
+              {cat.name}
             </Link>
           </>
         )}
@@ -169,15 +193,15 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <div className="card pdp-price-box" style={{ padding: '1.15rem', backgroundColor: '#f8fafc', marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', flexWrap: 'wrap' }}>
               <span className="pdp-price-val" style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--primary-blue)' }}>
-                {formatINR(product.price)}
+                {formatINR(priceNum)}
               </span>
-              {product.mrp.toNumber() > product.price.toNumber() && (
+              {mrpNum > priceNum && (
                 <>
                   <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                    MRP: {formatINR(product.mrp)}
+                    MRP: {formatINR(mrpNum)}
                   </span>
                   <span className="badge badge-success" style={{ fontSize: '0.75rem' }}>
-                    Save {formatINR(product.mrp.toNumber() - product.price.toNumber())}
+                    Save {formatINR(mrpNum - priceNum)}
                   </span>
                 </>
               )}
