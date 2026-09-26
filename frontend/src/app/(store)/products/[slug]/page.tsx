@@ -21,38 +21,99 @@ export const revalidate = 0;
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = await params;
 
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: {
-      images: { orderBy: { sortOrder: 'asc' } },
-      category: {
-        include: {
-          department: true,
-        },
+  let decodedSlug = slug;
+  try {
+    decodedSlug = decodeURIComponent(slug).trim();
+  } catch {
+    decodedSlug = slug;
+  }
+
+  // Create clean slug variations to match bulk Excel uploaded items (e.g. Metallio 18 Pedestal 450mm)
+  const cleanSlugBase = decodedSlug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  let product: any = null;
+  try {
+    product = await prisma.product.findFirst({
+      where: {
+        OR: [
+          { slug: { equals: slug, mode: 'insensitive' } },
+          { slug: { equals: decodedSlug, mode: 'insensitive' } },
+          { slug: { contains: cleanSlugBase, mode: 'insensitive' } },
+          { id: slug },
+          { id: decodedSlug },
+          { sku: { equals: slug, mode: 'insensitive' } },
+          { sku: { equals: decodedSlug, mode: 'insensitive' } },
+          { name: { equals: decodedSlug, mode: 'insensitive' } },
+          { name: { contains: decodedSlug.replace(/-/g, ' '), mode: 'insensitive' } },
+        ],
       },
-      subcategory: true,
-      productDefinition: {
-        include: {
-          subcategory: {
-            include: {
-              category: {
-                include: {
-                  department: true,
+      include: {
+        images: { orderBy: { sortOrder: 'asc' } },
+        category: {
+          include: {
+            department: true,
+          },
+        },
+        subcategory: true,
+        productDefinition: {
+          include: {
+            subcategory: {
+              include: {
+                category: {
+                  include: {
+                    department: true,
+                  },
                 },
               },
             },
           },
         },
       },
-    },
-  });
-
-  // Only allow active or out of stock products to be viewed publicly
-  if (!product || (product.status !== 'ACTIVE' && product.status !== 'OUT_OF_STOCK')) {
-    notFound();
+    });
+  } catch (err) {
+    console.error('Error fetching product by slug:', err);
   }
 
   const storeConfig = await getStoreConfig();
+
+  // If product is not found in DB or deleted, render clean friendly fallback screen
+  if (!product) {
+    return (
+      <div className="container" style={{ padding: '3.5rem 1rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
+        <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#eff6ff', color: '#2563eb', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
+          <ImageIcon size={32} />
+        </div>
+
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.5rem' }}>
+          Product Details Updating...
+        </h1>
+        
+        <p style={{ fontSize: '0.9rem', color: '#64748b', lineHeight: 1.6, marginBottom: '1.75rem' }}>
+          We couldn't locate details for <strong>"{decodedSlug}"</strong> right now. This item may be undergoing catalog updates or available via direct store order.
+        </p>
+
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link
+            href="/products"
+            className="btn btn-primary"
+            style={{ padding: '0.65rem 1.25rem', fontSize: '0.875rem', fontWeight: 700, borderRadius: '10px' }}
+          >
+            Browse All Products
+          </Link>
+
+          {storeConfig.phone && (
+            <a
+              href={`tel:${storeConfig.phone}`}
+              className="btn btn-phone"
+              style={{ padding: '0.65rem 1.25rem', fontSize: '0.875rem', fontWeight: 700, borderRadius: '10px', textDecoration: 'none' }}
+            >
+              <PhoneCall size={16} /> Call Store ({storeConfig.phone})
+            </a>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // Safely parse price and mrp numbers
   const priceNum = Number(product.price || 0);

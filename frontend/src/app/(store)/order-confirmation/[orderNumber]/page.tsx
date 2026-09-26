@@ -120,7 +120,7 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span>Local Delivery Charge</span>
-            <strong>{order.deliveryCharge.toNumber() === 0 ? 'FREE' : formatINR(order.deliveryCharge)}</strong>
+            <strong>{Number(order.deliveryCharge || 0) === 0 ? 'FREE' : formatINR(order.deliveryCharge)}</strong>
           </div>
           <div style={{ borderTop: '1px solid var(--border-strong)', paddingTop: '0.5rem', marginTop: '0.25rem', display: 'flex', justifyContent: 'space-between', fontSize: '1.125rem', fontWeight: 800 }}>
             <span>Total Amount</span>
